@@ -2,24 +2,32 @@
     <div class="auth-title">Selamat Datang! 👋</div>
     <div class="auth-sub">Masuk ke akun Al Ilmi Center kamu</div>
 
-    <form wire:submit.prevent="login">
+    <form wire:submit="login">
         <div class="mb-3">
             <div class="form-label-custom">Email</div>
             <div class="input-wrap">
                 <i class="bi bi-envelope input-icon"></i>
-                <input type="email" class="form-control-custom" placeholder="contoh@email.com" wire:model="email"/>
+                <input type="email" wire:model="email" class="form-control-custom" placeholder="contoh@email.com" />
             </div>
-            @error('email') <span class="text-danger" style="font-size:12px">{{ $message }}</span> @enderror
+            @error('email')
+                <span class="text-danger" style="font-size:12px">{{ $message }}</span>
+            @enderror
         </div>
 
         <div class="mb-4">
             <div class="form-label-custom">Password</div>
-            <div class="input-wrap">
+            <div class="input-wrap" x-data="{ show: false }">
                 <i class="bi bi-lock input-icon"></i>
-                <input type="password" class="form-control-custom" placeholder="Masukkan password" wire:model="password"/>
-                <i class="bi bi-eye input-toggle"></i>
+
+                {{-- Pisahkan x-data dari wire:model dengan x-ref --}}
+                <input x-ref="passInput" x-bind:type="show ? 'text' : 'password'" wire:model="password"
+                    class="form-control-custom" placeholder="Masukkan password" />
+
+                <i class="bi input-toggle" :class="show ? 'bi-eye-slash' : 'bi-eye'" @click="show = !show"></i>
             </div>
-            @error('password') <span class="text-danger" style="font-size:12px">{{ $message }}</span> @enderror
+            @error('password')
+                <span class="text-danger" style="font-size:12px">{{ $message }}</span>
+            @enderror
         </div>
 
         <button type="submit" class="btn-primary-custom">
