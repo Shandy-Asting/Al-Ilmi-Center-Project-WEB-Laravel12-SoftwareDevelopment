@@ -405,10 +405,25 @@
                 <option>3 Bulan Terakhir</option>
                 <option>6 Bulan Terakhir</option>
             </select>
-            <button class="btn btn-sm fw-bold px-3"
-                style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:12px;">
-                <i class="bi bi-download me-1"></i> Unduh Laporan
-            </button>
+                                    <div class="dropdown">
+                <button class="btn btn-sm fw-bold px-3 dropdown-toggle"
+                    style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:12px;"
+                    data-bs-toggle="dropdown">
+                    <i class="bi bi-download me-1"></i> Unduh Laporan
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="border-radius:10px;border:1px solid var(--border);padding:6px;">
+                    <li>
+                        <a href="/siswa/hasil-progres/export-excel" class="dropdown-item" style="border-radius:8px;font-size:13px;font-weight:600;">
+                            <i class="bi bi-file-earmark-excel me-2" style="color:#16a34a;"></i> Download Excel
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/siswa/hasil-progres/export-pdf" class="dropdown-item" style="border-radius:8px;font-size:13px;font-weight:600;">
+                            <i class="bi bi-file-earmark-pdf me-2" style="color:#dc2626;"></i> Download PDF
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 

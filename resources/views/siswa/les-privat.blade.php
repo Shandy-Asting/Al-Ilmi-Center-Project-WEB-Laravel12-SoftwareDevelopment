@@ -762,11 +762,10 @@
                 Dashboard / <span style="color:var(--primary);font-weight:600;">Les Privat</span>
             </div>
         </div>
-        <button class="btn btn-sm fw-bold px-3 py-2"
-            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;"
-            onclick="showTab('pesan')">
+                <a href="/siswa/pesan-jadwal" class="btn btn-sm fw-bold px-3 py-2"
+            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;text-decoration:none;">
             <i class="bi bi-plus-lg me-1"></i> Pesan Les Baru
-        </button>
+        </a>
     </div>
 
     {{-- STEP BAR --}}
