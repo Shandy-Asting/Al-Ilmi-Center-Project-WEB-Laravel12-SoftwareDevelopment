@@ -17,23 +17,25 @@ class Register extends Component
     public string $password_confirmation = '';
 
     protected array $rules = [
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'no_hp' => 'required|string|max:15',
-        'role' => 'required|in:siswa,tutor',
+        'name'     => 'required|min:3',
+        'email'    => 'required|email|unique:users,email',
+        'no_hp'    => 'required|min:10',
+        'role'     => 'required|in:siswa,tutor',
         'password' => 'required|min:8|confirmed',
     ];
 
     protected array $messages = [
-        'name.required' => 'Nama lengkap wajib diisi.',
-        'email.required' => 'Email wajib diisi.',
-        'email.email' => 'Format email tidak valid.',
-        'email.unique' => 'Email sudah terdaftar.',
-        'no_hp.required' => 'No. HP wajib diisi.',
-        'role.required' => 'Role wajib dipilih.',
-        'role.in' => 'Role tidak valid.',
-        'password.required' => 'Password wajib diisi.',
-        'password.min' => 'Password minimal 8 karakter.',
+        'name.required'      => 'Nama wajib diisi.',
+        'name.min'           => 'Nama minimal 3 karakter.',
+        'email.required'     => 'Email wajib diisi.',
+        'email.email'        => 'Format email tidak valid.',
+        'email.unique'       => 'Email sudah terdaftar.',
+        'no_hp.required'     => 'No. HP wajib diisi.',
+        'no_hp.min'          => 'No. HP minimal 10 digit.',
+        'role.required'      => 'Pilih role terlebih dahulu.',
+        'role.in'            => 'Role tidak valid.',
+        'password.required'  => 'Password wajib diisi.',
+        'password.min'       => 'Password minimal 8 karakter.',
         'password.confirmed' => 'Konfirmasi password tidak cocok.',
     ];
 
@@ -42,21 +44,25 @@ class Register extends Component
         $this->validate();
 
         $user = User::create([
-            'name' => $this->name,
-            'email' => $this->email,
-            'no_hp' => $this->no_hp,
-            'role' => $this->role,
+            'name'     => $this->name,
+            'email'    => $this->email,
+            'no_hp'    => $this->no_hp,
+            'role'     => $this->role,
             'password' => Hash::make($this->password),
         ]);
 
         Auth::login($user);
+        session()->regenerate();
 
-        return redirect('/login');
+        return match ($user->role) {
+            'tutor' => redirect('/tutor/dashboard'),
+            default => redirect('/siswa/dashboard'),
+        };
     }
 
     public function render()
     {
-    return view('livewire.auth.register')
-        ->layout('layouts.auth', ['title' => 'Daftar - Al Ilmi Center']);
+        return view('livewire.auth.register')
+            ->layout('layouts.auth', ['title' => 'Daftar - Al Ilmi Center']);
     }
 }
