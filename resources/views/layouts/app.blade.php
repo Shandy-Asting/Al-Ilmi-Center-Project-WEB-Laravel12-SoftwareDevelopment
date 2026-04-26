@@ -474,19 +474,15 @@
                     <span class="badge-dot"></span>
                 </div>
                 <div class="icon-btn"><i class="bi bi-envelope"></i></div>
-                {{-- <form method="POST" action="{{ route('logout') }}" class="d-inline">
-        @csrf
-        <button type="submit" class="btn btn-sm ms-1"
-          style="background:var(--primary);color:#fff;border-radius:8px;
-                 font-size:13px;font-weight:600;padding:6px 14px;border:none">
-          <i class="bi bi-box-arrow-right me-1"></i> Logout
-        </button>
-      </form> --}}
-                <a href="#" class="btn btn-sm ms-1"
-                    style="background:var(--primary);color:#fff;border-radius:8px;
-         font-size:13px;font-weight:600;padding:6px 14px;border:none">
-                    <i class="bi bi-box-arrow-right me-1"></i> Logout
-                </a>
+                <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm ms-1"
+                        style="background:var(--primary);color:#fff;border-radius:8px;
+                        font-size:13px;font-weight:600;padding:6px 14px;border:none">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </button>
+                </form>
+
             </div>
         </div>
 
