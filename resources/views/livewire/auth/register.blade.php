@@ -8,10 +8,7 @@
             <div class="form-label-custom">Nama Lengkap</div>
             <div class="input-wrap">
                 <i class="bi bi-person input-icon"></i>
-                <input type="text"
-                    wire:model="name"
-                    class="form-control-custom"
-                    placeholder="Masukkan nama lengkap"/>
+                <input type="text" wire:model="name" class="form-control-custom" placeholder="Masukkan nama lengkap" />
             </div>
             @error('name')
                 <span class="text-danger" style="font-size:12px">{{ $message }}</span>
@@ -22,10 +19,7 @@
             <div class="form-label-custom">Email</div>
             <div class="input-wrap">
                 <i class="bi bi-envelope input-icon"></i>
-                <input type="email"
-                    wire:model="email"
-                    class="form-control-custom"
-                    placeholder="contoh@email.com"/>
+                <input type="email" wire:model="email" class="form-control-custom" placeholder="contoh@email.com" />
             </div>
             @error('email')
                 <span class="text-danger" style="font-size:12px">{{ $message }}</span>
@@ -36,10 +30,7 @@
             <div class="form-label-custom">No. HP</div>
             <div class="input-wrap">
                 <i class="bi bi-telephone input-icon"></i>
-                <input type="text"
-                    wire:model="no_hp"
-                    class="form-control-custom"
-                    placeholder="08xxxxxxxxxx"/>
+                <input type="text" wire:model="no_hp" class="form-control-custom" placeholder="08xxxxxxxxxx" />
             </div>
             @error('no_hp')
                 <span class="text-danger" style="font-size:12px">{{ $message }}</span>
@@ -54,6 +45,7 @@
                     <option value="">-- Pilih Role --</option>
                     <option value="siswa">Siswa</option>
                     <option value="tutor">Tutor</option>
+                    <option value="admin">Admin</option>
                 </select>
             </div>
             @error('role')
@@ -65,13 +57,9 @@
             <div class="form-label-custom">Password</div>
             <div class="input-wrap" x-data="{ show: false }">
                 <i class="bi bi-lock input-icon"></i>
-                <input :type="show ? 'text' : 'password'"
-                    wire:model="password"
-                    class="form-control-custom"
-                    placeholder="Minimal 8 karakter"/>
-                <i class="bi input-toggle"
-                    :class="show ? 'bi-eye-slash' : 'bi-eye'"
-                    @click="show = !show"></i>
+                <input :type="show ? 'text' : 'password'" wire:model="password" class="form-control-custom"
+                    placeholder="Minimal 8 karakter" />
+                <i class="bi input-toggle" :class="show ? 'bi-eye-slash' : 'bi-eye'" @click="show = !show"></i>
             </div>
             @error('password')
                 <span class="text-danger" style="font-size:12px">{{ $message }}</span>
@@ -82,13 +70,9 @@
             <div class="form-label-custom">Konfirmasi Password</div>
             <div class="input-wrap" x-data="{ show: false }">
                 <i class="bi bi-lock-fill input-icon"></i>
-                <input :type="show ? 'text' : 'password'"
-                    wire:model="password_confirmation"
-                    class="form-control-custom"
-                    placeholder="Ulangi password"/>
-                <i class="bi input-toggle"
-                    :class="show ? 'bi-eye-slash' : 'bi-eye'"
-                    @click="show = !show"></i>
+                <input :type="show ? 'text' : 'password'" wire:model="password_confirmation" class="form-control-custom"
+                    placeholder="Ulangi password" />
+                <i class="bi input-toggle" :class="show ? 'bi-eye-slash' : 'bi-eye'" @click="show = !show"></i>
             </div>
         </div>
 

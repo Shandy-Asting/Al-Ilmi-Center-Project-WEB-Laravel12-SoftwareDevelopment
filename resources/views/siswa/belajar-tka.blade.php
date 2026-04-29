@@ -24,7 +24,7 @@
     <a href="/siswa/pembayaran" class="nav-item-custom {{ request()->is('siswa/pembayaran') ? 'active' : '' }}">
         <i class="bi bi-credit-card-fill"></i> Pembayaran
     </a>
-    <a href="#" class="nav-item-custom">
+    <a href="/siswa/notifikasi" class="nav-item-custom {{ request()->is('siswa/notifikasi') ? 'active' : '' }}">
         <i class="bi bi-bell-fill"></i> Notifikasi
         <span class="nav-badge">3</span>
     </a>

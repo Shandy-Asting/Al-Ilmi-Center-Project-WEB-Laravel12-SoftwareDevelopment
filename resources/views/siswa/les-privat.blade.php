@@ -24,7 +24,7 @@
     <a href="/siswa/pembayaran" class="nav-item-custom {{ request()->is('siswa/pembayaran') ? 'active' : '' }}">
         <i class="bi bi-credit-card-fill"></i> Pembayaran
     </a>
-    <a href="#" class="nav-item-custom">
+    <a href="/siswa/notifikasi" class="nav-item-custom {{ request()->is('siswa/notifikasi') ? 'active' : '' }}">
         <i class="bi bi-bell-fill"></i> Notifikasi
         <span class="nav-badge">3</span>
     </a>
@@ -762,7 +762,7 @@
                 Dashboard / <span style="color:var(--primary);font-weight:600;">Les Privat</span>
             </div>
         </div>
-                <a href="/siswa/pesan-jadwal" class="btn btn-sm fw-bold px-3 py-2"
+        <a href="/siswa/pesan-jadwal" class="btn btn-sm fw-bold px-3 py-2"
             style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;text-decoration:none;">
             <i class="bi bi-plus-lg me-1"></i> Pesan Les Baru
         </a>
