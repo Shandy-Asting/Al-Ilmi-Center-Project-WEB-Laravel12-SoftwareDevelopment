@@ -39,7 +39,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $materi = \App\Models\Materi::where('status', 'aktif')->get();
         return view('siswa.belajar-tka', ['materi' => $materi]);
     });
-    Route::get('/les-privat', function () { return view('siswa.les-privat'); });
+    Route::get('/les-privat', function () {
+        return view('siswa.les-privat');
+    });
     Route::get('/hasil-progres', function () {
         $user = auth()->user();
         $rataRataNilai = round(\App\Models\HasilLatihan::where('user_id', $user->id)->avg('nilai') ?? 0);
@@ -70,8 +72,15 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ]);
         return $pdf->download('laporan-hasil-belajar-' . now()->format('d-m-Y') . '.pdf');
     });
-    Route::get('/pembayaran', function () { return view('siswa.pembayaran'); });
-    Route::get('/profil', function () { return view('siswa.profil'); });
+    Route::get('/notifikasi', function () {
+        return view('siswa.notifikasi');
+    });
+    Route::get('/pembayaran', function () {
+        return view('siswa.pembayaran');
+    });
+    Route::get('/profil', function () {
+        return view('siswa.profil');
+    });
     Route::get('/pesan-jadwal', function () {
         $tutors = \App\Models\User::where('role', 'tutor')->get();
         $paketDipilih = session('paket_dipilih');
@@ -202,7 +211,9 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         \App\Models\Soal::findOrFail($id)->delete();
         return redirect('/tutor/soal')->with('sukses', 'Soal berhasil dihapus!');
     });
-    Route::get('/jadwal', function () { return view('tutor.jadwal'); });
+    Route::get('/jadwal', function () {
+        return view('tutor.jadwal');
+    });
     Route::get('/les-privat', function () {
         $pesanan = \App\Models\LesPrivat::where('tutor_id', auth()->user()->id)
             ->with('siswa')
@@ -220,14 +231,26 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         $les->update(['status' => 'dibatalkan']);
         return redirect('/tutor/les-privat')->with('sukses', 'Pesanan berhasil ditolak!');
     });
-    Route::get('/profil', function () { return view('tutor.profil'); });
+    Route::get('/profil', function () {
+        return view('tutor.profil');
+    });
 });
 
 // ── ADMIN ──
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () { return view('admin.dashboard'); });
-    Route::get('/pengguna', function () { return view('admin.pengguna'); });
-    Route::get('/paket', function () { return view('admin.paket'); });
-    Route::get('/transaksi', function () { return view('admin.transaksi'); });
-    Route::get('/laporan', function () { return view('admin.laporan'); });
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    });
+    Route::get('/pengguna', function () {
+        return view('admin.pengguna');
+    });
+    Route::get('/paket', function () {
+        return view('admin.paket');
+    });
+    Route::get('/transaksi', function () {
+        return view('admin.transaksi');
+    });
+    Route::get('/laporan', function () {
+        return view('admin.laporan');
+    });
 });

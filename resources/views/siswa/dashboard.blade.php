@@ -24,7 +24,7 @@
     <a href="/siswa/pembayaran" class="nav-item-custom {{ request()->is('siswa/pembayaran') ? 'active' : '' }}">
         <i class="bi bi-credit-card-fill"></i> Pembayaran
     </a>
-    <a href="#" class="nav-item-custom">
+    <a href="/siswa/notifikasi" class="nav-item-custom {{ request()->is('siswa/notifikasi') ? 'active' : '' }}">
         <i class="bi bi-bell-fill"></i> Notifikasi
         <span class="nav-badge">3</span>
     </a>
@@ -833,7 +833,7 @@
         </div>
     </div>
 
-   {{-- ── HARGA ── --}}
+    {{-- ── HARGA ── --}}
     <div class="section-title">
         <span>💳 Informasi Paket Harga</span>
         <a href="#">Bandingkan Paket →</a>
@@ -852,7 +852,8 @@
                 </ul>
                 <form method="POST" action="/siswa/pilih-paket/sd">
                     @csrf
-                    <button type="submit" class="btn-harga" style="background:var(--bg);color:var(--primary);">Pilih Paket</button>
+                    <button type="submit" class="btn-harga" style="background:var(--bg);color:var(--primary);">Pilih
+                        Paket</button>
                 </form>
             </div>
         </div>
@@ -870,7 +871,8 @@
                 </ul>
                 <form method="POST" action="/siswa/pilih-paket/smp">
                     @csrf
-                    <button type="submit" class="btn-harga" style="background:var(--accent);color:var(--primary);">Pilih Paket</button>
+                    <button type="submit" class="btn-harga" style="background:var(--accent);color:var(--primary);">Pilih
+                        Paket</button>
                 </form>
             </div>
         </div>
@@ -887,7 +889,8 @@
                 </ul>
                 <form method="POST" action="/siswa/pilih-paket/sma">
                     @csrf
-                    <button type="submit" class="btn-harga" style="background:var(--primary);color:#fff;">Pilih Paket</button>
+                    <button type="submit" class="btn-harga" style="background:var(--primary);color:#fff;">Pilih
+                        Paket</button>
                 </form>
             </div>
         </div>
