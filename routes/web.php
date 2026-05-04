@@ -39,6 +39,96 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $materi = \App\Models\Materi::where('status', 'aktif')->get();
         return view('siswa.belajar-tka', ['materi' => $materi]);
     });
+    // Ambil soal berdasarkan materi
+Route::get('/belajar-tka/{materi_id}/soal', function ($materi_id) {
+    $user = auth()->user();
+    $materi = \App\Models\Materi::with('soal')->findOrFail($materi_id);
+    $soal = $materi->soal()->inRandomOrder()->take(15)->get();
+    $hasilSebelumnya = \App\Models\HasilKuis::where('user_id', $user->id)
+        ->where('materi_id', $materi_id)
+        ->orderBy('created_at', 'desc')
+        ->first();
+
+    return view('siswa.latihan-soal', [
+        'materi' => $materi,
+        'soal' => $soal,
+        'hasilSebelumnya' => $hasilSebelumnya,
+    ]);
+});
+
+// Submit jawaban
+Route::post('/belajar-tka/{materi_id}/submit', function (\Illuminate\Http\Request $request, $materi_id) {
+    $user = auth()->user();
+    $materi = \App\Models\Materi::with('soal')->findOrFail($materi_id);
+    $soalList = $materi->soal()->get()->keyBy('id');
+
+    $jawaban = $request->input('jawaban', []);
+    $soalBenar = 0;
+    $soalSalah = 0;
+    $detailJawaban = [];
+
+    foreach ($jawaban as $soalId => $jawabanSiswa) {
+        $soal = $soalList->get($soalId);
+        if (!$soal) continue;
+
+        $benar = $soal->jawaban_benar === $jawabanSiswa;
+        if ($benar) $soalBenar++;
+        else $soalSalah++;
+
+        $detailJawaban[] = [
+            'soal_id' => $soalId,
+            'pertanyaan' => $soal->pertanyaan,
+            'jawaban_siswa' => $jawabanSiswa,
+            'jawaban_benar' => $soal->jawaban_benar,
+            'benar' => $benar,
+            'pembahasan' => $soal->pembahasan,
+        ];
+    }
+
+    $totalSoal = count($jawaban);
+    $nilai = $totalSoal > 0 ? round(($soalBenar / $totalSoal) * 100) : 0;
+    $durasi = $request->input('durasi_menit', 0);
+
+    $hasil = \App\Models\HasilKuis::create([
+        'user_id' => $user->id,
+        'materi_id' => $materi_id,
+        'nilai' => $nilai,
+        'soal_benar' => $soalBenar,
+        'soal_salah' => $soalSalah,
+        'total_soal' => $totalSoal,
+        'durasi_menit' => $durasi,
+        'tipe' => $request->input('tipe', 'latihan'),
+        'jawaban' => $detailJawaban,
+    ]);
+
+    \App\Models\HasilLatihan::create([
+        'user_id' => $user->id,
+        'mata_pelajaran' => $materi->mata_pelajaran,
+        'nilai' => $nilai,
+        'jumlah_soal' => $totalSoal,
+        'soal_benar' => $soalBenar,
+        'durasi_menit' => $durasi,
+    ]);
+
+    \App\Models\AktivitasBelajar::create([
+        'user_id' => $user->id,
+        'tanggal' => now()->toDateString(),
+        'durasi_menit' => $durasi,
+        'mata_pelajaran' => $materi->mata_pelajaran,
+    ]);
+
+    return redirect('/siswa/belajar-tka/' . $materi_id . '/hasil/' . $hasil->id);
+});
+
+// Lihat hasil kuis
+Route::get('/belajar-tka/{materi_id}/hasil/{hasil_id}', function ($materi_id, $hasil_id) {
+    $materi = \App\Models\Materi::findOrFail($materi_id);
+    $hasil = \App\Models\HasilKuis::findOrFail($hasil_id);
+    return view('siswa.hasil-kuis', [
+        'materi' => $materi,
+        'hasil' => $hasil,
+    ]);
+});
     Route::get('/les-privat', function () {
         return view('siswa.les-privat');
     });
