@@ -1,14 +1,11 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class HasilLatihan extends Model
 {
-    use HasUuids;
-
     protected $table = 'hasil_latihan';
 
     protected $fillable = [
@@ -19,6 +16,15 @@ class HasilLatihan extends Model
         'soal_benar',
         'durasi_menit',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
 
     public function user()
     {
