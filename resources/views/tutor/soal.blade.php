@@ -723,6 +723,38 @@
             <div style="font-size:1.4rem;font-weight:800;color:var(--danger);">{{ $hasilSiswa->where('nilai','<',60)->count() }}</div>
             <div style="font-size:.75rem;color:var(--muted);">Perlu Perhatian (&lt;60)</div>
         </div>
+        <select class="filter-select">
+            <option>Semua Jenjang</option>
+            <option>SD</option>
+            <option>SMP</option>
+            <option>SMA</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Mapel</option>
+            <option>Matematika</option>
+            <option>Fisika</option>
+            <option>Kimia</option>
+            <option>Biologi</option>
+            <option>B. Inggris</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Tipe</option>
+            <option>Pilihan Ganda</option>
+            <option>Esai / Uraian</option>
+            <option>Benar / Salah</option>
+            <option>Isian Singkat</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Tingkat</option>
+            <option>Mudah</option>
+            <option>Sedang</option>
+            <option>Sulit</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Status</option>
+            <option>Aktif</option>
+            <option>Draft</option>
+        </select>
     </div>
     @endif
 </div>
@@ -1094,7 +1126,6 @@
 
         </div>
     </div>
-</div>
 
 @endsection
 

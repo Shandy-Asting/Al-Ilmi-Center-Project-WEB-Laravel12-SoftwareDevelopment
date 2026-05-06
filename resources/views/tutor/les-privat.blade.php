@@ -12,6 +12,7 @@
     </a>
     <a href="/tutor/jadwal" class="nav-item-custom {{ request()->is('tutor/jadwal') ? 'active' : '' }}">
         <i class="bi bi-calendar3"></i> Jadwal Mengajar
+        <span class="nav-badge">3</span>
     </a>
     <a href="/tutor/daftar-siswa" class="nav-item-custom {{ request()->is('tutor/daftar-siswa') ? 'active' : '' }}">
         <i class="bi bi-people-fill"></i> Daftar Siswa

@@ -551,6 +551,11 @@
                 <div class="stat-label">{{ $s[4] }}</div>
             </div>
         </div>
+        <button class="btn btn-sm fw-bold px-3 py-2"
+            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;"
+            data-bs-toggle="modal" data-bs-target="#modalTambah">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Materi
+        </button>
     </div>
     @endforeach
 </div>
@@ -683,31 +688,69 @@
             </table>
         </div>
 
-        {{-- PAGINATION --}}
-        <div class="d-flex align-items-center justify-content-between px-4 py-3 flex-wrap gap-2" style="border-top:1px solid var(--border);">
-            <div class="d-flex gap-2">
-                <button class="btn btn-sm rounded-2 fw-semibold" style="background:var(--danger-soft);color:var(--danger);border:none;font-size:.78rem;" data-bs-toggle="modal" data-bs-target="#modalHapus">
-                    <i class="bi bi-trash3 me-1"></i> Hapus Terpilih
-                </button>
-                <button class="btn btn-sm rounded-2 fw-semibold" style="background:#f1f5f9;border:none;color:var(--muted);font-size:.78rem;">
-                    <i class="bi bi-archive me-1"></i> Arsipkan
-                </button>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <span style="font-size:.78rem;color:var(--muted);">Halaman 1 dari 5</span>
-                <div class="d-flex gap-1">
-                    <a href="#" class="page-btn disabled"><i class="bi bi-chevron-left"></i></a>
-                    <a href="#" class="page-btn active">1</a>
-                    <a href="#" class="page-btn">2</a>
-                    <a href="#" class="page-btn">3</a>
-                    <span class="page-btn" style="cursor:default;">…</span>
-                    <a href="#" class="page-btn">5</a>
-                    <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
+    {{-- STAT CARDS --}}
+    <div class="row g-3 mb-4">
+        @php
+            $stats = [
+                ['bi-journal-richtext', '#eff6ff', 'var(--primary)', '38', 'Total Materi'],
+                ['bi-check-circle-fill', 'var(--success-soft)', 'var(--success)', '29', 'Aktif / Terbit'],
+                ['bi-pencil-square', 'var(--accent-soft)', 'var(--warning)', '6', 'Draft'],
+                ['bi-archive-fill', '#f1f5f9', '#94a3b8', '3', 'Diarsipkan'],
+            ];
+        @endphp
+        @foreach ($stats as $s)
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:{{ $s[1] }};color:{{ $s[2] }};"><i
+                            class="bi {{ $s[0] }}"></i></div>
+                    <div>
+                        <div class="stat-val">{{ $s[3] }}</div>
+                        <div class="stat-label">{{ $s[4] }}</div>
+                    </div>
                 </div>
             </div>
+        @endforeach
+    </div>
+
+    {{-- FILTER BAR --}}
+    <div class="filter-bar mb-4">
+        <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Cari judul materi, topik, atau kata kunci…" />
+        </div>
+        <select class="filter-select">
+            <option>Semua Jenjang</option>
+            <option>SD</option>
+            <option>SMP</option>
+            <option>SMA</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Mata Pelajaran</option>
+            <option>Matematika</option>
+            <option>Fisika</option>
+            <option>Kimia</option>
+            <option>Biologi</option>
+            <option>B. Inggris</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Tipe</option>
+            <option>PDF</option>
+            <option>Video</option>
+            <option>Dokumen</option>
+            <option>Presentasi</option>
+            <option>Kuis</option>
+        </select>
+        <select class="filter-select">
+            <option>Semua Status</option>
+            <option>Aktif</option>
+            <option>Draft</option>
+            <option>Arsip</option>
+        </select>
+        <div class="view-toggle ms-auto">
+            <button class="view-btn active" id="btnTable" title="Tabel"><i class="bi bi-list-ul"></i></button>
+            <button class="view-btn" id="btnGrid" title="Grid"><i class="bi bi-grid-3x3-gap-fill"></i></button>
         </div>
     </div>
-</div>
 
 {{-- GRID VIEW --}}
 <div id="gridView" style="display:none;">
@@ -729,28 +772,220 @@
                         <span class="badge-status {{ $g[3] }}">{{ ucfirst($g[3]) }}</span>
                     </div>
                 </div>
-                <div class="materi-card-body">
-                    <div class="d-flex gap-1 mb-2 flex-wrap">
-                        <span class="badge-jenjang" style="background:#dbeafe;color:#1d4ed8;">{{ $g[4] }}</span>
-                        <span class="badge-mapel">{{ $g[5] }}</span>
-                        <span class="badge-tipe {{ $g[6] }}">{{ strtoupper($g[6]) }}</span>
-                    </div>
-                    <div class="materi-card-title">{{ $g[7] }}</div>
-                    <div class="materi-card-meta mt-2">
-                        <i class="bi bi-file-earmark me-1"></i>{{ $g[8] }} &nbsp;·&nbsp;
-                        <i class="bi bi-calendar3 me-1"></i>{{ $g[9] }}
-                    </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table-materi">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;"><input type="checkbox" class="form-check-input" /></th>
+                            <th>Materi</th>
+                            <th>Jenjang</th>
+                            <th>Mata Pelajaran</th>
+                            <th>Tipe</th>
+                            <th>Ukuran / Durasi</th>
+                            <th>Status</th>
+                            <th>Terakhir Diubah</th>
+                            <th style="text-align:center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $materis = [
+                                [
+                                    '#fee2e2',
+                                    'bi-file-earmark-pdf-fill',
+                                    '#dc2626',
+                                    'Trigonometri – Dasar dan Penerapan',
+                                    'Sin, cos, tan + contoh soal UTBK',
+                                    'SMA',
+                                    '#dbeafe',
+                                    '#1d4ed8',
+                                    'Matematika',
+                                    '',
+                                    'pdf',
+                                    '2.4 MB · 18 hal',
+                                    'aktif',
+                                    '2 Apr 2026',
+                                ],
+                                [
+                                    '#dbeafe',
+                                    'bi-camera-video-fill',
+                                    '#2563eb',
+                                    'Gerak Parabola – Video Penjelasan Lengkap',
+                                    'Animasi + derivasi rumus step-by-step',
+                                    'SMA',
+                                    '#dbeafe',
+                                    '#1d4ed8',
+                                    'Fisika',
+                                    'var(--info-soft);color:var(--info)',
+                                    'video',
+                                    'Link · 24 mnt',
+                                    'aktif',
+                                    '3 Apr 2026',
+                                ],
+                                [
+                                    'var(--success-soft)',
+                                    'bi-patch-question-fill',
+                                    'var(--success)',
+                                    'Kuis Stoikiometri – 25 Soal Latihan',
+                                    'Konsep mol, massa molar, dan persamaan reaksi',
+                                    'SMA',
+                                    '#dbeafe',
+                                    '#1d4ed8',
+                                    'Kimia',
+                                    'var(--accent-soft);color:var(--warning)',
+                                    'quiz',
+                                    '25 soal',
+                                    'draft',
+                                    '1 Apr 2026',
+                                ],
+                                [
+                                    '#e0f2fe',
+                                    'bi-file-earmark-word-fill',
+                                    '#0369a1',
+                                    'Tenses dalam Bahasa Inggris – Rangkuman',
+                                    'Simple, continuous, perfect tenses + latihan',
+                                    'SMP',
+                                    '#f0fdf4',
+                                    '#16a34a',
+                                    'B. Inggris',
+                                    'var(--success-soft);color:var(--success)',
+                                    'doc',
+                                    '1.1 MB · 12 hal',
+                                    'aktif',
+                                    '28 Mar 2026',
+                                ],
+                                [
+                                    '#fef3c7',
+                                    'bi-file-earmark-slides-fill',
+                                    '#d97706',
+                                    'Integral – Presentasi Interaktif',
+                                    'Integral tentu & tak tentu dengan contoh grafis',
+                                    'SMA',
+                                    '#dbeafe',
+                                    '#1d4ed8',
+                                    'Matematika',
+                                    '',
+                                    'ppt',
+                                    '8.3 MB · 32 slide',
+                                    'aktif',
+                                    '5 Apr 2026',
+                                ],
+                                [
+                                    '#fee2e2',
+                                    'bi-file-earmark-pdf-fill',
+                                    '#dc2626',
+                                    'Sistem Persamaan Linear – Soal & Pembahasan',
+                                    'SPLDV, SPLTV dengan metode substitusi & eliminasi',
+                                    'SMP',
+                                    '#f0fdf4',
+                                    '#16a34a',
+                                    'Matematika',
+                                    '',
+                                    'pdf',
+                                    '1.8 MB · 14 hal',
+                                    'arsip',
+                                    '10 Feb 2026',
+                                ],
+                                [
+                                    'var(--success-soft)',
+                                    'bi-patch-question-fill',
+                                    'var(--success)',
+                                    'Kuis Fisika – Hukum Newton (30 Soal)',
+                                    'Soal pilihan ganda + esai singkat',
+                                    'SMA',
+                                    '#dbeafe',
+                                    '#1d4ed8',
+                                    'Fisika',
+                                    'var(--info-soft);color:var(--info)',
+                                    'quiz',
+                                    '30 soal',
+                                    'aktif',
+                                    '4 Apr 2026',
+                                ],
+                                [
+                                    '#dbeafe',
+                                    'bi-camera-video-fill',
+                                    '#2563eb',
+                                    'Reaksi Kimia – Video Eksperimen Sederhana',
+                                    'Demo reaksi eksoterm & endoterm',
+                                    'SMA',
+                                    '#dbeafe',
+                                    '#1d4ed8',
+                                    'Kimia',
+                                    'var(--accent-soft);color:var(--warning)',
+                                    'video',
+                                    'Link · 18 mnt',
+                                    'draft',
+                                    '5 Apr 2026',
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($materis as $m)
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input" /></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="materi-icon-wrap" style="background:{{ $m[0] }};"><i
+                                                class="bi {{ $m[1] }}" style="color:{{ $m[2] }};"></i>
+                                        </div>
+                                        <div>
+                                            <div class="materi-title">{{ $m[3] }}</div>
+                                            <div class="materi-desc">{{ $m[4] }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge-jenjang"
+                                        style="background:{{ $m[6] }};color:{{ $m[7] }};">{{ $m[5] }}</span>
+                                </td>
+                                <td><span class="badge-mapel">{{ $m[8] }}</span></td>
+                                <td><span class="badge-tipe {{ $m[10] }}">{{ strtoupper($m[10]) }}</span></td>
+                                <td style="font-size:.8rem;color:var(--muted);">{{ $m[11] }}</td>
+                                <td><span class="badge-status {{ $m[12] }}">{{ ucfirst($m[12]) }}</span></td>
+                                <td style="font-size:.8rem;color:var(--muted);">{{ $m[13] }}</td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn-action suc" title="Lihat"><i class="bi bi-eye"></i></button>
+                                        <button class="btn-action" title="Ubah" data-bs-toggle="modal"
+                                            data-bs-target="#modalUbah"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn-action del" title="Hapus" data-bs-toggle="modal"
+                                            data-bs-target="#modalHapus"><i class="bi bi-trash3"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- PAGINATION --}}
+            <div class="d-flex align-items-center justify-content-between px-4 py-3 flex-wrap gap-2"
+                style="border-top:1px solid var(--border);">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm rounded-2 fw-semibold"
+                        style="background:var(--danger-soft);color:var(--danger);border:none;font-size:.78rem;"
+                        data-bs-toggle="modal" data-bs-target="#modalHapus">
+                        <i class="bi bi-trash3 me-1"></i> Hapus Terpilih
+                    </button>
+                    <button class="btn btn-sm rounded-2 fw-semibold"
+                        style="background:#f1f5f9;border:none;color:var(--muted);font-size:.78rem;">
+                        <i class="bi bi-archive me-1"></i> Arsipkan
+                    </button>
                 </div>
-                <div class="materi-card-footer">
-                    <button class="btn-action suc"><i class="bi bi-eye"></i></button>
-                    <div class="d-flex gap-2">
-                        <button class="btn-action" data-bs-toggle="modal" data-bs-target="#modalUbah"><i class="bi bi-pencil"></i></button>
-                        <button class="btn-action del" data-bs-toggle="modal" data-bs-target="#modalHapus"><i class="bi bi-trash3"></i></button>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:.78rem;color:var(--muted);">Halaman 1 dari 5</span>
+                    <div class="d-flex gap-1">
+                        <a href="#" class="page-btn disabled"><i class="bi bi-chevron-left"></i></a>
+                        <a href="#" class="page-btn active">1</a>
+                        <a href="#" class="page-btn">2</a>
+                        <a href="#" class="page-btn">3</a>
+                        <span class="page-btn" style="cursor:default;">…</span>
+                        <a href="#" class="page-btn">5</a>
+                        <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
                     </div>
                 </div>
             </div>
         </div>
-        @endforeach
     </div>
 </div>
 
@@ -1024,6 +1259,15 @@
                             <label class="form-label-custom">Catatan untuk Siswa</label>
                             <textarea name="catatan" id="edit_catatan" class="form-control-custom" rows="2"></textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label-custom">Atau Masukkan Link Video</label>
+                            <input type="url" class="form-control-custom"
+                                placeholder="https://www.youtube.com/watch?v=…" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label-custom">Catatan untuk Siswa</label>
+                            <textarea class="form-control-custom" rows="2" placeholder="Petunjuk belajar, hal yang perlu diperhatikan…"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1038,15 +1282,16 @@
             </form>
         </div>
     </div>
-</div>
 
-{{-- MODAL HAPUS --}}
-<div class="modal fade modal-custom" id="modalHapus" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
-        <div class="modal-content">
-            <div class="modal-body text-center p-4">
-                <div style="width:64px;height:64px;border-radius:50%;background:var(--danger-soft);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--danger);margin:0 auto 16px;">
-                    <i class="bi bi-trash3-fill"></i>
+    {{-- MODAL UBAH --}}
+    <div class="modal fade modal-custom" id="modalUbah" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="font-weight:700;">
+                        <i class="bi bi-pencil-square me-2" style="color:var(--warning);"></i>Ubah Materi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <h5 class="fw-bold mb-2" style="color:var(--text);">Hapus Materi?</h5>
                 <p style="color:var(--muted);font-size:.86rem;margin-bottom:4px;">Anda akan menghapus materi:</p>
