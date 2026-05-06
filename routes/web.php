@@ -321,6 +321,12 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         $les->update(['status' => 'dibatalkan']);
         return redirect('/tutor/les-privat')->with('sukses', 'Pesanan berhasil ditolak!');
     });
+    Route::get('/jadwal', function () {
+        return view('tutor.jadwal');
+    });
+    Route::get('/daftar-siswa', function () {
+        return view('tutor.daftar-siswa');
+    });
     Route::get('/profil', function () {
         return view('tutor.profil');
     });
