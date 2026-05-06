@@ -1,14 +1,11 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Soal extends Model
 {
-    use HasUuids;
-
     protected $table = 'soal';
 
     protected $fillable = [
@@ -23,6 +20,15 @@ class Soal extends Model
         'pembahasan',
         'tingkat_kesulitan',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
 
     public function materi()
     {

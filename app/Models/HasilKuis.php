@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class HasilKuis extends Model
 {
-    use HasUuids;
-
     protected $table = 'hasil_kuis';
 
     protected $fillable = [
+        'id',        // ← tambah ini
         'user_id',
         'materi_id',
         'nilai',
@@ -27,13 +26,22 @@ class HasilKuis extends Model
         'jawaban' => 'array',
     ];
 
-    public function user()
+    protected static function booted()
     {
-        return $this->belongsTo(User::class);
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function siswa()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function materi()
     {
-        return $this->belongsTo(Materi::class);
+        return $this->belongsTo(Materi::class, 'materi_id');
     }
 }

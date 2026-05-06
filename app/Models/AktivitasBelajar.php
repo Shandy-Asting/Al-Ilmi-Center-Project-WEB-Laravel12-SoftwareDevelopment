@@ -1,14 +1,11 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class AktivitasBelajar extends Model
 {
-    use HasUuids;
-
     protected $table = 'aktivitas_belajar';
 
     protected $fillable = [
@@ -21,6 +18,15 @@ class AktivitasBelajar extends Model
     protected $casts = [
         'tanggal' => 'date',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
 
     public function user()
     {
