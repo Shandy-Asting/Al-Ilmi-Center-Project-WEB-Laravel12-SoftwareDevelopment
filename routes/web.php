@@ -18,6 +18,7 @@ Route::post('/logout', function () {
     return redirect('/login');
 })->name('logout');
 
+
 // ── SISWA ──
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::get('/dashboard', function () {
@@ -28,13 +29,14 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $lesPrivat = \App\Models\LesPrivat::where('user_id', $user->id)->whereMonth('created_at', now()->month)->count() ?? 0;
 
         return view('siswa.dashboard', [
-            'namaUser' => $user->name,
-            'rataRataNilai' => $rataRataNilai,
+            'namaUser'        => $user->name,
+            'rataRataNilai'   => $rataRataNilai,
             'soalDiselesaikan' => $soalDiselesaikan,
-            'jamBelajar' => $jamBelajar,
-            'lesPrivat' => $lesPrivat,
+            'jamBelajar'      => $jamBelajar,
+            'lesPrivat'       => $lesPrivat,
         ]);
     });
+
     Route::get('/belajar-tka', function () {
         $materi = \App\Models\Materi::where('status', 'aktif')
             ->withCount('soal')
@@ -56,7 +58,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             'daftarMapel' => $daftarMapel,
         ]);
     });
-    // Ambil soal berdasarkan materi
+
     Route::get('/belajar-tka/{materi_id}/soal', function ($materi_id) {
         $user = auth()->user();
         $materi = \App\Models\Materi::with('soal')->findOrFail($materi_id);
@@ -67,13 +69,13 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ->first();
 
         return view('siswa.latihan-soal', [
-            'materi' => $materi,
-            'soal' => $soal,
+            'materi'          => $materi,
+            'soal'            => $soal,
             'hasilSebelumnya' => $hasilSebelumnya,
         ]);
     });
 
-    // Submit jawaban
+    // Submit jawaban ── notifikasi nilai kuis
     Route::post('/belajar-tka/{materi_id}/submit', function (\Illuminate\Http\Request $request, $materi_id) {
         $user = auth()->user();
         $materi = \App\Models\Materi::with('soal')->findOrFail($materi_id);
@@ -93,20 +95,19 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             else $soalSalah++;
 
             $detailJawaban[] = [
-                'soal_id' => $soalId,
-                'pertanyaan' => $soal->pertanyaan,
+                'soal_id'       => $soalId,
+                'pertanyaan'    => $soal->pertanyaan,
                 'jawaban_siswa' => $jawabanSiswa,
                 'jawaban_benar' => $soal->jawaban_benar,
-                'benar' => $benar,
-                'pembahasan' => $soal->pembahasan,
+                'benar'         => $benar,
+                'pembahasan'    => $soal->pembahasan,
             ];
         }
 
         $totalSoal = count($jawaban);
-        $nilai = $totalSoal > 0 ? round(($soalBenar / $totalSoal) * 100) : 0;
-        $durasi = $request->input('durasi_menit', 0);
-
-        $hasilId = (string) \Illuminate\Support\Str::uuid();
+        $nilai     = $totalSoal > 0 ? round(($soalBenar / $totalSoal) * 100) : 0;
+        $durasi    = $request->input('durasi_menit', 0);
+        $hasilId   = (string) \Illuminate\Support\Str::uuid();
 
         \App\Models\HasilKuis::insert([
             'id'           => $hasilId,
@@ -124,33 +125,37 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ]);
 
         \App\Models\HasilLatihan::create([
-            'user_id' => $user->id,
+            'user_id'        => $user->id,
             'mata_pelajaran' => $materi->mata_pelajaran,
-            'nilai' => $nilai,
-            'jumlah_soal' => $totalSoal,
-            'soal_benar' => $soalBenar,
-            'durasi_menit' => $durasi,
+            'nilai'          => $nilai,
+            'jumlah_soal'    => $totalSoal,
+            'soal_benar'     => $soalBenar,
+            'durasi_menit'   => $durasi,
         ]);
 
         \App\Models\AktivitasBelajar::create([
-            'user_id' => $user->id,
-            'tanggal' => now()->toDateString(),
-            'durasi_menit' => $durasi,
+            'user_id'        => $user->id,
+            'tanggal'        => now()->toDateString(),
+            'durasi_menit'   => $durasi,
             'mata_pelajaran' => $materi->mata_pelajaran,
         ]);
+
+        // ✅ Notifikasi nilai kuis
+        $hasilModel = \App\Models\HasilKuis::with('materi')->find($hasilId);
+        app(\App\Services\NotifikasiService::class)->nilaiKuis($hasilModel);
 
         return redirect('/siswa/belajar-tka/' . $materi_id . '/hasil/' . $hasilId);
     });
 
-    // Lihat hasil kuis
     Route::get('/belajar-tka/{materi_id}/hasil/{hasil_id}', function ($materi_id, $hasil_id) {
         $materi = \App\Models\Materi::findOrFail($materi_id);
-        $hasil = \App\Models\HasilKuis::findOrFail($hasil_id);
+        $hasil  = \App\Models\HasilKuis::findOrFail($hasil_id);
         return view('siswa.hasil-kuis', [
             'materi' => $materi,
-            'hasil' => $hasil,
+            'hasil'  => $hasil,
         ]);
     });
+
     // ── LES PRIVAT SISWA ──
     Route::get('/les-privat', function () {
         $user = auth()->user();
@@ -177,22 +182,18 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ]);
     });
 
-    // POST pesan les (dari form di les-privat)
     Route::post('/les-privat/pesan', function (\Illuminate\Http\Request $request) {
         $request->validate([
-            'tutor_id'      => 'required|exists:users,id',
+            'tutor_id'       => 'required|exists:users,id',
             'mata_pelajaran' => 'required|string',
-            'topik'         => 'nullable|string|max:255',
-            'catatan'       => 'nullable|string',
-            'jadwal'        => 'required|date|after:now',
-            'durasi_menit'  => 'required|in:60,90,120',
-            'mode'          => 'required|in:online,tatap_muka',
-            'lokasi'        => 'nullable|string',
+            'topik'          => 'nullable|string|max:255',
+            'catatan'        => 'nullable|string',
+            'jadwal'         => 'required|date|after:now',
+            'durasi_menit'   => 'required|in:60,90,120',
+            'mode'           => 'required|in:online,tatap_muka',
+            'lokasi'         => 'nullable|string',
         ]);
 
-        $tutor = \App\Models\User::findOrFail($request->tutor_id);
-
-        // Cek bentrok jadwal tutor
         $bentrok = \App\Models\LesPrivat::where('tutor_id', $request->tutor_id)
             ->where('status', 'dikonfirmasi')
             ->whereRaw("ABS(TIMESTAMPDIFF(MINUTE, jadwal, ?)) < durasi_menit", [$request->jadwal])
@@ -202,7 +203,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             return back()->withErrors(['jadwal' => 'Tutor sudah memiliki sesi di waktu tersebut.'])->withInput();
         }
 
-        // Harga dasar berdasarkan durasi
         $harga = match ((int)$request->durasi_menit) {
             60  => 50000,
             90  => 75000,
@@ -228,11 +228,10 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ->with('sukses', 'Pesanan les berhasil dikirim! Tunggu konfirmasi dari tutor.');
     });
 
-    // Batalkan pesanan (siswa)
     Route::post('/les-privat/{id}/batalkan', function ($id) {
         $les = \App\Models\LesPrivat::where('id', $id)
             ->where('user_id', auth()->id())
-            ->where('status', 'menunggu') // hanya bisa batalkan jika masih menunggu
+            ->where('status', 'menunggu')
             ->firstOrFail();
 
         $les->update(['status' => 'dibatalkan']);
@@ -241,81 +240,362 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ->with('sukses', 'Pesanan berhasil dibatalkan.');
     });
 
-    // Detail pesanan (siswa)
     Route::get('/les-privat/{id}', function ($id) {
         $les = \App\Models\LesPrivat::where('id', $id)
             ->where('user_id', auth()->id())
             ->with('tutor')
             ->firstOrFail();
 
-        return response()->json($les); // untuk AJAX di modal
+        return response()->json($les);
     });
-    Route::get('/hasil-progres', function () {
-        $user = auth()->user();
-        $rataRataNilai = round(\App\Models\HasilLatihan::where('user_id', $user->id)->avg('nilai') ?? 0);
-        $soalDiselesaikan = \App\Models\HasilLatihan::where('user_id', $user->id)->sum('soal_benar') ?? 0;
-        $jamBelajar = round(\App\Models\AktivitasBelajar::where('user_id', $user->id)->sum('durasi_menit') / 60, 1) ?? 0;
-        $hasilLatihan = \App\Models\HasilLatihan::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
-        return view('siswa.hasil-progres', [
-            'rataRataNilai' => $rataRataNilai,
-            'soalDiselesaikan' => $soalDiselesaikan,
-            'jamBelajar' => $jamBelajar,
-            'hasilLatihan' => $hasilLatihan,
-        ]);
-    });
-    Route::get('/hasil-progres/export-excel', function () {
-        $user = auth()->user();
+    Route::get('/hasil-progres/export-excel', function (\Illuminate\Http\Request $request) {
+        $user    = auth()->user();
+        $periode = $request->query('periode', 'bulan_ini');
+        $labelMap = [
+            'bulan_ini' => now()->format('M-Y'),
+            '3_bulan'   => '3-Bulan-' . now()->format('M-Y'),
+            '6_bulan'   => '6-Bulan-' . now()->format('M-Y'),
+            'semua'     => 'Semua',
+        ];
         return Excel::download(
-            new \App\Exports\HasilBelajarExport($user->id),
-            'laporan-hasil-belajar-' . now()->format('d-m-Y') . '.xlsx'
+            new \App\Exports\HasilBelajarExport($user->id, $periode),
+            'laporan-hasil-belajar-' . ($labelMap[$periode] ?? now()->format('M-Y')) . '.xlsx'
         );
     });
-    Route::get('/hasil-progres/export-pdf', function () {
-        $user = auth()->user();
-        $hasilLatihan = \App\Models\HasilLatihan::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
+    Route::get('/hasil-progres/export-pdf', function (\Illuminate\Http\Request $request) {
+        $user    = auth()->user();
+        $periode = $request->query('periode', 'bulan_ini');
+        $endDate = now();
+        switch ($periode) {
+            case '3_bulan':
+                $startDate = now()->subMonths(3)->startOfDay();
+                $labelPeriode = '3 Bulan Terakhir';
+                break;
+            case '6_bulan':
+                $startDate = now()->subMonths(6)->startOfDay();
+                $labelPeriode = '6 Bulan Terakhir';
+                break;
+            case 'semua':
+                $startDate = null;
+                $labelPeriode = 'Semua Waktu';
+                break;
+            default:
+                $startDate = now()->startOfMonth();
+                $labelPeriode = 'Bulan ' . now()->translatedFormat('F Y');
+                break;
+        }
+
+        $query = \App\Models\HasilKuis::where('user_id', $user->id)->with('materi')->orderBy('created_at', 'desc');
+        if ($startDate) $query->whereBetween('created_at', [$startDate, $endDate]);
+        $hasilKuis = $query->get();
+
+        $perMapel = $hasilKuis->groupBy(fn($h) => $h->materi->mata_pelajaran ?? 'Lainnya')
+            ->map(fn($list, $mapel) => [
+                'nama'       => $mapel,
+                'total'      => $list->count(),
+                'rata'       => round($list->avg('nilai')),
+                'tertinggi'  => $list->max('nilai'),
+                'terendah'   => $list->min('nilai'),
+                'totalSoal'  => $list->sum('total_soal'),
+                'totalBenar' => $list->sum('soal_benar'),
+            ]);
+
+        $labelFileMap = ['bulan_ini' => now()->format('M-Y'), '3_bulan' => '3-Bulan-' . now()->format('M-Y'), '6_bulan' => '6-Bulan-' . now()->format('M-Y'), 'semua' => 'Semua'];
+
         $pdf = Pdf::loadView('siswa.laporan-pdf', [
-            'user' => $user,
-            'hasilLatihan' => $hasilLatihan,
+            'user'         => $user,
+            'hasilKuis'    => $hasilKuis,
+            'perMapel'     => $perMapel,
+            'labelPeriode' => $labelPeriode,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('laporan-hasil-belajar-' . ($labelFileMap[$periode] ?? now()->format('M-Y')) . '.pdf');
+    });
+
+    Route::get('/hasil-progres', function () {
+        $user    = auth()->user();
+        $userId  = $user->id;
+        $now     = now();
+
+        $rataRataNilai     = round(\App\Models\HasilKuis::where('user_id', $userId)->avg('nilai') ?? 0);
+        $latihanSelesai    = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'latihan')->count();
+        $kuisDikerjakan    = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'kuis')->count();
+        $totalMenit        = \App\Models\AktivitasBelajar::where('user_id', $userId)->sum('durasi_menit');
+        $jamBelajar        = round($totalMenit / 60, 1);
+        $rataRataBulanLalu = round(\App\Models\HasilKuis::where('user_id', $userId)->whereMonth('created_at', $now->copy()->subMonth()->month)->avg('nilai') ?? 0);
+        $selisihNilai      = $rataRataNilai - $rataRataBulanLalu;
+        $latihanMingguIni  = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'latihan')->whereBetween('created_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])->count();
+        $kuisBulanLalu     = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'kuis')->whereMonth('created_at', $now->copy()->subMonth()->month)->count();
+        $selisihKuis       = $kuisDikerjakan - $kuisBulanLalu;
+        $jamBulanIni       = round(\App\Models\AktivitasBelajar::where('user_id', $userId)->whereMonth('tanggal', $now->month)->sum('durasi_menit') / 60, 1);
+
+        $aktivitasMingguan = [];
+        $hariLabel = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        for ($i = 6; $i >= 0; $i--) {
+            $tgl     = $now->copy()->subDays($i)->toDateString();
+            $hari    = $hariLabel[$now->copy()->subDays($i)->dayOfWeek];
+            $latihan = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'latihan')->whereDate('created_at', $tgl)->count();
+            $kuis    = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'kuis')->whereDate('created_at', $tgl)->count();
+            $aktivitasMingguan[] = ['hari' => $hari, 'latihan' => $latihan, 'kuis' => $kuis, 'total' => $latihan + $kuis];
+        }
+        $totalAktivitasMinggu = array_sum(array_column($aktivitasMingguan, 'total'));
+        $rataHari = $totalAktivitasMinggu > 0 ? round($totalAktivitasMinggu / 7, 1) : 0;
+
+        $semuaNilai = \App\Models\HasilKuis::where('user_id', $userId)->pluck('nilai');
+        $totalHasil = $semuaNilai->count();
+        $distribusi = [
+            'A' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n >= 87)->count() / $totalHasil * 100) : 0,
+            'B' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n >= 70 && $n < 87)->count() / $totalHasil * 100) : 0,
+            'C' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n >= 55 && $n < 70)->count() / $totalHasil * 100) : 0,
+            'D' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n < 55)->count() / $totalHasil * 100) : 0,
+        ];
+
+        $semuaMapel   = \App\Models\HasilKuis::where('user_id', $userId)->with('materi')->get()->groupBy(fn($h) => $h->materi->mata_pelajaran ?? 'Lainnya');
+        $progresMapel = [];
+        foreach ($semuaMapel as $mapel => $hasilList) {
+            $rata = round($hasilList->avg('nilai'));
+            $progresMapel[$mapel] = [
+                'nama'       => $mapel,
+                'rata'       => $rata,
+                'pct'        => min($rata, 100),
+                'totalSoal'  => $hasilList->sum('total_soal'),
+                'totalBenar' => $hasilList->sum('soal_benar'),
+            ];
+        }
+
+        $riwayatNilai   = \App\Models\HasilKuis::where('user_id', $userId)->with('materi')->orderBy('created_at', 'desc')->paginate(6);
+        $nilaiTertinggi = \App\Models\HasilKuis::where('user_id', $userId)->max('nilai') ?? 0;
+        $nilaiTerendah  = \App\Models\HasilKuis::where('user_id', $userId)->min('nilai') ?? 0;
+        $tren6Terakhir  = \App\Models\HasilKuis::where('user_id', $userId)->orderBy('created_at', 'desc')->take(6)->pluck('nilai')->reverse()->values();
+
+        $trenJam = [];
+        for ($i = 7; $i >= 0; $i--) {
+            $start = $now->copy()->subWeeks($i)->startOfWeek();
+            $end   = $now->copy()->subWeeks($i)->endOfWeek();
+            $menit = \App\Models\AktivitasBelajar::where('user_id', $userId)->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])->sum('durasi_menit');
+            $trenJam[] = ['label' => 'W' . (8 - $i), 'jam' => round($menit / 60, 1), 'menit' => $menit];
+        }
+        $maxJam = max(array_column($trenJam, 'menit')) ?: 1;
+
+        $kemampuanTopik   = \App\Models\HasilKuis::where('user_id', $userId)->with('materi')->get()
+            ->groupBy(fn($h) => $h->materi->topik ?? $h->materi->mata_pelajaran ?? 'Umum')
+            ->map(fn($list) => round($list->avg('nilai')))->sortDesc()->take(8);
+        $rekomendasiMapel = collect($progresMapel)->sortBy('rata')->first();
+
+        return view('siswa.hasil-progres', [
+            'rataRataNilai'        => $rataRataNilai,
+            'latihanSelesai'       => $latihanSelesai,
+            'kuisDikerjakan'       => $kuisDikerjakan,
+            'jamBelajar'           => $jamBelajar,
+            'selisihNilai'         => $selisihNilai,
+            'latihanMingguIni'     => $latihanMingguIni,
+            'selisihKuis'          => $selisihKuis,
+            'jamBulanIni'          => $jamBulanIni,
+            'aktivitasMingguan'    => $aktivitasMingguan,
+            'totalAktivitasMinggu' => $totalAktivitasMinggu,
+            'rataHari'             => $rataHari,
+            'distribusi'           => $distribusi,
+            'progresMapel'         => $progresMapel,
+            'riwayatNilai'         => $riwayatNilai,
+            'nilaiTertinggi'       => $nilaiTertinggi,
+            'nilaiTerendah'        => $nilaiTerendah,
+            'tren6Terakhir'        => $tren6Terakhir,
+            'trenJam'              => $trenJam,
+            'maxJam'               => $maxJam,
+            'kemampuanTopik'       => $kemampuanTopik,
+            'rekomendasiMapel'     => $rekomendasiMapel,
+            'totalHasil'           => $totalHasil,
         ]);
-        return $pdf->download('laporan-hasil-belajar-' . now()->format('d-m-Y') . '.pdf');
     });
+
+    // ── NOTIFIKASI ──
     Route::get('/notifikasi', function () {
-        return view('siswa.notifikasi');
+        $userId = auth()->id();
+
+        $notifikasi = \App\Models\Notifikasi::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $jumlahBelumDibaca = $notifikasi->where('sudah_dibaca', false)->count();
+
+        $hariIni   = $notifikasi->filter(fn($n) => $n->created_at->isToday());
+        $kemarin   = $notifikasi->filter(fn($n) => $n->created_at->isYesterday());
+        $mingguIni = $notifikasi->filter(fn($n) => !$n->created_at->isToday() && !$n->created_at->isYesterday() && $n->created_at->diffInDays(now()) <= 7);
+        $lebihLama = $notifikasi->filter(fn($n) => $n->created_at->diffInDays(now()) > 7);
+
+        return view('siswa.notifikasi', [
+            'jumlahBelumDibaca' => $jumlahBelumDibaca,
+            'hariIni'           => $hariIni,
+            'kemarin'           => $kemarin,
+            'mingguIni'         => $mingguIni,
+            'lebihLama'         => $lebihLama,
+        ]);
     });
-    Route::get('/pembayaran', function () {
-        return view('siswa.pembayaran');
+
+    // Tandai semua dibaca
+    Route::post('/notifikasi/tandai-semua', function () {
+        \App\Models\Notifikasi::where('user_id', auth()->id())
+            ->where('sudah_dibaca', false)
+            ->update(['sudah_dibaca' => true]);
+        return back();
     });
+
+    // Tandai dibaca + redirect ke url aksi
+    Route::post('/notifikasi/{id}/buka', function ($id) {
+        $notif = \App\Models\Notifikasi::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+        $notif->update(['sudah_dibaca' => true]);
+        return redirect($notif->url_aksi ?? '/siswa/notifikasi');
+    });
+
+    Route::get('/pembayaran', fn() => view('siswa.pembayaran'));
+    // GET - Tampilkan halaman profil
     Route::get('/profil', function () {
-        return view('siswa.profil');
+        $user   = auth()->user();
+        $userId = $user->id;
+
+        // Stat untuk profile header (dari DB)
+        $rataRataNilai  = round(\App\Models\HasilKuis::where('user_id', $userId)->avg('nilai') ?? 0);
+        $soalSelesai    = \App\Models\HasilKuis::where('user_id', $userId)->sum('total_soal');
+        $sesiLes        = \App\Models\LesPrivat::where('user_id', $userId)->where('status', 'selesai')->count();
+
+        // Pencapaian
+        $totalHasil     = \App\Models\HasilKuis::where('user_id', $userId)->count();
+        $latihanSelesai = \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'latihan')->count();
+        $aktivitasMinggu = \App\Models\HasilKuis::where('user_id', $userId)
+            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+
+        $achievements = [
+            ['🔥', 'Streak 5 Hari',    'Belajar 5 hari berturut',   $aktivitasMinggu >= 5],
+            ['⭐', 'Nilai Sempurna',    'Skor 100 di kuis',           \App\Models\HasilKuis::where('user_id', $userId)->where('nilai', 100)->exists()],
+            ['📚', 'Kutu Buku',         'Selesai 5 materi',           $latihanSelesai >= 5],
+            ['⚡', 'Kilat!',            'Kuis < 10 menit',            \App\Models\HasilKuis::where('user_id', $userId)->where('tipe', 'kuis')->where('durasi_menit', '<', 10)->where('durasi_menit', '>', 0)->exists()],
+            ['🥇', 'Juara Mapel',       'Rata-rata 95+ semua',        $rataRataNilai >= 95],
+            ['🌙', 'Belajar Malam',     'Latihan > 22:00',            \App\Models\HasilKuis::where('user_id', $userId)->whereTime('created_at', '>=', '22:00:00')->exists()],
+            ['💯', 'Perfectionist',     '10 kuis sempurna',           \App\Models\HasilKuis::where('user_id', $userId)->where('nilai', 100)->count() >= 10],
+            ['🎯', 'Fokus',             'Streak 30 hari',             $aktivitasMinggu >= 30],
+            ['🚀', 'Top Siswa',         'Masuk peringkat 10',         false],
+            ['📖', 'Pelajar Tekun',     '500 soal selesai',           $soalSelesai >= 500],
+            ['🎓', 'Siap TKA',          'Progres 100% semua',         false],
+            ['👑', 'Legend',            'Raih semua badge',           false],
+        ];
+
+        $badgeTerbuka  = collect($achievements)->filter(fn($a) => $a[3])->count();
+        $badgeTerkunci = count($achievements) - $badgeTerbuka;
+
+        return view('siswa.profil', [
+            'user'          => $user,
+            'rataRataNilai' => $rataRataNilai,
+            'soalSelesai'   => $soalSelesai,
+            'sesiLes'       => $sesiLes,
+            'badgeTerbuka'  => $badgeTerbuka,
+            'badgeTerkunci' => $badgeTerkunci,
+            'achievements'  => $achievements,
+            'aktivitasMinggu' => $aktivitasMinggu,
+        ]);
     });
+
+    // POST - Update info pribadi
+    Route::post('/profil/update-info', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+
+        $request->validate([
+            'name'          => 'required|string|max:100',
+            'no_hp'         => 'nullable|string|max:20',
+            'tanggal_lahir' => 'nullable|date',
+            'jenjang'       => 'nullable|in:sd,smp,sma',
+            'kelas'         => 'nullable|string|max:20',
+            'kota'          => 'nullable|string|max:100',
+            'provinsi'      => 'nullable|string|max:100',
+            'tujuan_belajar' => 'nullable|string|max:255',
+            'bio'           => 'nullable|string|max:500',
+        ]);
+
+        $user->update([
+            'name'           => $request->name,
+            'no_hp'          => $request->no_hp,
+            'tanggal_lahir'  => $request->tanggal_lahir,
+            'jenjang'        => $request->jenjang,
+            'kelas'          => $request->kelas,
+            'kota'           => $request->kota,
+            'provinsi'       => $request->provinsi,
+            'tujuan_belajar' => $request->tujuan_belajar,
+            'bio'            => $request->bio,
+        ]);
+
+        return redirect('/siswa/profil')->with('sukses_info', 'Informasi pribadi berhasil diperbarui!');
+    });
+
+    // POST - Upload avatar
+    Route::post('/profil/upload-avatar', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        // Hapus avatar lama
+        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->update(['avatar' => $path]);
+
+        return redirect('/siswa/profil')->with('sukses_info', 'Foto profil berhasil diperbarui!');
+    });
+
+    // POST - Ganti password
+    Route::post('/profil/ganti-password', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+
+        $request->validate([
+            'password_lama'     => 'required',
+            'password_baru'     => 'required|min:8|confirmed',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->password_lama, $user->password)) {
+            return back()->withErrors(['password_lama' => 'Password saat ini salah!'])->with('tab', 'keamanan');
+        }
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password_baru),
+        ]);
+
+        return redirect('/siswa/profil')->with('sukses_password', 'Password berhasil diubah!')->with('tab', 'keamanan');
+    });
+
     Route::get('/pesan-jadwal', function () {
-        $tutors = \App\Models\User::where('role', 'tutor')->get();
+        $tutors       = \App\Models\User::where('role', 'tutor')->get();
         $paketDipilih = session('paket_dipilih');
         return view('siswa.pesan-jadwal', [
-            'tutors' => $tutors,
+            'tutors'       => $tutors,
             'paketDipilih' => $paketDipilih,
         ]);
     });
+
     Route::post('/pesan-jadwal', function (\Illuminate\Http\Request $request) {
         $request->validate([
-            'tutor_id' => 'required|exists:users,id',
+            'tutor_id'       => 'required|exists:users,id',
             'mata_pelajaran' => 'required|string',
-            'jadwal' => 'required|date',
-            'mode' => 'required|in:online,tatap_muka',
+            'jadwal'         => 'required|date',
+            'mode'           => 'required|in:online,tatap_muka',
         ]);
-
         \App\Models\LesPrivat::create([
-            'user_id' => auth()->user()->id,
-            'tutor_id' => $request->tutor_id,
+            'user_id'        => auth()->user()->id,
+            'tutor_id'       => $request->tutor_id,
             'mata_pelajaran' => $request->mata_pelajaran,
-            'jadwal' => $request->jadwal,
-            'status' => 'menunggu',
-            'mode' => $request->mode,
+            'jadwal'         => $request->jadwal,
+            'status'         => 'menunggu',
+            'mode'           => $request->mode,
         ]);
-
         return redirect('/siswa/les-privat')->with('sukses', 'Jadwal les berhasil dipesan!');
     });
+
     Route::post('/pilih-paket/{tipe}', function ($tipe) {
         $paket = \App\Models\Paket::where('tipe', $tipe)->firstOrFail();
         session(['paket_dipilih' => $paket]);

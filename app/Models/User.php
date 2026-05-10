@@ -57,4 +57,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Soal::class, 'tutor_id');
     }
+    public function notifikasi()
+    {
+        return $this->hasMany(Notifikasi::class);
+    }
 }
