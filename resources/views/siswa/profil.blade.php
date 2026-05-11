@@ -34,449 +34,6 @@
 @endsection
 
 @push('styles')
-<<<<<<< HEAD
-    <style>
-        /* ── PROFILE HEADER ── */
-        .profile-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #3b6fa0 100%);
-            border-radius: 20px;
-            padding: 28px 32px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-
-        .profile-header::before {
-            content: '';
-            position: absolute;
-            top: -60px;
-            right: -60px;
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .05);
-        }
-
-        .profile-header::after {
-            content: '';
-            position: absolute;
-            bottom: -80px;
-            left: 40px;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .04);
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
-            border: 3px solid rgba(255, 255, 255, .3);
-            flex-shrink: 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .profile-name {
-            font-size: 22px;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .profile-role {
-            font-size: 13px;
-            opacity: .75;
-            color: #fff;
-        }
-
-        .profile-stats {
-            display: flex;
-            gap: 24px;
-            margin-top: 16px;
-            position: relative;
-            z-index: 1;
-            flex-wrap: wrap;
-        }
-
-        .ps-item {
-            text-align: center;
-        }
-
-        .ps-val {
-            font-size: 22px;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1;
-        }
-
-        .ps-label {
-            font-size: 11px;
-            opacity: .7;
-            color: #fff;
-            margin-top: 2px;
-        }
-
-        /* ── SECTION TABS ── */
-        .section-tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 5px;
-            margin-bottom: 24px;
-        }
-
-        .section-tab {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .2s;
-            color: var(--muted);
-            border: none;
-            background: transparent;
-        }
-
-        .section-tab.active {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .section-tab:hover:not(.active) {
-            background: var(--bg);
-            color: var(--primary);
-        }
-
-        /* ── FORM ── */
-        .form-section {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-        }
-
-        .form-section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-section-title i {
-            color: var(--primary);
-        }
-
-        .form-label-custom {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .form-control-custom {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            font-size: 13.5px;
-            color: var(--text);
-            background: #fff;
-            transition: all .2s;
-            outline: none;
-        }
-
-        .form-control-custom:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, .08);
-        }
-
-        .form-control-custom:disabled {
-            background: var(--bg);
-            color: var(--muted);
-        }
-
-        .form-control-custom.select {
-            cursor: pointer;
-        }
-
-        /* ── ACHIEVEMENT ── */
-        .achieve-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .achieve-card {
-            background: var(--bg);
-            border-radius: 12px;
-            padding: 14px;
-            text-align: center;
-            transition: transform .2s;
-        }
-
-        .achieve-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .achieve-card.unlocked {
-            background: linear-gradient(135deg, var(--accent-soft), #fffbeb);
-            border: 1px solid var(--accent);
-        }
-
-        .achieve-card.locked {
-            opacity: .45;
-            filter: grayscale(1);
-        }
-
-        .achieve-icon {
-            font-size: 28px;
-            margin-bottom: 6px;
-        }
-
-        .achieve-title {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .achieve-sub {
-            font-size: 10px;
-            color: var(--muted);
-            margin-top: 2px;
-        }
-
-        /* ── PAKET CARD ── */
-        .paket-aktif {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            border-radius: 16px;
-            padding: 20px;
-            color: #fff;
-            margin-bottom: 16px;
-        }
-
-        .pa-label {
-            font-size: 11px;
-            opacity: .7;
-            margin-bottom: 4px;
-        }
-
-        .pa-name {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .pa-period {
-            font-size: 12px;
-            opacity: .7;
-        }
-
-        .pa-features {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .pa-feature {
-            font-size: 12px;
-            opacity: .85;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* ── DANGER ZONE ── */
-        .danger-zone {
-            background: var(--danger-soft);
-            border: 1.5px solid var(--danger);
-            border-radius: 16px;
-            padding: 20px;
-        }
-
-        .dz-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--danger);
-            margin-bottom: 8px;
-        }
-
-        .dz-desc {
-            font-size: 12.5px;
-            color: #7f1d1d;
-            margin-bottom: 14px;
-            line-height: 1.5;
-        }
-
-        /* CARD BOX */
-        .card-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-        }
-
-        /* ══ RESPONSIVE GLOBAL ══ */
-        @media (max-width: 991px) {
-            .row>[class*='col-lg'] {
-                margin-bottom: 12px;
-            }
-        }
-
-        @media (max-width: 767px) {
-            h4.fw-bold {
-                font-size: 1.1rem !important;
-            }
-
-            .d-flex.justify-content-between {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .stat-card {
-                padding: 14px !important;
-            }
-
-            .stat-val {
-                font-size: 1.3rem !important;
-            }
-
-            .main-tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
-
-            .main-tab {
-                min-width: 100px;
-                flex: none;
-            }
-
-            table {
-                font-size: 12px !important;
-            }
-
-            table td,
-            table th {
-                padding: 8px 10px !important;
-            }
-
-            .card-box-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .modal-box {
-                width: 96% !important;
-                margin: 10px auto;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stat-card {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .d-flex.gap-2 {
-                flex-wrap: wrap;
-            }
-
-            .btn {
-                font-size: 12px !important;
-                padding: 7px 12px !important;
-            }
-        }
-
-        @media (max-width: 767px) {
-            .profile-header {
-                padding: 18px 16px !important;
-                border-radius: 14px !important;
-            }
-
-            .profile-header .d-flex {
-                flex-direction: column;
-                align-items: center !important;
-                text-align: center;
-            }
-
-            .profile-avatar {
-                margin: 0 auto 12px !important;
-            }
-
-            .profile-stats {
-                justify-content: center;
-                gap: 16px;
-            }
-
-            .section-tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
-
-            .section-tab {
-                min-width: 100px;
-                flex: none;
-                font-size: 12px;
-            }
-
-            .achieve-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-
-            .form-section {
-                padding: 16px !important;
-            }
-
-            .paket-aktif {
-                padding: 16px !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-stats {
-                gap: 12px;
-            }
-
-            .ps-val {
-                font-size: 18px !important;
-            }
-
-            .achieve-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-
-            .section-tabs {
-                gap: 3px;
-            }
-
-            .section-tab {
-                padding: 7px 6px !important;
-                font-size: 11px !important;
-            }
-        }
-    </style>
-=======
 <style>
     /* ── PROFILE HEADER ── */
     .profile-header {
@@ -778,131 +335,80 @@
         border-radius: 16px;
         padding: 20px;
     }
+
+    /* ══ RESPONSIVE GLOBAL ══ */
+    @media (max-width: 767px) {
+        .profile-header {
+            padding: 18px 16px !important;
+            border-radius: 14px !important;
+        }
+
+        .profile-header .d-flex {
+            flex-direction: column;
+            align-items: center !important;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            margin: 0 auto 12px !important;
+        }
+
+        .profile-stats {
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .section-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+        }
+
+        .section-tab {
+            min-width: 100px;
+            flex: none;
+            font-size: 12px;
+        }
+
+        .achieve-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .form-section {
+            padding: 16px !important;
+        }
+
+        .paket-aktif {
+            padding: 16px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-stats {
+            gap: 12px;
+        }
+
+        .ps-val {
+            font-size: 18px !important;
+        }
+
+        .achieve-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .section-tabs {
+            gap: 3px;
+        }
+
+        .section-tab {
+            padding: 7px 6px !important;
+            font-size: 11px !important;
+        }
+    }
 </style>
->>>>>>> main
 @endpush
 
 @section('content')
 
-<<<<<<< HEAD
-    {{-- PROFILE HEADER --}}
-    <div class="profile-header">
-        <div class="d-flex align-items-center gap-4" style="position:relative;z-index:1;">
-            <div class="profile-avatar">A</div>
-            <div style="flex:1;">
-                <div class="profile-name">Andi Pratama</div>
-                <div class="profile-role">Siswa · SMA Kelas 12 · Kediri, Jawa Timur</div>
-                <div style="margin-top:8px;">
-                    <span
-                        style="background:rgba(255,255,255,.15);color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;">
-                        <i class="bi bi-star-fill me-1" style="color:var(--accent);"></i> Paket Pro
-                    </span>
-                    <span
-                        style="background:rgba(255,255,255,.15);color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;margin-left:6px;">
-                        <i class="bi bi-fire me-1"></i> 5 Hari Streak
-                    </span>
-                </div>
-            </div>
-            <button class="btn btn-sm fw-bold"
-                style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;font-size:12px;white-space:nowrap;position:relative;z-index:1;">
-                <i class="bi bi-camera-fill me-1"></i> Ganti Foto
-            </button>
-        </div>
-        <div class="profile-stats">
-            <div class="ps-item">
-                <div class="ps-val">87</div>
-                <div class="ps-label">Rata-rata Nilai</div>
-            </div>
-            <div class="ps-item">
-                <div class="ps-val">42</div>
-                <div class="ps-label">Soal Selesai</div>
-            </div>
-            <div class="ps-item">
-                <div class="ps-val">8</div>
-                <div class="ps-label">Sesi Les</div>
-            </div>
-            <div class="ps-item">
-                <div class="ps-val">5</div>
-                <div class="ps-label">Badge</div>
-            </div>
-        </div>
-    </div>
-
-    {{-- SECTION TABS --}}
-    <div class="section-tabs">
-        <button class="section-tab active" onclick="switchSection(this,'info')">
-            <i class="bi bi-person me-1"></i> Info Pribadi
-        </button>
-        <button class="section-tab" onclick="switchSection(this,'keamanan')">
-            <i class="bi bi-shield-lock me-1"></i> Keamanan
-        </button>
-        <button class="section-tab" onclick="switchSection(this,'paket')">
-            <i class="bi bi-star me-1"></i> Paket & Langganan
-        </button>
-        <button class="section-tab" onclick="switchSection(this,'pencapaian')">
-            <i class="bi bi-trophy me-1"></i> Pencapaian
-        </button>
-    </div>
-
-    {{-- ══ SECTION: INFO PRIBADI ══ --}}
-    <div id="section-info">
-        <div class="form-section">
-            <div class="form-section-title">
-                <i class="bi bi-person-fill"></i> Informasi Pribadi
-            </div>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label-custom">Nama Lengkap</label>
-                    <input type="text" class="form-control-custom" value="Andi Pratama" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Email</label>
-                    <input type="email" class="form-control-custom" value="andi.pratama@gmail.com" disabled />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">No. HP</label>
-                    <input type="text" class="form-control-custom" value="08786886543" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Tanggal Lahir</label>
-                    <input type="date" class="form-control-custom" value="2008-03-15" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Jenjang Pendidikan</label>
-                    <select class="form-control-custom select">
-                        <option>SD / Sederajat</option>
-                        <option>SMP / Sederajat</option>
-                        <option selected>SMA / Sederajat</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Kelas</label>
-                    <select class="form-control-custom select">
-                        <option>Kelas 10</option>
-                        <option>Kelas 11</option>
-                        <option selected>Kelas 12</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Kota / Kabupaten</label>
-                    <input type="text" class="form-control-custom" value="Kediri" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Provinsi</label>
-                    <input type="text" class="form-control-custom" value="Jawa Timur" />
-                </div>
-                <div class="col-12">
-                    <label class="form-label-custom">Tujuan Belajar</label>
-                    <select class="form-control-custom select">
-                        <option selected>Persiapan TKA (Naik Jenjang)</option>
-                        <option>Belajar Biasa</option>
-                        <option>Persiapan Olimpiade</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <label class="form-label-custom">Tentang Saya</label>
-                    <textarea class="form-control-custom" rows="3" style="resize:vertical;">Siswa SMA kelas 12 yang sedang mempersiapkan diri untuk ujian TKA. Suka matematika dan fisika.</textarea>
-=======
 {{-- FLASH MESSAGE --}}
 @if(session('sukses_info'))
 <div class="alert alert-success rounded-3 mb-3 d-flex align-items-center gap-2" style="font-size:.85rem;" id="flash-sukses">
@@ -1029,7 +535,7 @@
                     <label class="form-label-custom">Jenjang Pendidikan</label>
                     <select name="jenjang" class="form-control-custom select">
                         <option value="">-- Pilih Jenjang --</option>
-                        <option value="sd" {{ old('jenjang', $user->jenjang) === 'sd'  ? 'selected' : '' }}>SD / Sederajat</option>
+                        <option value="sd" {{ old('jenjang', $user->jenjang) === 'sd' ? 'selected' : '' }}>SD / Sederajat</option>
                         <option value="smp" {{ old('jenjang', $user->jenjang) === 'smp' ? 'selected' : '' }}>SMP / Sederajat</option>
                         <option value="sma" {{ old('jenjang', $user->jenjang) === 'sma' ? 'selected' : '' }}>SMA / Sederajat</option>
                     </select>
@@ -1078,59 +584,101 @@
     </div>
 </div>
 
-<div class="form-section">
-    <div class="form-section-title"><i class="bi bi-key-fill"></i> Ubah Password</div>
-    <form method="POST" action="/siswa/profil/ganti-password">
-        @csrf
-        <div class="row g-3">
-            <div class="col-12">
-                <label class="form-label-custom">Password Saat Ini</label>
-                <div style="position:relative;">
-                    <input type="password" name="password_lama" id="passLama"
-                        class="form-control-custom {{ $errors->has('password_lama') ? 'border-danger' : '' }}"
-                        placeholder="Masukkan password saat ini" style="padding-right:40px;" required />
-                    <i class="bi bi-eye" id="toggleLama" onclick="togglePass('passLama','toggleLama')"
-                        style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
->>>>>>> main
+{{-- ══ SECTION: KEAMANAN ══ --}}
+<div id="section-keamanan" style="display:none;">
+    <div class="form-section">
+        <div class="form-section-title"><i class="bi bi-key-fill"></i> Ubah Password</div>
+        <form method="POST" action="/siswa/profil/ganti-password">
+            @csrf
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label-custom">Password Saat Ini</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password_lama" id="passLama"
+                            class="form-control-custom {{ $errors->has('password_lama') ? 'border-danger' : '' }}"
+                            placeholder="Masukkan password saat ini" style="padding-right:40px;" required />
+                        <i class="bi bi-eye" id="toggleLama" onclick="togglePass('passLama','toggleLama')"
+                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    </div>
+                    @error('password_lama')
+                    <div style="font-size:.78rem;color:var(--danger);margin-top:4px;">{{ $message }}</div>
+                    @enderror
                 </div>
-                @error('password_lama')
-                <div style="font-size:.78rem;color:var(--danger);margin-top:4px;">{{ $message }}</div>
-                @enderror
+                <div class="col-md-6">
+                    <label class="form-label-custom">Password Baru</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password_baru" id="passBaru"
+                            class="form-control-custom"
+                            placeholder="Minimal 8 karakter" style="padding-right:40px;" required />
+                        <i class="bi bi-eye" id="toggleBaru" onclick="togglePass('passBaru','toggleBaru')"
+                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom">Konfirmasi Password Baru</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password_baru_confirmation" id="passKonfirm"
+                            class="form-control-custom"
+                            placeholder="Ulangi password baru" style="padding-right:40px;" required />
+                        <i class="bi bi-eye" id="toggleKonfirm" onclick="togglePass('passKonfirm','toggleKonfirm')"
+                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    </div>
+                </div>
             </div>
-<<<<<<< HEAD
             <div class="d-flex justify-content-end mt-3">
-                <button class="btn fw-bold px-4 py-2"
+                <button type="submit" class="btn fw-bold px-4 py-2"
                     style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                    <i class="bi bi-check2 me-1"></i> Simpan Perubahan
-=======
-            <div class="col-md-6">
-                <label class="form-label-custom">Password Baru</label>
-                <div style="position:relative;">
-                    <input type="password" name="password_baru" id="passBaru"
-                        class="form-control-custom"
-                        placeholder="Minimal 8 karakter" style="padding-right:40px;" required />
-                    <i class="bi bi-eye" id="toggleBaru" onclick="togglePass('passBaru','toggleBaru')"
-                        style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    <i class="bi bi-shield-check me-1"></i> Ubah Password
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-section">
+        <div class="form-section-title"><i class="bi bi-bell-fill"></i> Pengaturan Notifikasi</div>
+        <div class="d-flex flex-column gap-3">
+            @php
+                $notifSettings = [
+                    ['Notifikasi Tagihan & Pembayaran', 'Dapatkan pengingat jatuh tempo tagihan', true],
+                    ['Notifikasi Jadwal Les', 'Pengingat sesi les privat yang akan datang', true],
+                    ['Notifikasi Nilai & Progres', 'Update nilai kuis dan perkembangan belajar', true],
+                    ['Notifikasi Materi Baru', 'Pemberitahuan saat tutor mengunggah materi baru', false],
+                    ['Email Marketing', 'Promo dan penawaran spesial dari Al Ilmi Center', false],
+                ];
+            @endphp
+            @foreach($notifSettings as $ns)
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
+                style="background:var(--bg);">
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $ns[0] }}</div>
+                    <div style="font-size:11.5px;color:var(--muted);">{{ $ns[1] }}</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" {{ $ns[2] ? 'checked' : '' }}
+                        style="width:40px;height:22px;cursor:pointer;" />
                 </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label-custom">Konfirmasi Password Baru</label>
-                <div style="position:relative;">
-                    <input type="password" name="password_baru_confirmation" id="passKonfirm"
-                        class="form-control-custom"
-                        placeholder="Ulangi password baru" style="padding-right:40px;" required />
-                    <i class="bi bi-eye" id="toggleKonfirm" onclick="togglePass('passKonfirm','toggleKonfirm')"
-                        style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
-                </div>
-            </div>
+            @endforeach
         </div>
         <div class="d-flex justify-content-end mt-3">
-            <button type="submit" class="btn fw-bold px-4 py-2"
+            <button class="btn fw-bold px-4 py-2"
                 style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                <i class="bi bi-shield-check me-1"></i> Ubah Password
+                <i class="bi bi-check2 me-1"></i> Simpan Pengaturan
             </button>
         </div>
-    </form>
+    </div>
+
+    <div class="danger-zone">
+        <div class="dz-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya</div>
+        <div class="dz-desc">
+            Menghapus akun akan menghapus semua data termasuk riwayat belajar, nilai, dan transaksi secara permanen.
+            Tindakan ini tidak dapat dibatalkan.
+        </div>
+        <button class="btn fw-bold px-4 py-2"
+            style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
+            <i class="bi bi-trash3-fill me-1"></i> Hapus Akun Saya
+        </button>
+    </div>
 </div>
 
 {{-- ══ SECTION: PAKET ══ --}}
@@ -1150,9 +698,9 @@
     <div class="row g-3 mb-3">
         @php
         $pakets = [
-        ['Starter','Rp 99K','/ bulan',false,['Akses Materi TKA','50 Soal/Hari','1x Les Privat Online'],'var(--bg)','var(--primary)','Pilih Paket'],
-        ['Pro','Rp 199K','/ bulan',true,['Akses Materi Penuh','Soal Tak Terbatas','4x Les Privat Online','Feedback Tutor'],'var(--primary)','#fff','Paket Aktif'],
-        ['Premium','Rp 349K','/ bulan',false,['Semua Fitur Pro','8x Les Online/Offline','Konsultasi Karir','Laporan Mingguan'],'var(--bg)','var(--primary)','Upgrade'],
+            ['Starter','Rp 99K','/ bulan',false,['Akses Materi TKA','50 Soal/Hari','1x Les Privat Online'],'var(--bg)','var(--primary)','Pilih Paket'],
+            ['Pro','Rp 199K','/ bulan',true,['Akses Materi Penuh','Soal Tak Terbatas','4x Les Privat Online','Feedback Tutor'],'var(--primary)','#fff','Paket Aktif'],
+            ['Premium','Rp 349K','/ bulan',false,['Semua Fitur Pro','8x Les Online/Offline','Konsultasi Karir','Laporan Mingguan'],'var(--bg)','var(--primary)','Upgrade'],
         ];
         @endphp
         @foreach($pakets as $p)
@@ -1175,53 +723,19 @@
                     style="background:{{ $p[5] }};color:{{ $p[6] }};border-radius:10px;border:{{ $p[3] ? 'none' : '1.5px solid var(--border)' }};font-size:13px;"
                     {{ $p[3] ? 'disabled' : '' }}>
                     {{ $p[7] }}
->>>>>>> main
                 </button>
             </div>
         </div>
+        @endforeach
     </div>
 
-<<<<<<< HEAD
-    {{-- ══ SECTION: KEAMANAN ══ --}}
-    <div id="section-keamanan" style="display:none;">
-        <div class="form-section">
-            <div class="form-section-title"><i class="bi bi-key-fill"></i> Ubah Password</div>
-            <div class="row g-3">
-                <div class="col-12">
-                    <label class="form-label-custom">Password Saat Ini</label>
-                    <div style="position:relative;" x-data="{ show: false }">
-                        <input :type="show ? 'text' : 'password'" class="form-control-custom"
-                            placeholder="Masukkan password saat ini" style="padding-right:40px;" />
-                        <i class="bi input-toggle" :class="show ? 'bi-eye-slash' : 'bi-eye'" @click="show=!show"
-                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Password Baru</label>
-                    <div style="position:relative;" x-data="{ show: false }">
-                        <input :type="show ? 'text' : 'password'" class="form-control-custom"
-                            placeholder="Minimal 8 karakter" style="padding-right:40px;" />
-                        <i class="bi input-toggle" :class="show ? 'bi-eye-slash' : 'bi-eye'" @click="show=!show"
-                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label-custom">Konfirmasi Password Baru</label>
-                    <div style="position:relative;" x-data="{ show: false }">
-                        <input :type="show ? 'text' : 'password'" class="form-control-custom"
-                            placeholder="Ulangi password baru" style="padding-right:40px;" />
-                        <i class="bi input-toggle" :class="show ? 'bi-eye-slash' : 'bi-eye'" @click="show=!show"
-                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
-                    </div>
-                </div>
-=======
     <div class="card-box">
         <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Riwayat Langganan</div>
         @php
         $langganan = [
-        ['Paket Pro','April 2026','Rp 199.000','var(--success-soft)','var(--success)','Aktif'],
-        ['Paket Pro','Maret 2026','Rp 199.000','var(--success-soft)','var(--success)','Lunas'],
-        ['Paket Starter','Februari 2026','Rp 99.000','var(--success-soft)','var(--success)','Lunas'],
+            ['Paket Pro','April 2026','Rp 199.000','var(--success-soft)','var(--success)','Aktif'],
+            ['Paket Pro','Maret 2026','Rp 199.000','var(--success-soft)','var(--success)','Lunas'],
+            ['Paket Starter','Februari 2026','Rp 99.000','var(--success-soft)','var(--success)','Lunas'],
         ];
         @endphp
         @foreach($langganan as $l)
@@ -1229,303 +743,65 @@
             <div>
                 <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $l[0] }}</div>
                 <div style="font-size:12px;color:var(--muted);">Periode: {{ $l[1] }}</div>
->>>>>>> main
             </div>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn fw-bold px-4 py-2"
-                    style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                    <i class="bi bi-shield-check me-1"></i> Ubah Password
-                </button>
+            <div class="text-end">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $l[2] }}</div>
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:{{ $l[3] }};color:{{ $l[4] }};">{{ $l[5] }}</span>
             </div>
-        </div>
-
-<<<<<<< HEAD
-        <div class="form-section">
-            <div class="form-section-title"><i class="bi bi-bell-fill"></i> Pengaturan Notifikasi</div>
-            <div class="d-flex flex-column gap-3">
-                @php
-                    $notifSettings = [
-                        ['Notifikasi Tagihan & Pembayaran', 'Dapatkan pengingat jatuh tempo tagihan', true],
-                        ['Notifikasi Jadwal Les', 'Pengingat sesi les privat yang akan datang', true],
-                        ['Notifikasi Nilai & Progres', 'Update nilai kuis dan perkembangan belajar', true],
-                        ['Notifikasi Materi Baru', 'Pemberitahuan saat tutor mengunggah materi baru', false],
-                        ['Email Marketing', 'Promo dan penawaran spesial dari Al Ilmi Center', false],
-                    ];
-                @endphp
-                @foreach ($notifSettings as $ns)
-                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
-                        style="background:var(--bg);">
-                        <div>
-                            <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $ns[0] }}</div>
-                            <div style="font-size:11.5px;color:var(--muted);">{{ $ns[1] }}</div>
-                        </div>
-                        <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" {{ $ns[2] ? 'checked' : '' }}
-                                style="width:40px;height:22px;cursor:pointer;" />
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn fw-bold px-4 py-2"
-                    style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                    <i class="bi bi-check2 me-1"></i> Simpan Pengaturan
-                </button>
-            </div>
-        </div>
-
-        <div class="danger-zone">
-            <div class="dz-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya</div>
-            <div class="dz-desc">
-                Menghapus akun akan menghapus semua data termasuk riwayat belajar, nilai, dan transaksi secara permanen.
-                Tindakan ini tidak dapat dibatalkan.
-            </div>
-            <button class="btn fw-bold px-4 py-2"
-                style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                <i class="bi bi-trash3-fill me-1"></i> Hapus Akun Saya
-            </button>
-=======
-{{-- ══ SECTION: PENCAPAIAN ══ --}}
-<div id="section-pencapaian" style="display:none;">
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--primary);">{{ $badgeTerbuka }}</div>
-            <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
->>>>>>> main
-        </div>
-    </div>
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--muted);">{{ $badgeTerkunci }}</div>
-            <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 {{ $aktivitasMinggu }}</div>
-            <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--success);">{{ $rataRataNilai }}</div>
-            <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
-        </div>
-    </div>
-</div>
-
-<<<<<<< HEAD
-    {{-- ══ SECTION: PAKET ══ --}}
-    <div id="section-paket" style="display:none;">
-        <div class="paket-aktif">
-            <div class="pa-label">Paket Aktif</div>
-            <div class="pa-name">Paket Pro ⭐</div>
-            <div class="pa-period">Periode: 1 – 30 April 2026 · Perpanjang Otomatis</div>
-            <div class="pa-features">
-                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Akses Materi
-                    TKA Penuh</div>
-                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Soal Latihan
-                    Tak Terbatas</div>
-                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> 4x Les
-                    Privat Online</div>
-                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Feedback
-                    Tutor Langsung</div>
-            </div>
-        </div>
-
-        <div class="row g-3 mb-3">
-            @php
-                $pakets = [
-                    [
-                        'Starter',
-                        'Rp 99K',
-                        '/ bulan',
-                        false,
-                        ['Akses Materi TKA', '50 Soal/Hari', '1x Les Privat Online'],
-                        'var(--bg)',
-                        'var(--primary)',
-                        'Pilih Paket',
-                    ],
-                    [
-                        'Pro',
-                        'Rp 199K',
-                        '/ bulan',
-                        true,
-                        ['Akses Materi Penuh', 'Soal Tak Terbatas', '4x Les Privat Online', 'Feedback Tutor'],
-                        'var(--primary)',
-                        '#fff',
-                        'Paket Aktif',
-                    ],
-                    [
-                        'Premium',
-                        'Rp 349K',
-                        '/ bulan',
-                        false,
-                        ['Semua Fitur Pro', '8x Les Online/Offline', 'Konsultasi Karir', 'Laporan Mingguan'],
-                        'var(--bg)',
-                        'var(--primary)',
-                        'Upgrade',
-                    ],
-                ];
-            @endphp
-            @foreach ($pakets as $p)
-                <div class="col-md-4">
-                    <div class="card-box text-center"
-                        style="{{ $p[3] ? 'border-color:var(--primary);border-width:2px;' : '' }}">
-                        @if ($p[3])
-                            <div
-                                style="background:var(--accent);color:var(--primary);font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">
-                                Paket Aktif</div>
-                        @endif
-                        <div
-                            style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">
-                            {{ $p[0] }}</div>
-                        <div
-                            style="font-size:26px;font-weight:800;color:{{ $p[3] ? 'var(--primary)' : 'var(--text)' }};margin:8px 0 2px;">
-                            {{ $p[1] }}</div>
-                        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">{{ $p[2] }}</div>
-                        <ul style="list-style:none;padding:0;text-align:left;margin-bottom:16px;">
-                            @foreach ($p[4] as $f)
-                                <li
-                                    style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
-                                    <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
-                                    {{ $f }}
-                                </li>
-                            @endforeach
-                        </ul>
-                        <button class="btn fw-bold w-100"
-                            style="background:{{ $p[5] }};color:{{ $p[6] }};border-radius:10px;border:{{ $p[3] ? 'none' : '1.5px solid var(--border)' }};font-size:13px;"
-                            {{ $p[3] ? 'disabled' : '' }}>
-                            {{ $p[7] }}
-                        </button>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <div class="card-box">
-            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Riwayat Langganan</div>
-            @php
-                $langganan = [
-                    ['Paket Pro', 'April 2026', 'Rp 199.000', 'var(--success-soft)', 'var(--success)', 'Aktif'],
-                    ['Paket Pro', 'Maret 2026', 'Rp 199.000', 'var(--success-soft)', 'var(--success)', 'Lunas'],
-                    ['Paket Starter', 'Februari 2026', 'Rp 99.000', 'var(--success-soft)', 'var(--success)', 'Lunas'],
-                ];
-            @endphp
-            @foreach ($langganan as $l)
-                <div
-                    style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
-                    <div>
-                        <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $l[0] }}</div>
-                        <div style="font-size:12px;color:var(--muted);">Periode: {{ $l[1] }}</div>
-                    </div>
-                    <div class="text-end">
-                        <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $l[2] }}</div>
-                        <span
-                            style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:{{ $l[3] }};color:{{ $l[4] }};">{{ $l[5] }}</span>
-                    </div>
-                </div>
-            @endforeach
-=======
-<div class="card-box">
-    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
-    <div class="achieve-grid">
-        @foreach($achievements as $a)
-        <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
-            <div class="achieve-icon">{{ $a[0] }}</div>
-            <div class="achieve-title">{{ $a[1] }}</div>
-            <div class="achieve-sub">{{ $a[2] }}</div>
-            @if($a[3])
-            <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka</div>
-            @endif
->>>>>>> main
         </div>
         @endforeach
     </div>
-<<<<<<< HEAD
+</div>
 
-    {{-- ══ SECTION: PENCAPAIAN ══ --}}
-    <div id="section-pencapaian" style="display:none;">
-        <div class="row g-3 mb-3">
-            <div class="col-md-3 col-6">
-                <div class="card-box text-center">
-                    <div style="font-size:32px;font-weight:800;color:var(--primary);">4</div>
-                    <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card-box text-center">
-                    <div style="font-size:32px;font-weight:800;color:var(--muted);">8</div>
-                    <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card-box text-center">
-                    <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 5</div>
-                    <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card-box text-center">
-                    <div style="font-size:32px;font-weight:800;color:var(--success);">87</div>
-                    <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
-                </div>
+{{-- ══ SECTION: PENCAPAIAN ══ --}}
+<div id="section-pencapaian" style="display:none;">
+    <div class="row g-3 mb-3">
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--primary);">{{ $badgeTerbuka }}</div>
+                <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
             </div>
         </div>
-
-        <div class="card-box">
-            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
-            <div class="achieve-grid">
-                @php
-                    $achievements = [
-                        ['🔥', 'Streak 5 Hari', 'Belajar 5 hari berturut', true],
-                        ['⭐', 'Nilai Sempurna', 'Skor 100 di kuis', true],
-                        ['📚', 'Kutu Buku', 'Selesai 5 materi', true],
-                        ['⚡', 'Kilat!', 'Kuis < 10 menit', true],
-                        ['🥇', 'Juara Mapel', 'Rata-rata 95+ semua', false],
-                        ['🌙', 'Belajar Malam', 'Latihan > 22:00', false],
-                        ['💯', 'Perfectionist', '10 kuis sempurna', false],
-                        ['🎯', 'Fokus', 'Streak 30 hari', false],
-                        ['🚀', 'Top Siswa', 'Masuk peringkat 10', false],
-                        ['📖', 'Pelajar Tekun', '500 soal selesai', false],
-                        ['🎓', 'Siap TKA', 'Progres 100% semua', false],
-                        ['👑', 'Legend', 'Raih semua badge', false],
-                    ];
-                @endphp
-                @foreach ($achievements as $a)
-                    <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
-                        <div class="achieve-icon">{{ $a[0] }}</div>
-                        <div class="achieve-title">{{ $a[1] }}</div>
-                        <div class="achieve-sub">{{ $a[2] }}</div>
-                        @if ($a[3])
-                            <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--muted);">{{ $badgeTerkunci }}</div>
+                <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 {{ $aktivitasMinggu }}</div>
+                <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--success);">{{ $rataRataNilai }}</div>
+                <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
             </div>
         </div>
     </div>
-=======
+
+    <div class="card-box">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
+        <div class="achieve-grid">
+            @foreach($achievements as $a)
+            <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
+                <div class="achieve-icon">{{ $a[0] }}</div>
+                <div class="achieve-title">{{ $a[1] }}</div>
+                <div class="achieve-sub">{{ $a[2] }}</div>
+                @if($a[3])
+                <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka</div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
 </div>
-</div>
->>>>>>> main
 
 @endsection
 
 @push('scripts')
-<<<<<<< HEAD
-    <script>
-        function switchSection(el, id) {
-            document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            ['info', 'keamanan', 'paket', 'pencapaian'].forEach(s => {
-                document.getElementById('section-' + s).style.display = s === id ? '' : 'none';
-            });
-        }
-    </script>
-@endpush
-=======
 <script>
     function switchSection(el, id) {
         document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
@@ -1559,7 +835,7 @@
     }, 3000);
 
     // Buka tab keamanan jika ada error password
-@if(session('tab') === 'keamanan' || $errors->has('password_lama'))
+    @if(session('tab') === 'keamanan' || $errors->has('password_lama'))
     document.addEventListener('DOMContentLoaded', () => {
         const tab = document.querySelector('[onclick*="keamanan"]');
         if (tab) tab.click();
@@ -1567,4 +843,3 @@
     @endif
 </script>
 @endpush
->>>>>>> main
