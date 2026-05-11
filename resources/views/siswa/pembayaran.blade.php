@@ -1,4 +1,54 @@
+@php
+    // TEMPORARY DUMMY DATA - hapus setelah backend fix
+    if (!isset($tagihan)) {
+        $tagihan = collect([
+            (object) [
+                'id' => 'abc12345-xxxx',
+                'mata_pelajaran' => 'Matematika',
+                'topik' => 'Trigonometri',
+                'jadwal' => now()->addDays(2),
+                'durasi_menit' => 90,
+                'harga' => 150000,
+                'tutor' => (object) ['name' => 'Pak Budi'],
+                'mode_label' => 'Offline', // ← ganti jadi property
+            ],
+        ]);
+    }
+    if (!isset($riwayat)) {
+        $riwayat = collect([
+            (object) [
+                'id' => 'def67890-xxxx',
+                'jumlah' => 150000,
+                'status' => 'dikonfirmasi',
+                'created_at' => now()->subDays(5),
+                'bukti_transfer' => null,
+                'catatan_tutor' => null,
+                'lesPrivat' => (object) ['mata_pelajaran' => 'Fisika', 'topik' => 'Gerak Parabola'],
+                'tutor' => (object) ['name' => 'Pak Budi'],
+                'rekening' => (object) ['nama_bank' => 'Bank BCA', 'nomor_rekening' => '1234567890'],
+            ],
+        ]);
+    }
+    if (!isset($rekening)) {
+        $rekening = collect([
+            (object) [
+                'id' => 1,
+                'nama_bank' => 'Bank BCA',
+                'nomor_rekening' => '1234567890',
+                'atas_nama' => 'Al Ilmi Center',
+            ],
+            (object) [
+                'id' => 2,
+                'nama_bank' => 'Bank BRI',
+                'nomor_rekening' => '0987654321',
+                'atas_nama' => 'Al Ilmi Center',
+            ],
+        ]);
+    }
+@endphp
+
 @extends('layouts.app')
+
 
 @section('title', 'Pembayaran - Al Ilmi Center')
 @section('sidebar-sub', 'Portal Siswa')
@@ -12,7 +62,6 @@
     </a>
     <a href="/siswa/belajar-tka" class="nav-item-custom {{ request()->is('siswa/belajar-tka') ? 'active' : '' }}">
         <i class="bi bi-book-fill"></i> Belajar TKA
-        <span class="nav-badge">Baru</span>
     </a>
     <a href="/siswa/les-privat" class="nav-item-custom {{ request()->is('siswa/les-privat') ? 'active' : '' }}">
         <i class="bi bi-person-video3"></i> Les Privat
@@ -34,622 +83,887 @@
 @endsection
 
 @push('styles')
-<style>
-    /* ── TABS ── */
-    .main-tabs{display:flex;gap:6px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:6px;margin:0 0 24px;}
-    .main-tab{flex:1;text-align:center;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:transparent;}
-    .main-tab.active{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(30,58,95,.25);}
-    .main-tab:hover:not(.active){background:var(--bg);color:var(--primary);}
+    <style>
+        /* ── TABS ── */
+        .main-tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 24px;
+        }
 
-    /* ── STAT CARDS ── */
-    .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:18px;height:100%;transition:transform .2s,box-shadow .2s;}
-    .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
-    .stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
-    .stat-val{font-size:20px;font-weight:800;line-height:1;margin-bottom:4px;color:var(--text);}
-    .stat-label{font-size:12px;color:var(--muted);}
+        .main-tab {
+            flex: 1;
+            text-align: center;
+            padding: 9px 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            color: var(--muted);
+            border: none;
+            background: transparent;
+        }
 
-    /* ── SALDO CARD ── */
-    .saldo-card{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 60%,#3b6fa0 100%);border-radius:20px;padding:24px 28px;color:#fff;position:relative;overflow:hidden;}
-    .saldo-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07);}
-    .saldo-card::after{content:'';position:absolute;bottom:-50px;left:60px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05);}
-    .sc-label{font-size:12px;font-weight:600;opacity:.75;margin-bottom:6px;position:relative;z-index:1;}
-    .sc-amount{font-size:34px;font-weight:800;line-height:1;position:relative;z-index:1;}
-    .sc-sub{font-size:12px;opacity:.65;margin-top:4px;position:relative;z-index:1;}
-    .sc-actions{display:flex;gap:8px;margin-top:16px;position:relative;z-index:1;}
-    .sc-btn{flex:1;padding:9px;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;}
+        .main-tab.active {
+            background: var(--primary);
+            color: #fff;
+        }
 
-    /* ── TAGIHAN CARD ── */
-    .tagihan-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;transition:box-shadow .2s;}
-    .tagihan-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.07);}
-    .tagihan-card.urgent{border-color:#fca5a5;}
-    .tagihan-header{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-    .tagihan-header.urgent{background:#fef2f2;}
-    .tagihan-header.normal{background:#f8faff;}
-    .tagihan-id{font-size:11.5px;font-weight:700;color:var(--muted);}
-    .tagihan-body{padding:16px 18px;}
-    .tagihan-row{display:flex;align-items:center;gap:14px;}
-    .tagihan-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-    .ti-title{font-size:14px;font-weight:700;color:var(--text);}
-    .ti-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-    .ti-due{font-size:12px;font-weight:700;margin-top:4px;}
-    .tagihan-amount{margin-left:auto;text-align:right;flex-shrink:0;}
-    .ta-val{font-size:20px;font-weight:800;}
-    .ta-label{font-size:11px;color:var(--muted);}
-    .tagihan-footer{padding:12px 18px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-    .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:700;}
-    .btn-bayar{border:none;border-radius:10px;padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+        .main-tab:hover:not(.active) {
+            background: var(--bg);
+            color: var(--primary);
+        }
 
-    /* ── METODE PEMBAYARAN ── */
-    .metode-card{background:var(--card-bg);border:2px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;margin-bottom:10px;}
-    .metode-card:hover{border-color:var(--primary-light);}
-    .metode-card.selected{border-color:var(--primary);background:#eff6ff;}
-    .metode-logo{width:48px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
-    .metode-name{font-size:13px;font-weight:700;color:var(--text);}
-    .metode-sub{font-size:11.5px;color:var(--muted);}
-    .metode-check{margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .metode-card.selected .metode-check{background:var(--primary);border-color:var(--primary);color:#fff;}
+        /* ── TAGIHAN CARD ── */
+        .tagihan-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: box-shadow .2s;
+        }
 
-    /* ── RIWAYAT ── */
-    .trx-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);}
-    .trx-row:last-child{border-bottom:none;padding-bottom:0;}
-    .trx-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-    .ti-date{font-size:11px;color:var(--muted);margin-top:2px;}
-    .trx-amount{margin-left:auto;text-align:right;flex-shrink:0;}
-    .trx-amount .ta-val{font-size:15px;font-weight:800;}
-    .ta-status{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:3px;display:inline-block;}
+        .tagihan-card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
+        }
 
-    /* ── COUNTDOWN ── */
-    .countdown-box{background:linear-gradient(135deg,#fef2f2,#fff5f5);border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
-    .cd-timer{font-size:22px;font-weight:800;color:var(--danger);}
-    .cd-label{font-size:12.5px;color:#dc2626;}
+        .tagihan-card.urgent {
+            border-color: #fca5a5;
+        }
 
-    /* ── MODAL ── */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;}
-    .modal-overlay.show{display:flex;}
-    .modal-box{background:#fff;border-radius:20px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;animation:fadeIn .25s ease;}
-    @keyframes fadeIn{from{transform:scale(.93);opacity:0;}to{transform:scale(1);opacity:1;}}
-    .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-    .modal-head h5{font-size:16px;font-weight:800;color:var(--text);}
-    .modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);}
-    .modal-body-p{padding:22px 24px;}
-    .invoice-divider{border:none;border-top:1px dashed var(--border);margin:14px 0;}
-    .invoice-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;}
-    .invoice-row .ir-label{color:var(--muted);}
-    .invoice-row .ir-val{font-weight:600;color:var(--text);}
-    .invoice-total{display:flex;justify-content:space-between;padding:12px 0;border-top:1.5px solid var(--text);border-bottom:1.5px solid var(--text);margin:8px 0;}
-    .invoice-total .it-label{font-size:14px;font-weight:800;color:var(--text);}
-    .invoice-total .it-val{font-size:18px;font-weight:800;color:var(--primary);}
-    .btn-modal{width:100%;padding:11px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;}
+        .th-header {
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
 
-    /* CARD BOX */
-    .card-box{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:20px;}
-    .section-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
-    .section-title a{font-size:12px;color:var(--primary);text-decoration:none;font-weight:600;}
-</style>
+        .th-header.urgent {
+            background: #fef2f2;
+        }
+
+        .th-header.normal {
+            background: #f8faff;
+        }
+
+        .th-id {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .th-body {
+            padding: 16px 18px;
+        }
+
+        .th-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .th-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .th-info {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .th-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .th-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .th-amount {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .th-amount .amount-val {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .th-footer {
+            padding: 12px 18px;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
+
+        /* ── REKENING CARD ── */
+        .rek-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: 10px;
+        }
+
+        .rek-card:hover {
+            border-color: var(--primary-light);
+        }
+
+        .rek-card.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .rek-logo {
+            width: 52px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .rek-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rek-norek {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .btn-copy {
+            border: none;
+            background: #eff6ff;
+            color: var(--primary);
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .rek-check {
+            margin-left: auto;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rek-card.selected .rek-check {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        /* ── UPLOAD ZONE ── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            background: var(--bg);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .upload-zone.has-file {
+            border-color: var(--success);
+            background: var(--success-soft);
+        }
+
+        /* ── RIWAYAT ── */
+        .riwayat-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .riwayat-item:last-child {
+            border-bottom: none;
+        }
+
+        .ri-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .ri-val {
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .ri-status {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-top: 3px;
+            display: inline-block;
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 92vh;
+            overflow-y: auto;
+            animation: fadeUp .25s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-head {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-head h5 {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .modal-close-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            color: var(--muted);
+        }
+
+        .form-label-custom {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 13.5px;
+            color: var(--text);
+            outline: none;
+            transition: border .2s;
+            background: #fff;
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary);
+        }
+
+        /* CARD BOX */
+        .card-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .card-box-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .card-box-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-box-title i {
+            color: var(--primary);
+            margin-right: 6px;
+        }
+
+        /* PRINT */
+        @media print {
+
+            .sidebar,
+            .topbar,
+            .main-tabs,
+            .no-print {
+                display: none !important;
+            }
+
+            .main-wrap {
+                margin-left: 0 !important;
+            }
+
+            .content {
+                padding: 0 !important;
+            }
+
+            .card-box,
+            .tagihan-card {
+                break-inside: avoid;
+            }
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:767px) {
+            .main-tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .main-tab {
+                min-width: 110px;
+                flex: none;
+                font-size: 12px;
+            }
+
+            .th-row {
+                flex-direction: column;
+            }
+
+            .th-amount {
+                text-align: left;
+                width: 100%;
+            }
+
+            .th-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .riwayat-item {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
 
-{{-- PAGE HEADER --}}
-<div class="d-flex align-items-start justify-content-between mb-3">
-    <div>
-        <h4 class="fw-bold mb-1">💳 Pembayaran</h4>
-        <div style="font-size:13px;color:var(--muted);">
-            Dashboard / <span style="color:var(--primary);font-weight:600;">Pembayaran</span>
+    {{-- ALERT --}}
+    @if (session('sukses'))
+        <div
+            style="background:var(--success-soft);border:1px solid var(--success);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+            <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:18px;"></i>
+            <span style="font-size:13px;font-weight:600;color:var(--success);">{{ session('sukses') }}</span>
         </div>
-    </div>
-    <button class="btn btn-sm fw-bold px-3 py-2"
-        style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:12px;"
-        onclick="openInvoiceModal()">
-        <i class="bi bi-file-earmark-text me-1"></i> Lihat Invoice
-    </button>
-</div>
+    @endif
 
-{{-- TABS --}}
-<div class="main-tabs">
-    <button class="main-tab active" onclick="switchTab(this,'tagihan')">
-        <i class="bi bi-receipt me-1"></i> Informasi Tagihan
-    </button>
-    <button class="main-tab" onclick="switchTab(this,'status')">
-        <i class="bi bi-activity me-1"></i> Status Pembayaran
-    </button>
-    <button class="main-tab" onclick="switchTab(this,'riwayat')">
-        <i class="bi bi-clock-history me-1"></i> Riwayat Transaksi
-    </button>
-</div>
-
-{{-- ══ TAB: TAGIHAN ══ --}}
-<div id="tab-tagihan">
-    <div class="row g-3 mb-4">
-
-        {{-- SALDO + STAT --}}
-        <div class="col-lg-5">
-            <div class="saldo-card mb-3">
-                <div class="sc-label">Saldo Al Ilmi Center</div>
-                <div class="sc-amount">Rp 150.000</div>
-                <div class="sc-sub">Dapat digunakan untuk pembayaran layanan</div>
-                <div class="sc-actions">
-                    <button class="sc-btn" style="background:rgba(255,255,255,.2);color:#fff;">
-                        <i class="bi bi-plus-lg me-1"></i> Top Up
-                    </button>
-                    <button class="sc-btn" style="background:#fff;color:var(--primary);">
-                        <i class="bi bi-arrow-right me-1"></i> Gunakan
-                    </button>
-                </div>
-            </div>
-            <div class="row g-2">
-                @php
-                $stats = [
-                    ['var(--danger-soft)','var(--danger)','bi-exclamation-triangle-fill','2','Tagihan Belum Lunas','var(--danger)'],
-                    ['var(--success-soft)','var(--success)','bi-check-circle-fill','8','Tagihan Lunas','var(--success)'],
-                    ['#eff6ff','var(--primary)','bi-currency-dollar','Rp 275rb','Total Tagihan Aktif','var(--primary)'],
-                    ['var(--info-soft)','var(--info)','bi-calendar3','8 Apr','Jatuh Tempo Terdekat','var(--info)'],
-                ];
-                @endphp
-                @foreach($stats as $s)
-                <div class="col-6">
-                    <div class="stat-card" style="padding:16px;">
-                        <div class="stat-icon" style="background:{{ $s[0] }};color:{{ $s[1] }};width:38px;height:38px;font-size:16px;margin-bottom:10px;">
-                            <i class="bi {{ $s[2] }}"></i>
-                        </div>
-                        <div class="stat-val" style="font-size:18px;color:{{ $s[5] }};">{{ $s[3] }}</div>
-                        <div class="stat-label">{{ $s[4] }}</div>
-                    </div>
-                </div>
-                @endforeach
+    {{-- HEADER --}}
+    <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-1">💳 Pembayaran</h4>
+            <div style="font-size:13px;color:var(--muted);">
+                Dashboard / <span style="color:var(--primary);font-weight:600;">Pembayaran</span>
             </div>
         </div>
-
-        {{-- TAGIHAN AKTIF --}}
-        <div class="col-lg-7">
-            <div class="section-title"><span>🔔 Tagihan Perlu Dibayar</span></div>
-
-            <div class="countdown-box">
-                <i class="bi bi-alarm-fill" style="font-size:22px;color:var(--danger);"></i>
-                <div>
-                    <div class="cd-timer" id="countdown">01:48:22</div>
-                    <div class="cd-label">Batas waktu pembayaran <strong>#INV-2026-0412</strong> — segera selesaikan!</div>
-                </div>
-            </div>
-
-            {{-- Tagihan 1 --}}
-            <div class="tagihan-card urgent">
-                <div class="tagihan-header urgent">
-                    <span class="tagihan-id">#INV-2026-0412</span>
-                    <span class="status-badge" style="background:var(--danger-soft);color:var(--danger);">
-                        <i class="bi bi-clock-fill"></i> Segera Dibayar
-                    </span>
-                </div>
-                <div class="tagihan-body">
-                    <div class="tagihan-row">
-                        <div class="tagihan-icon" style="background:#eff6ff;color:var(--primary);">
-                            <i class="bi bi-person-video3"></i>
-                        </div>
-                        <div class="tagihan-info">
-                            <div class="ti-title">Les Privat – Matematika (Online)</div>
-                            <div class="ti-sub">Pak Budi Santoso · Selasa, 8 Apr · 11:00 WIB</div>
-                            <div class="ti-due" style="color:var(--danger);">
-                                <i class="bi bi-exclamation-circle me-1"></i>Jatuh tempo: 8 Apr 2026, 13:00 WIB
-                            </div>
-                        </div>
-                        <div class="tagihan-amount">
-                            <div class="ta-val" style="color:var(--danger);">Rp 75.000</div>
-                            <div class="ta-label">Belum Lunas</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tagihan-footer">
-                    <div style="font-size:12px;color:var(--muted);">
-                        <i class="bi bi-shield-check me-1"></i>Pembayaran aman & terenkripsi
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn-bayar" style="background:var(--bg);color:var(--muted);" onclick="openInvoiceModal()">Invoice</button>
-                        <button class="btn-bayar" style="background:var(--danger);color:#fff;box-shadow:0 4px 12px rgba(220,38,38,.3);" onclick="openBayarModal()">Bayar Sekarang</button>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Tagihan 2 --}}
-            <div class="tagihan-card">
-                <div class="tagihan-header normal">
-                    <span class="tagihan-id">#INV-2026-0418</span>
-                    <span class="status-badge" style="background:var(--accent-soft);color:var(--warning);">
-                        <i class="bi bi-hourglass-split"></i> Menunggu Bayar
-                    </span>
-                </div>
-                <div class="tagihan-body">
-                    <div class="tagihan-row">
-                        <div class="tagihan-icon" style="background:var(--success-soft);color:var(--success);">
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <div class="tagihan-info">
-                            <div class="ti-title">Paket Berlangganan – Pro (Bulan Ini)</div>
-                            <div class="ti-sub">Periode: 1 – 30 April 2026</div>
-                            <div class="ti-due" style="color:var(--warning);">
-                                <i class="bi bi-calendar3 me-1"></i>Jatuh tempo: 15 Apr 2026
-                            </div>
-                        </div>
-                        <div class="tagihan-amount">
-                            <div class="ta-val" style="color:var(--primary);">Rp 199.000</div>
-                            <div class="ta-label">Belum Lunas</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tagihan-footer">
-                    <div style="font-size:12px;color:var(--muted);">
-                        <i class="bi bi-info-circle me-1"></i>Perpanjang otomatis aktif
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn-bayar" style="background:var(--bg);color:var(--muted);" onclick="openInvoiceModal()">Invoice</button>
-                        <button class="btn-bayar" style="background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(30,58,95,.3);" onclick="openBayarModal()">Bayar Sekarang</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- METODE PEMBAYARAN --}}
-    <div class="card-box">
-        <div class="section-title">
-            <span>💳 Metode Pembayaran Tersimpan</span>
-            <a href="#" onclick="openBayarModal();return false;">+ Tambah Metode</a>
-        </div>
-        <div class="row g-3">
-            @php
-            $metodes = [
-                ['#003087','#fff','BCA','Bank BCA','Virtual Account · ****1234',true],
-                ['#00a850','#fff','GP','GoPay','Dompet Digital · +62 812****78',false],
-                ['#6b21a8','#fff','OVO','OVO','Dompet Digital · +62 812****78',false],
-                ['var(--primary)','#fff','SALDO','Saldo Al Ilmi','Rp 150.000 tersedia',false],
-            ];
-            @endphp
-            @foreach($metodes as $m)
-            <div class="col-md-6">
-                <div class="metode-card {{ $m[5] ? 'selected' : '' }}" onclick="selectMetode(this)">
-                    <div class="metode-logo" style="background:{{ $m[0] }};color:{{ $m[1] }};">{{ $m[2] }}</div>
-                    <div>
-                        <div class="metode-name">{{ $m[3] }}</div>
-                        <div class="metode-sub">{{ $m[4] }}</div>
-                    </div>
-                    <div class="metode-check">
-                        @if($m[5])<i class="bi bi-check-lg" style="font-size:12px;"></i>@endif
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</div>
-
-{{-- ══ TAB: STATUS ══ --}}
-<div id="tab-status" style="display:none;">
-    <div class="row g-3 mb-4">
-        @php
-        $statusStats = [
-            ['var(--success-soft)','var(--success)','bi-check-circle-fill','8','Lunas','var(--success)'],
-            ['var(--accent-soft)','var(--warning)','bi-hourglass-split','2','Menunggu','var(--warning)'],
-            ['var(--danger-soft)','var(--danger)','bi-x-circle-fill','1','Kedaluwarsa','var(--danger)'],
-            ['#eff6ff','var(--primary)','bi-arrow-repeat','3','Diproses','var(--primary)'],
-        ];
-        @endphp
-        @foreach($statusStats as $s)
-        <div class="col-md-3">
-            <div class="stat-card text-center">
-                <div class="stat-icon mx-auto" style="background:{{ $s[0] }};color:{{ $s[1] }};">
-                    <i class="bi {{ $s[2] }}"></i>
-                </div>
-                <div class="stat-val" style="color:{{ $s[5] }};">{{ $s[3] }}</div>
-                <div class="stat-label">{{ $s[4] }}</div>
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-    <div class="card-box">
-        <div class="section-title">
-            <span>📋 Status Semua Pembayaran</span>
-            <select class="form-select form-select-sm" style="font-size:12px;border-radius:8px;width:auto;">
-                <option>Semua Status</option>
-                <option>Lunas</option><option>Menunggu</option>
-                <option>Diproses</option><option>Kedaluwarsa</option>
-            </select>
-        </div>
-        <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;">
-                <thead>
-                    <tr style="background:var(--bg);">
-                        @foreach(['ID Transaksi','Layanan','Tanggal','Jumlah','Status','Aksi'] as $h)
-                        <th style="padding:10px 14px;font-size:11.5px;font-weight:700;color:var(--muted);text-align:{{ in_array($h,['Jumlah','Status','Aksi']) ? 'center' : 'left' }};border-bottom:1.5px solid var(--border);">{{ $h }}</th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                @php
-                $rows = [
-                    ['#INV-2026-0412','Les Privat – Matematika','8 Apr 2026','Rp 75.000','var(--danger-soft)','var(--danger)','Segera Bayar','bayar'],
-                    ['#INV-2026-0418','Paket Pro – April 2026','15 Apr 2026','Rp 199.000','var(--accent-soft)','var(--warning)','Menunggu','bayar'],
-                    ['#INV-2026-0398','Les Privat – Fisika','28 Mar 2026','Rp 90.000','#eff6ff','var(--primary)','Diproses','invoice'],
-                    ['#INV-2026-0380','Paket Pro – Maret 2026','1 Mar 2026','Rp 199.000','var(--success-soft)','var(--success)','Lunas','invoice'],
-                    ['#INV-2026-0361','Les Privat – Kimia','15 Feb 2026','Rp 75.000','var(--bg)','var(--muted)','Kedaluwarsa','detail'],
-                ];
-                @endphp
-                @foreach($rows as $r)
-                <tr style="transition:background .15s;" onmouseover="this.style.background='#f8faff'" onmouseout="this.style.background=''">
-                    <td style="padding:12px 14px;font-size:12.5px;font-weight:700;border-bottom:1px solid var(--border);">{{ $r[0] }}</td>
-                    <td style="padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);">{{ $r[1] }}</td>
-                    <td style="padding:12px 14px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--border);">{{ $r[2] }}</td>
-                    <td style="padding:12px 14px;font-size:13px;font-weight:700;text-align:center;border-bottom:1px solid var(--border);">{{ $r[3] }}</td>
-                    <td style="padding:12px 14px;text-align:center;border-bottom:1px solid var(--border);">
-                        <span class="status-badge" style="background:{{ $r[4] }};color:{{ $r[5] }};">{{ $r[6] }}</span>
-                    </td>
-                    <td style="padding:12px 14px;text-align:center;border-bottom:1px solid var(--border);">
-                        <button onclick="{{ $r[7] === 'bayar' ? 'openBayarModal()' : 'openInvoiceModal()' }}"
-                            style="border:none;background:#eff6ff;color:var(--primary);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;">
-                            {{ $r[7] === 'bayar' ? 'Bayar' : ($r[7] === 'invoice' ? 'Invoice' : 'Detail') }}
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-{{-- ══ TAB: RIWAYAT ══ --}}
-<div id="tab-riwayat" style="display:none;">
-    <div class="row g-3 mb-4">
-        @php
-        $rwStats = [
-            ['var(--success-soft)','var(--success)','bi-arrow-down-circle-fill','Rp 643rb','Total Dibayar Bulan Ini'],
-            ['#eff6ff','var(--primary)','bi-receipt-cutoff','11','Total Transaksi Bulan Ini'],
-            ['var(--info-soft)','var(--info)','bi-piggy-bank-fill','Rp 2jt','Total Transaksi Tahun Ini'],
-        ];
-        @endphp
-        @foreach($rwStats as $s)
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:{{ $s[0] }};color:{{ $s[1] }};"><i class="bi {{ $s[2] }}"></i></div>
-                <div class="stat-val" style="color:{{ $s[1] }};">{{ $s[3] }}</div>
-                <div class="stat-label">{{ $s[4] }}</div>
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-    <div class="d-flex gap-2 mb-3 flex-wrap">
-        <div style="position:relative;flex:1;min-width:200px;">
-            <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;"></i>
-            <input type="text" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 14px 8px 36px;font-size:13px;width:100%;outline:none;" placeholder="Cari ID, layanan…"/>
-        </div>
-        <select class="form-select form-select-sm" style="width:auto;font-size:12px;border-radius:8px;">
-            <option>Semua Jenis</option>
-            <option>Les Privat</option>
-            <option>Paket Berlangganan</option>
-        </select>
-        <select class="form-select form-select-sm" style="width:auto;font-size:12px;border-radius:8px;">
-            <option>April 2026</option>
-            <option>Maret 2026</option>
-        </select>
-        <button class="btn btn-sm fw-bold" style="background:var(--card-bg);border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted);">
-            <i class="bi bi-download me-1"></i> Export
+        <button onclick="window.print()" class="btn btn-sm fw-bold px-3 py-2 no-print"
+            style="background:var(--danger-soft);color:var(--danger);border-radius:10px;border:1.5px solid var(--danger);font-size:12px;">
+            <i class="bi bi-printer-fill me-1"></i> Cetak
         </button>
     </div>
 
-    @php
-    $months = [
-        'April 2026' => [
-            ['#eff6ff','var(--primary)','bi-person-video3','Les Privat – Matematika (Online)','Pak Budi Santoso · #INV-2026-0412','8 Apr 2026 · BCA','- Rp 75.000','var(--danger)','var(--danger-soft)','Belum Lunas'],
-            ['var(--success-soft)','var(--success)','bi-stars','Paket Pro – April 2026','Berlangganan Bulanan · #INV-2026-0418','1 Apr 2026 · GoPay','- Rp 199.000','var(--danger)','var(--accent-soft)','Menunggu'],
-            ['var(--info-soft)','var(--info)','bi-arrow-down-circle-fill','Top Up Saldo Al Ilmi','Transfer BCA · #TOP-2026-0092','2 Apr 2026 · 09:14','+ Rp 200.000','var(--success)','var(--success-soft)','Berhasil'],
-        ],
-        'Maret 2026' => [
-            ['#eff6ff','var(--primary)','bi-person-video3','Les Privat – Fisika (Tatap Muka)','Bu Sari Dewi · #INV-2026-0398','28 Mar 2026 · OVO','- Rp 120.000','var(--danger)','var(--success-soft)','Lunas'],
-            ['var(--success-soft)','var(--success)','bi-stars','Paket Pro – Maret 2026','Berlangganan Bulanan · #INV-2026-0380','1 Mar 2026 · GoPay','- Rp 199.000','var(--danger)','var(--success-soft)','Lunas'],
-        ],
-    ];
-    @endphp
-
-    @foreach($months as $month => $trxs)
-    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase;">{{ $month }}</div>
-    <div class="card-box mb-3">
-        @foreach($trxs as $t)
-        <div class="trx-row">
-            <div class="trx-icon" style="background:{{ $t[0] }};color:{{ $t[1] }};"><i class="bi {{ $t[2] }}"></i></div>
-            <div>
-                <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $t[3] }}</div>
-                <div style="font-size:11.5px;color:var(--muted);">{{ $t[4] }}</div>
-                <div class="ti-date"><i class="bi bi-calendar3 me-1"></i>{{ $t[5] }}</div>
-            </div>
-            <div class="trx-amount">
-                <div class="ta-val" style="color:{{ $t[7] }};">{{ $t[6] }}</div>
-                <span class="ta-status" style="background:{{ $t[8] }};color:{{ $t[7] }};">{{ $t[9] }}</span>
-            </div>
-        </div>
-        @endforeach
+    {{-- TABS --}}
+    <div class="main-tabs no-print">
+        <button class="main-tab active" onclick="switchTab(this,'tagihan')">
+            <i class="bi bi-receipt me-1"></i> Tagihan
+            @if ($tagihan->count() > 0)
+                <span
+                    style="background:var(--danger);color:#fff;font-size:10px;padding:1px 5px;border-radius:20px;margin-left:3px;">{{ $tagihan->count() }}</span>
+            @endif
+        </button>
+        <button class="main-tab" onclick="switchTab(this,'riwayat')">
+            <i class="bi bi-clock-history me-1"></i> Riwayat
+        </button>
     </div>
-    @endforeach
 
-    <div class="d-flex justify-content-center gap-2">
-        @foreach(['<i class="bi bi-chevron-left"></i>','1','2','3','<i class="bi bi-chevron-right"></i>'] as $p)
-        <button style="border-radius:8px;{{ $p === '1' ? 'background:var(--primary);color:#fff;border:none;' : 'background:var(--card-bg);border:1.5px solid var(--border);color:var(--muted);' }}font-size:12px;font-weight:700;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;">{!! $p !!}</button>
-        @endforeach
+    {{-- ══ TAB TAGIHAN ══ --}}
+    <div id="tab-tagihan">
+
+        @forelse($tagihan as $t)
+            <div class="tagihan-card {{ now()->diffInHours($t->jadwal) < 24 ? 'urgent' : '' }}">
+                <div class="th-header {{ now()->diffInHours($t->jadwal) < 24 ? 'urgent' : 'normal' }}">
+                    <span class="th-id">#LES-{{ strtoupper(substr($t->id, 0, 8)) }}</span>
+                    <span class="status-badge" style="background:var(--danger-soft);color:var(--danger);">
+                        <i class="bi bi-clock-fill"></i> Belum Dibayar
+                    </span>
+                </div>
+                <div class="th-body">
+                    <div class="th-row">
+                        <div class="th-icon" style="background:#eff6ff;color:var(--primary);">
+                            <i class="bi bi-person-video3"></i>
+                        </div>
+                        <div class="th-info">
+                            <div class="th-title">
+                                Les Privat – {{ $t->mata_pelajaran }}
+                                {{ $t->topik ? '(' . $t->topik . ')' : '' }}
+                            </div>
+                            <div class="th-sub">
+                                <i class="bi bi-person-fill me-1"></i>{{ $t->tutor->name ?? '-' }}
+                            </div>
+                            <div class="th-sub">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                {{ $t->jadwal->translatedFormat('l, d M Y · H:i') }} WIB
+                                {{-- · {{ $t->durasi_menit }} mnt · {{ $t->getModeLabel() }} --}}
+                                · {{ $t->durasi_menit }} mnt ·
+                                {{ method_exists($t, 'getModeLabel') ? $t->getModeLabel() : $t->mode_label ?? 'Offline' }}
+                            </div>
+                        </div>
+                        <div class="th-amount">
+                            <div class="amount-val" style="color:var(--danger);">Rp
+                                {{ number_format($t->harga, 0, ',', '.') }}</div>
+                            <div style="font-size:11px;color:var(--muted);">Belum Lunas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="th-footer">
+                    <div style="font-size:12px;color:var(--muted);">
+                        <i class="bi bi-shield-check me-1"></i> Bayar via transfer bank ke rekening Al Ilmi Center
+                    </div>
+                    <button
+                        onclick="openModalBayar('{{ $t->id }}','{{ $t->mata_pelajaran }}','{{ number_format($t->harga, 0, ',', '.') }}','{{ $t->tutor->name ?? '' }}')"
+                        class="btn btn-sm fw-bold"
+                        style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;padding:8px 20px;box-shadow:0 4px 12px rgba(30,58,95,.3);">
+                        <i class="bi bi-send-fill me-1"></i> Bayar Sekarang
+                    </button>
+                </div>
+            </div>
+        @empty
+            <div
+                style="text-align:center;padding:48px;color:var(--muted);background:var(--card-bg);border-radius:16px;border:1px solid var(--border);">
+                <i class="bi bi-check-circle"
+                    style="font-size:2.5rem;color:var(--success);display:block;margin-bottom:10px;"></i>
+                <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">Semua Tagihan Lunas! 🎉
+                </div>
+                <div style="font-size:13px;">Tidak ada tagihan yang perlu dibayar saat ini.</div>
+            </div>
+        @endforelse
     </div>
-</div>
 
-{{-- ══ MODAL INVOICE ══ --}}
-<div class="modal-overlay" id="modal-invoice">
-    <div class="modal-box">
-        <div class="modal-head">
-            <h5>🧾 Invoice Pembayaran</h5>
-            <button class="modal-close" onclick="closeModal('modal-invoice')"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="modal-body-p">
-            <div class="text-center mb-3">
-                <div style="font-size:20px;font-weight:800;color:var(--primary);">Al Ilmi Center</div>
-                <div style="font-size:11px;color:var(--muted);">Platform Bimbel Online Terpercaya</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px;">
-                <span>No. Invoice: <strong style="color:var(--text);">#INV-2026-0412</strong></span>
-                <span>Tgl: <strong style="color:var(--text);">8 Apr 2026</strong></span>
-            </div>
-            <div style="background:var(--bg);border-radius:10px;padding:12px 14px;font-size:12.5px;margin-bottom:12px;">
-                <div style="margin-bottom:4px;"><strong>Kepada:</strong> Andi Pratama</div>
-                <div style="color:var(--muted);">Siswa · Kediri, Jawa Timur</div>
-            </div>
-            <hr class="invoice-divider"/>
+    {{-- ══ TAB RIWAYAT ══ --}}
+    <div id="tab-riwayat" style="display:none;">
+
+        {{-- STAT RINGKASAN --}}
+        <div class="row g-3 mb-4">
             @php
-            $invoiceRows = [
-                ['Layanan','Les Privat – Matematika'],
-                ['Tutor','Pak Budi Santoso, S.Pd'],
-                ['Jadwal','Selasa, 8 Apr · 11:00 WIB'],
-                ['Durasi','90 Menit'],
-                ['Jenis','Online (Zoom/Meet)'],
-            ];
+                $totalLunas = $riwayat->where('status', 'dikonfirmasi')->sum('jumlah');
+                $totalDitolak = $riwayat->where('status', 'ditolak')->count();
+                $totalMenunggu = $riwayat->where('status', 'menunggu_verifikasi')->count();
             @endphp
-            @foreach($invoiceRows as $ir)
-            <div class="invoice-row"><span class="ir-label">{{ $ir[0] }}</span><span class="ir-val">{{ $ir[1] }}</span></div>
-            @endforeach
-            <hr class="invoice-divider"/>
-            <div class="invoice-row"><span class="ir-label">Subtotal</span><span class="ir-val">Rp 75.000</span></div>
-            <div class="invoice-row"><span class="ir-label">Biaya Layanan</span><span class="ir-val">Rp 2.000</span></div>
-            <div class="invoice-row"><span class="ir-label">Diskon Member</span><span class="ir-val" style="color:var(--success);">- Rp 2.000</span></div>
-            <div class="invoice-total">
-                <span class="it-label">TOTAL BAYAR</span>
-                <span class="it-val">Rp 75.000</span>
+            <div class="col-6 col-md-4">
+                <div
+                    style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+                    <div style="font-size:1.4rem;font-weight:800;color:var(--success);">Rp
+                        {{ number_format($totalLunas / 1000, 0) }}rb</div>
+                    <div style="font-size:12px;color:var(--muted);">Total Terbayar</div>
+                </div>
             </div>
-            <div class="text-center mt-3">
-                <span class="status-badge" style="background:var(--danger-soft);color:var(--danger);font-size:12px;">
-                    <i class="bi bi-exclamation-circle me-1"></i>Belum Lunas — Jatuh tempo 8 Apr 2026
-                </span>
+            <div class="col-6 col-md-4">
+                <div
+                    style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+                    <div style="font-size:1.4rem;font-weight:800;color:var(--primary);">{{ $riwayat->count() }}</div>
+                    <div style="font-size:12px;color:var(--muted);">Total Transaksi</div>
+                </div>
             </div>
-            <div class="d-flex gap-2 mt-4">
-                <button class="btn-modal" style="background:var(--bg);color:var(--muted);flex:1;" onclick="closeModal('modal-invoice')">Tutup</button>
-                <button class="btn-modal" style="background:var(--primary);color:#fff;flex:1;" onclick="closeModal('modal-invoice');openBayarModal();">Bayar Sekarang</button>
+            <div class="col-6 col-md-4">
+                <div
+                    style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+                    <div style="font-size:1.4rem;font-weight:800;color:var(--danger);">{{ $totalDitolak }}</div>
+                    <div style="font-size:12px;color:var(--muted);">Ditolak</div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-{{-- ══ MODAL BAYAR ══ --}}
-<div class="modal-overlay" id="modal-bayar">
-    <div class="modal-box">
-        <div class="modal-head">
-            <h5>💳 Pilih Metode Pembayaran</h5>
-            <button class="modal-close" onclick="closeModal('modal-bayar')"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="modal-body-p">
-            <div style="background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text);">Les Privat – Matematika</div>
-                    <div style="font-size:12px;color:var(--muted);">#INV-2026-0412</div>
-                </div>
-                <div style="font-size:20px;font-weight:800;color:var(--primary);">Rp 75.000</div>
-            </div>
-            <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text);">Pilih Metode:</div>
-            @php
-            $bayarMetodes = [
-                ['#003087','#fff','BCA','Bank BCA','Virtual Account',true],
-                ['#00a850','#fff','GP','GoPay','Scan QR',false],
-                ['var(--primary)','#fff','SALDO','Saldo Al Ilmi','Tersedia: Rp 150.000',false],
-            ];
-            @endphp
-            @foreach($bayarMetodes as $bm)
-            <div class="metode-card {{ $bm[5] ? 'selected' : '' }}" onclick="selectMetodeBayar(this)" style="margin-bottom:8px;">
-                <div class="metode-logo" style="background:{{ $bm[0] }};color:{{ $bm[1] }};">{{ $bm[2] }}</div>
-                <div>
-                    <div class="metode-name">{{ $bm[3] }}</div>
-                    <div class="metode-sub">{{ $bm[4] }}</div>
-                </div>
-                <div class="metode-check">
-                    @if($bm[5])<i class="bi bi-check-lg" style="font-size:12px;"></i>@endif
-                </div>
-            </div>
-            @endforeach
-
-            <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--warning);margin:12px 0;">
-                <i class="bi bi-clock me-1"></i> Selesaikan dalam <strong id="modal-timer">01:47:51</strong> sebelum pesanan dibatalkan
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn-modal" style="background:var(--bg);color:var(--muted);flex:1;" onclick="closeModal('modal-bayar')">Batal</button>
-                <button class="btn-modal" style="background:var(--success);color:#fff;flex:2;box-shadow:0 4px 12px rgba(22,163,74,.3);" onclick="bayarBerhasil()">
-                    <i class="bi bi-shield-check me-1"></i> Konfirmasi Bayar
+        {{-- TABEL RIWAYAT --}}
+        <div class="card-box">
+            <div class="card-box-header">
+                <div class="card-box-title"><i class="bi bi-clock-history"></i> Riwayat Pembayaran</div>
+                <button onclick="window.print()" class="btn btn-sm no-print"
+                    style="background:var(--danger-soft);color:var(--danger);border:1.5px solid var(--danger);border-radius:8px;font-size:12px;font-weight:600;">
+                    <i class="bi bi-printer-fill me-1"></i> Cetak
                 </button>
             </div>
-        </div>
-    </div>
-</div>
 
-{{-- ══ MODAL SUKSES ══ --}}
-<div class="modal-overlay" id="modal-sukses">
-    <div class="modal-box">
-        <div class="modal-body-p" style="text-align:center;padding:32px 28px;">
-            <div style="font-size:56px;margin-bottom:12px;">🎉</div>
-            <div style="font-size:18px;font-weight:800;margin-bottom:6px;color:var(--text);">Pembayaran Berhasil!</div>
-            <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
-                Pembayaran <strong>Rp 75.000</strong> untuk <strong>Les Privat Matematika</strong><br/>
-                telah berhasil diproses. Invoice dikirim ke email kamu.
-            </div>
-            <div style="background:var(--success-soft);border-radius:12px;padding:14px;margin-bottom:20px;">
-                <div style="font-size:12px;color:var(--success);font-weight:700;">
-                    <i class="bi bi-check-circle-fill me-1"></i> ID Transaksi: #TXN-2026-08192
+            @if ($riwayat->count() > 0)
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:var(--bg);">
+                                @foreach (['ID', 'Layanan', 'Tutor', 'Bank', 'Jumlah', 'Status', 'Tanggal', 'Aksi'] as $h)
+                                    <th
+                                        style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;">
+                                        {{ $h }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($riwayat as $r)
+                                <tr onmouseover="this.style.background='#f8faff'" onmouseout="this.style.background=''">
+                                    <td
+                                        style="padding:11px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);color:var(--primary);">
+                                        #{{ strtoupper(substr($r->id, 0, 8)) }}
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);">
+                                        {{ $r->lesPrivat->mata_pelajaran ?? '-' }}
+                                        @if ($r->lesPrivat->topik ?? false)
+                                            <div style="font-size:11px;color:var(--muted);">{{ $r->lesPrivat->topik }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);">
+                                        {{ $r->tutor->name ?? '-' }}
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:12.5px;border-bottom:1px solid var(--border);">
+                                        {{ $r->rekening->nama_bank ?? '-' }}<br />
+                                        <span
+                                            style="color:var(--muted);font-size:11px;">{{ $r->rekening->nomor_rekening ?? '' }}</span>
+                                    </td>
+                                    <td
+                                        style="padding:11px 14px;font-size:13px;font-weight:700;border-bottom:1px solid var(--border);">
+                                        Rp {{ number_format($r->jumlah, 0, ',', '.') }}
+                                    </td>
+                                    <td style="padding:11px 14px;border-bottom:1px solid var(--border);">
+                                        @if ($r->status === 'dikonfirmasi')
+                                            <span
+                                                style="background:var(--success-soft);color:var(--success);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;">
+                                                <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Lunas
+                                            </span>
+                                        @elseif($r->status === 'menunggu_verifikasi')
+                                            <span
+                                                style="background:var(--accent-soft);color:var(--warning);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                                                ⏳ Menunggu
+                                            </span>
+                                        @else
+                                            <span
+                                                style="background:var(--danger-soft);color:var(--danger);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                                                ❌ Ditolak
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td
+                                        style="padding:11px 14px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border);">
+                                        {{ $r->created_at->format('d M Y') }}
+                                    </td>
+                                    <td style="padding:11px 14px;border-bottom:1px solid var(--border);">
+                                        @if ($r->bukti_transfer)
+                                            <a href="{{ asset('storage/' . $r->bukti_transfer) }}" target="_blank"
+                                                style="background:#eff6ff;color:var(--primary);border:none;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:600;cursor:pointer;text-decoration:none;">
+                                                <i class="bi bi-image me-1"></i>Bukti
+                                            </a>
+                                        @endif
+                                        @if ($r->status === 'ditolak' && $r->catatan_tutor)
+                                            <div style="font-size:11px;color:var(--danger);margin-top:3px;">
+                                                <i class="bi bi-info-circle me-1"></i>{{ $r->catatan_tutor }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <div style="font-size:12px;color:var(--success);margin-top:4px;">Metode: Bank BCA Virtual Account</div>
+            @else
+                <div style="text-align:center;padding:40px;color:var(--muted);">
+                    <i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>
+                    Belum ada riwayat pembayaran.
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ══ MODAL BAYAR ══ --}}
+    <div class="modal-overlay" id="modal-bayar">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h5><i class="bi bi-credit-card-fill me-2" style="color:var(--primary);"></i>Bayar Tagihan</h5>
+                <button class="modal-close-btn" onclick="closeModal()"><i class="bi bi-x-lg"></i></button>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn-modal" style="background:var(--bg);color:var(--muted);flex:1;" onclick="closeModal('modal-sukses')">Tutup</button>
-                <button class="btn-modal" style="background:var(--primary);color:#fff;flex:1;" onclick="closeModal('modal-sukses')">Unduh Invoice</button>
+            <div style="padding:20px 22px;">
+
+                {{-- Detail tagihan --}}
+                <div style="background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Detail Tagihan</div>
+                    <div style="font-size:14px;font-weight:700;color:var(--text);" id="modal-layanan">-</div>
+                    <div style="font-size:12.5px;color:var(--muted);" id="modal-tutor">-</div>
+                    <div style="font-size:18px;font-weight:800;color:var(--primary);margin-top:8px;" id="modal-jumlah">-
+                    </div>
+                </div>
+
+                <form action="/siswa/pembayaran/kirim" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="les_privat_id" id="modal-les-id" />
+
+                    {{-- PILIH REKENING --}}
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                        1️⃣ Pilih Rekening Tujuan Transfer
+                    </div>
+
+                    @foreach ($rekening as $rek)
+                        <label style="display:block;cursor:pointer;">
+                            <input type="radio" name="rekening_id" value="{{ $rek->id }}" style="display:none;"
+                                required class="rek-radio" />
+                            <div class="rek-card" onclick="selectRek(this)">
+                                <div class="rek-logo"
+                                    style="background:{{ $rek->nama_bank === 'Bank BCA' ? '#003087' : ($rek->nama_bank === 'Bank BRI' ? '#004ea8' : '#005e97') }};color:#fff;">
+                                    {{ strtoupper(str_replace(['Bank ', 'bank '], '', $rek->nama_bank)) }}
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="rek-name">{{ $rek->nama_bank }}</div>
+                                    <div class="rek-norek">
+                                        {{ $rek->nomor_rekening }}
+                                        <button type="button" class="btn-copy"
+                                            onclick="event.stopPropagation();copyText('{{ $rek->nomor_rekening }}')">
+                                            <i class="bi bi-clipboard me-1"></i>Salin
+                                        </button>
+                                    </div>
+                                    <div style="font-size:11px;color:var(--muted);">a.n. {{ $rek->atas_nama }}</div>
+                                </div>
+                                <div class="rek-check">
+                                    <i class="bi bi-check-lg" style="font-size:11px;display:none;"></i>
+                                </div>
+                            </div>
+                        </label>
+                    @endforeach
+
+                    {{-- INSTRUKSI --}}
+                    <div
+                        style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0;font-size:12.5px;color:#92400e;">
+                        <div style="font-weight:700;margin-bottom:4px;"><i class="bi bi-info-circle me-1"></i>Cara
+                            Pembayaran:</div>
+                        <ol style="margin:0;padding-left:16px;line-height:1.8;">
+                            <li>Pilih rekening tujuan transfer di atas</li>
+                            <li>Transfer sesuai jumlah tagihan (pastikan nominal tepat)</li>
+                            <li>Foto/screenshot bukti transfer</li>
+                            <li>Upload bukti di bawah lalu klik Kirim</li>
+                            <li>Tunggu konfirmasi dari tutor (maks 1x24 jam)</li>
+                        </ol>
+                    </div>
+
+                    {{-- UPLOAD BUKTI --}}
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                        2️⃣ Upload Bukti Transfer
+                    </div>
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('buktiFile').click()">
+                        <div style="font-size:2rem;color:var(--muted);margin-bottom:8px;" id="uploadIcon">
+                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                        </div>
+                        <div style="font-size:13px;" id="uploadText">
+                            <strong style="color:var(--primary);">Klik untuk upload foto</strong><br />
+                            <span style="font-size:12px;color:var(--muted);">JPG, PNG – Maks. 2MB</span>
+                        </div>
+                        <input type="file" id="buktiFile" name="bukti_transfer"
+                            accept="image/jpg,image/jpeg,image/png" style="display:none;" required
+                            onchange="previewFile(this)" />
+                    </div>
+
+                    {{-- PREVIEW --}}
+                    <div id="previewWrap" style="display:none;margin-top:10px;text-align:center;">
+                        <img id="previewImg"
+                            style="max-width:100%;max-height:200px;border-radius:10px;border:1.5px solid var(--success);" />
+                        <div style="font-size:12px;color:var(--success);margin-top:4px;">
+                            <i class="bi bi-check-circle-fill me-1"></i><span id="previewName"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="button" class="btn fw-bold flex-fill py-2"
+                            style="background:var(--bg);color:var(--muted);border-radius:10px;border:1.5px solid var(--border);font-size:13px;"
+                            onclick="closeModal()">Batal</button>
+                        <button type="submit" class="btn fw-bold flex-fill py-2"
+                            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;box-shadow:0 4px 12px rgba(30,58,95,.3);">
+                            <i class="bi bi-send-fill me-1"></i> Kirim Bukti Bayar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 
 @push('scripts')
-<script>
-    function switchTab(el, id) {
-        document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        ['tagihan','status','riwayat'].forEach(t => {
-            document.getElementById('tab-'+t).style.display = t === id ? '' : 'none';
-        });
-    }
-    function selectMetode(el) {
-        document.querySelectorAll('.metode-card').forEach(c => {
-            c.classList.remove('selected');
-            c.querySelector('.metode-check').innerHTML = '';
-        });
-        el.classList.add('selected');
-        el.querySelector('.metode-check').innerHTML = '<i class="bi bi-check-lg" style="font-size:12px;"></i>';
-    }
-    function selectMetodeBayar(el) {
-        document.querySelectorAll('#modal-bayar .metode-card').forEach(c => {
-            c.classList.remove('selected');
-            c.querySelector('.metode-check').innerHTML = '';
-        });
-        el.classList.add('selected');
-        el.querySelector('.metode-check').innerHTML = '<i class="bi bi-check-lg" style="font-size:12px;"></i>';
-    }
-    function openInvoiceModal() { document.getElementById('modal-invoice').classList.add('show'); }
-    function openBayarModal()   { document.getElementById('modal-bayar').classList.add('show'); }
-    function closeModal(id)     { document.getElementById(id).classList.remove('show'); }
-    function bayarBerhasil()    { closeModal('modal-bayar'); document.getElementById('modal-sukses').classList.add('show'); }
+    <script>
+        function switchTab(el, id) {
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('tab-tagihan').style.display = id === 'tagihan' ? '' : 'none';
+            document.getElementById('tab-riwayat').style.display = id === 'riwayat' ? '' : 'none';
+        }
 
-    let sec = 1 * 3600 + 48 * 60 + 22;
-    function fmtTime(s) {
-        const h = Math.floor(s/3600).toString().padStart(2,'0');
-        const m = Math.floor((s%3600)/60).toString().padStart(2,'0');
-        const ss = (s%60).toString().padStart(2,'0');
-        return h+':'+m+':'+ss;
-    }
-    setInterval(() => {
-        if(sec<=0) return;
-        sec--;
-        const el1 = document.getElementById('countdown');
-        const el2 = document.getElementById('modal-timer');
-        if(el1) el1.textContent = fmtTime(sec);
-        if(el2) el2.textContent = fmtTime(sec);
-    }, 1000);
-</script>
+        function openModalBayar(lesId, layanan, jumlah, tutor) {
+            document.getElementById('modal-les-id').value = lesId;
+            document.getElementById('modal-layanan').textContent = 'Les Privat – ' + layanan;
+            document.getElementById('modal-tutor').textContent = 'Tutor: ' + tutor;
+            document.getElementById('modal-jumlah').textContent = 'Rp ' + jumlah;
+            document.getElementById('modal-bayar').classList.add('show');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+        }
+
+        function selectRek(el) {
+            document.querySelectorAll('.rek-card').forEach(c => {
+                c.classList.remove('selected');
+                const icon = c.querySelector('.rek-check i');
+                if (icon) icon.style.display = 'none';
+                const rc = c.querySelector('.rek-check');
+                if (rc) {
+                    rc.style.background = '';
+                    rc.style.borderColor = 'var(--border)';
+                }
+            });
+            el.classList.add('selected');
+            const check = el.querySelector('.rek-check');
+            if (check) {
+                check.style.background = 'var(--primary)';
+                check.style.borderColor = 'var(--primary)';
+                const icon = check.querySelector('i');
+                if (icon) icon.style.display = '';
+            }
+            // Centang radio
+            const label = el.closest('label');
+            if (label) {
+                const radio = label.querySelector('.rek-radio');
+                if (radio) radio.checked = true;
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target.closest('.btn-copy');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check me-1"></i>Tersalin!';
+                btn.style.background = 'var(--success-soft)';
+                btn.style.color = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+
+        function previewFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewName').textContent = file.name;
+                    document.getElementById('previewWrap').style.display = '';
+                    document.getElementById('uploadZone').classList.add('has-file');
+                    document.getElementById('uploadIcon').innerHTML =
+                        '<i class="bi bi-check-circle-fill" style="color:var(--success);"></i>';
+                    document.getElementById('uploadText').innerHTML =
+                        '<strong style="color:var(--success);">File siap dikirim</strong><br/><span style="font-size:12px;color:var(--muted);">Klik untuk ganti foto</span>';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 @endpush

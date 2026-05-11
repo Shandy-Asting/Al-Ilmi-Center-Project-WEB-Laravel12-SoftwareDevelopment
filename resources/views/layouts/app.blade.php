@@ -5,12 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'Al Ilmi Center')</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
-
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
             --primary: #1e3a5f;
@@ -26,6 +25,7 @@
             --info: #0284c7;
             --info-soft: #e0f2fe;
             --sidebar-w: 260px;
+            --topbar-h: 60px;
             --bg: #f1f5f9;
             --card-bg: #ffffff;
             --text: #1e293b;
@@ -46,7 +46,20 @@
             min-height: 100vh;
         }
 
-        /* ── SIDEBAR ── */
+        /* ══ OVERLAY MOBILE ══ */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* ══ SIDEBAR ══ */
         .sidebar {
             position: fixed;
             top: 0;
@@ -58,11 +71,13 @@
             flex-direction: column;
             z-index: 100;
             overflow-y: auto;
+            overflow-x: hidden;
+            transition: transform .3s cubic-bezier(.4, 0, .2, 1);
         }
 
         .sidebar-brand {
-            padding: 24px 20px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, .10);
+            padding: 20px 18px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
         }
 
         .logo-wrap {
@@ -72,32 +87,33 @@
         }
 
         .logo-icon {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             background: var(--accent);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 17px;
             color: var(--primary);
             font-weight: 800;
+            flex-shrink: 0;
         }
 
         .brand-name {
             color: #fff;
             font-weight: 800;
-            font-size: 18px;
+            font-size: 17px;
+            line-height: 1.2;
         }
 
         .brand-sub {
             color: rgba(255, 255, 255, .5);
             font-size: 11px;
-            font-weight: 500;
         }
 
         .sidebar-menu {
-            padding: 16px 12px;
+            padding: 12px 10px;
             flex: 1;
         }
 
@@ -108,7 +124,7 @@
             letter-spacing: 1.2px;
             text-transform: uppercase;
             padding: 8px 10px 4px;
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .nav-item-custom {
@@ -141,6 +157,7 @@
             font-size: 16px;
             width: 20px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .nav-badge {
@@ -154,22 +171,22 @@
         }
 
         .sidebar-footer {
-            padding: 16px 12px;
-            border-top: 1px solid rgba(255, 255, 255, .10);
+            padding: 14px 10px;
+            border-top: 1px solid rgba(255, 255, 255, .1);
         }
 
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px;
+            padding: 10px 12px;
             border-radius: 10px;
             background: rgba(255, 255, 255, .07);
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
@@ -177,7 +194,7 @@
             justify-content: center;
             color: var(--primary);
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             flex-shrink: 0;
         }
 
@@ -185,6 +202,7 @@
             color: #fff;
             font-size: 13px;
             font-weight: 600;
+            line-height: 1.2;
         }
 
         .user-role {
@@ -192,19 +210,21 @@
             font-size: 11px;
         }
 
-        /* ── MAIN ── */
+        /* ══ MAIN ══ */
         .main-wrap {
             margin-left: var(--sidebar-w);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: margin .3s;
         }
 
-        /* ── TOPBAR ── */
+        /* ══ TOPBAR ══ */
         .topbar {
             background: var(--card-bg);
             border-bottom: 1px solid var(--border);
-            padding: 14px 28px;
+            padding: 0 20px;
+            height: var(--topbar-h);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -213,30 +233,60 @@
             z-index: 50;
         }
 
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-menu {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: var(--bg);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 18px;
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+
+        .btn-menu:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .topbar-titles {}
+
         .topbar-title {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             color: var(--text);
+            line-height: 1.2;
         }
 
         .topbar-sub {
-            font-size: 12px;
+            font-size: 11.5px;
             color: var(--muted);
-            margin-top: 1px;
         }
 
         .topbar-right {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
         }
 
         .icon-btn {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 8px;
-            border: 1px solid var(--border);
-            background: #fff;
+            border: 1.5px solid var(--border);
+            background: var(--card-bg);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -245,6 +295,7 @@
             font-size: 16px;
             transition: all .2s;
             position: relative;
+            text-decoration: none;
         }
 
         .icon-btn:hover {
@@ -252,33 +303,46 @@
             color: var(--primary);
         }
 
-        .icon-btn .badge-dot {
+        .badge-dot {
             position: absolute;
             top: 5px;
             right: 5px;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background: var(--danger);
             border-radius: 50%;
             border: 1.5px solid #fff;
         }
 
-        /* ── CONTENT ── */
+        .logout-btn {
+            background: var(--primary);
+            color: #fff !important;
+            border-color: var(--primary) !important;
+            padding: 0 14px;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .logout-btn:hover {
+            background: var(--primary-light) !important;
+        }
+
+        /* ══ CONTENT ══ */
         .content {
-            padding: 24px 28px;
+            padding: 20px 24px;
             flex: 1;
         }
 
-        /* ── CARD BOX ── */
+        /* ══ CARD BOX ══ */
         .card-box {
             background: var(--card-bg);
             border-radius: 14px;
             border: 1px solid var(--border);
-            overflow: hidden;
         }
 
         .card-box-header {
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
@@ -288,19 +352,16 @@
         }
 
         .card-box-title {
-            font-size: 14.5px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--text);
         }
 
-        .card-box-title span {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--muted);
-            margin-left: 5px;
+        .card-box-title i {
+            color: var(--primary);
+            margin-right: 6px;
         }
 
-        /* ── PILLS / BADGES ── */
         .pill {
             display: inline-flex;
             align-items: center;
@@ -309,10 +370,6 @@
             border-radius: 20px;
             font-size: 11.5px;
             font-weight: 600;
-        }
-
-        .pill i {
-            font-size: 8px;
         }
 
         .p-success {
@@ -340,94 +397,53 @@
             color: var(--primary);
         }
 
-        /* ── TABLE ── */
-        .tbl {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .tbl thead th {
-            background: #f8fafc;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .6px;
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-        }
-
-        .tbl tbody td {
-            padding: 12px 14px;
-            font-size: 13px;
-            color: var(--text);
-            border-bottom: 1px solid #f1f5f9;
-            vertical-align: middle;
-        }
-
-        .tbl tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .tbl tbody tr:hover td {
-            background: #fafcff;
-        }
-
-        /* ── USER CELL ── */
-        .user-cell {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-        }
-
-        .u-ava {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .u-name {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .u-sub {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        /* ── RESPONSIVE ── */
-        @media (max-width: 991px) {
+        /* ══ RESPONSIVE ══ */
+        @media (max-width:991px) {
             .sidebar {
                 transform: translateX(-100%);
             }
 
-            .sidebar.show {
+            .sidebar.open {
                 transform: translateX(0);
             }
 
             .main-wrap {
                 margin-left: 0;
             }
+
+            .btn-menu {
+                display: flex;
+            }
+
+            .content {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width:576px) {
+            .content {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 0 14px;
+            }
+
+            .logout-btn span {
+                display: none;
+            }
         }
     </style>
-
     @stack('styles')
 </head>
 
 <body>
 
-    {{-- ====== SIDEBAR ====== --}}
-    <aside class="sidebar" id="sidebar">
+    <!-- OVERLAY MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-        {{-- Logo --}}
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
             <div class="logo-wrap">
                 <div class="logo-icon">A</div>
@@ -437,65 +453,91 @@
                 </div>
             </div>
         </div>
-
-        {{-- Menu --}}
         <div class="sidebar-menu">
             @yield('sidebar-menu')
         </div>
-
-        {{-- User Info --}}
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="user-avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-                </div>
-                <div>
-                    <div class="user-name">{{ auth()->user()->name ?? 'Pengguna' }}</div>
+                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="user-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        {{ auth()->user()->name ?? 'Pengguna' }}</div>
                     <div class="user-role">{{ ucfirst(auth()->user()->role ?? '') }}</div>
                 </div>
-            </div>
-        </div>
-
-    </aside>
-
-    {{-- ====== MAIN ====== --}}
-    <div class="main-wrap">
-
-        {{-- Topbar --}}
-        <div class="topbar">
-            <div>
-                <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
-                <div class="topbar-sub">@yield('page-sub', '')</div>
-            </div>
-            <div class="topbar-right">
-                <div class="icon-btn"><i class="bi bi-search"></i></div>
-                <div class="icon-btn">
-                    <i class="bi bi-bell"></i>
-                    <span class="badge-dot"></span>
-                </div>
-                <div class="icon-btn"><i class="bi bi-envelope"></i></div>
-                <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="btn btn-sm ms-1"
-                        style="background:var(--primary);color:#fff;border-radius:8px;
-                        font-size:13px;font-weight:600;padding:6px 14px;border:none">
-                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    <button type="submit" title="Logout"
+                        style="width:30px;height:30px;border-radius:8px;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;">
+                        <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
+            </div>
+        </div>
+    </aside>
 
+    <!-- MAIN -->
+    <div class="main-wrap" id="mainWrap">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="btn-menu" onclick="toggleSidebar()">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-titles">
+                    <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
+                    <div class="topbar-sub">@yield('page-sub', '')</div>
+                </div>
+            </div>
+            <div class="topbar-right">
+                {{-- Notifikasi --}}
+                @if (auth()->user()->role === 'siswa')
+                    <a href="/siswa/notifikasi" class="icon-btn">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge-dot"></span>
+                    </a>
+                @elseif(auth()->user()->role === 'tutor')
+                    <a href="/tutor/notifikasi" class="icon-btn">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge-dot"></span>
+                    </a>
+                @endif
+
+                {{-- Logout --}}
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="icon-btn logout-btn">
+                        <i class="bi bi-box-arrow-right me-1"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
         </div>
 
-        {{-- Konten Halaman --}}
+        <!-- KONTEN -->
         <div class="content">
             @yield('content')
         </div>
-
-    </div>{{-- /main-wrap --}}
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    @stack('scripts')
+    <script>
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            sb.classList.toggle('open');
+            ov.classList.toggle('show');
+        }
 
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+        // Tutup sidebar kalau resize ke desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 991) closeSidebar();
+        });
+    </script>
+    @stack('scripts')
 </body>
 
 </html>

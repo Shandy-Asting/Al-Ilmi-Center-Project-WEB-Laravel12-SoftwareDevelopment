@@ -645,6 +645,23 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         return redirect('/tutor/les-privat')->with('sukses', 'Sesi berhasil ditandai selesai!');
     });
 
+    Route::get('/daftar-siswa', function () {
+        $user = auth()->user();
+        $siswaList = \App\Models\LesPrivat::where('tutor_id', $user->id)
+            ->with('siswa')
+            ->select('user_id')
+            ->distinct()
+            ->get()
+            ->pluck('siswa')
+            ->filter();
+
+        return view('tutor.daftar-siswa', ['siswaList' => $siswaList]);
+    });
+
+    Route::get('/notifikasi', function () {
+        return view('tutor.notifikasi');
+    });
+
     Route::get('/profil', fn() => view('tutor.profil'));
 });
 

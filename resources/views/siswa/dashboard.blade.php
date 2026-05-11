@@ -516,6 +516,96 @@
                 display: none;
             }
         }
+
+        /* ══ RESPONSIVE GLOBAL ══ */
+        @media (max-width: 991px) {
+            .row>[class*='col-lg'] {
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            h4.fw-bold {
+                font-size: 1.1rem !important;
+            }
+
+            .d-flex.justify-content-between {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px !important;
+            }
+
+            .stat-val {
+                font-size: 1.3rem !important;
+            }
+
+            .main-tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .main-tab {
+                min-width: 100px;
+                flex: none;
+            }
+
+            table {
+                font-size: 12px !important;
+            }
+
+            table td,
+            table th {
+                padding: 8px 10px !important;
+            }
+
+            .card-box-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .modal-box {
+                width: 96% !important;
+                margin: 10px auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-card {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .d-flex.gap-2 {
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                font-size: 12px !important;
+                padding: 7px 12px !important;
+            }
+        }
+
+        /* Dashboard responsive */
+        @media (max-width: 767px) {
+            .greeting-card {
+                padding: 16px 18px !important;
+            }
+
+            .greeting-card h4 {
+                font-size: 1rem !important;
+            }
+
+            .col-6 .stat-card {
+                padding: 12px !important;
+            }
+
+            .col-6 .stat-val {
+                font-size: 1.2rem !important;
+            }
+        }
     </style>
 @endpush
 
