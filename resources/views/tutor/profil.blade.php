@@ -12,7 +12,6 @@
     </a>
     <a href="/tutor/jadwal" class="nav-item-custom {{ request()->is('tutor/jadwal') ? 'active' : '' }}">
         <i class="bi bi-calendar3"></i> Jadwal Mengajar
-        <span class="nav-badge">3</span>
     </a>
     <a href="/tutor/daftar-siswa" class="nav-item-custom {{ request()->is('tutor/daftar-siswa') ? 'active' : '' }}">
         <i class="bi bi-people-fill"></i> Daftar Siswa
@@ -27,7 +26,14 @@
     <a href="/tutor/les-privat" class="nav-item-custom {{ request()->is('tutor/les-privat') ? 'active' : '' }}">
         <i class="bi bi-person-video3"></i> Les Privat
     </a>
+    <a href="/tutor/pembayaran" class="nav-item-custom {{ request()->is('tutor/pembayaran') ? 'active' : '' }}">
+        <i class="bi bi-cash-coin"></i> Pembayaran
+        <span class="nav-badge">2</span>
+    </a>
     <div class="menu-label">Akun</div>
+    <a href="/tutor/notifikasi" class="nav-item-custom {{ request()->is('tutor/notifikasi') ? 'active' : '' }}">
+        <i class="bi bi-bell-fill"></i> Notifikasi
+    </a>
     <a href="/tutor/profil" class="nav-item-custom {{ request()->is('tutor/profil') ? 'active' : '' }}">
         <i class="bi bi-person-circle"></i> Profil Saya
     </a>

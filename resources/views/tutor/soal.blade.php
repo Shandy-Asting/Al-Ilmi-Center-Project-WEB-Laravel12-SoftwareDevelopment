@@ -12,9 +12,8 @@
     </a>
     <a href="/tutor/jadwal" class="nav-item-custom {{ request()->is('tutor/jadwal') ? 'active' : '' }}">
         <i class="bi bi-calendar3"></i> Jadwal Mengajar
-        <span class="nav-badge">3</span>
     </a>
-    <a href="#" class="nav-item-custom">
+    <a href="/tutor/daftar-siswa" class="nav-item-custom {{ request()->is('tutor/daftar-siswa') ? 'active' : '' }}">
         <i class="bi bi-people-fill"></i> Daftar Siswa
     </a>
     <a href="/tutor/materi" class="nav-item-custom {{ request()->is('tutor/materi') ? 'active' : '' }}">
@@ -26,9 +25,15 @@
     </a>
     <a href="/tutor/les-privat" class="nav-item-custom {{ request()->is('tutor/les-privat') ? 'active' : '' }}">
         <i class="bi bi-person-video3"></i> Les Privat
+    </a>
+    <a href="/tutor/pembayaran" class="nav-item-custom {{ request()->is('tutor/pembayaran') ? 'active' : '' }}">
+        <i class="bi bi-cash-coin"></i> Pembayaran
         <span class="nav-badge">2</span>
     </a>
     <div class="menu-label">Akun</div>
+    <a href="/tutor/notifikasi" class="nav-item-custom {{ request()->is('tutor/notifikasi') ? 'active' : '' }}">
+        <i class="bi bi-bell-fill"></i> Notifikasi
+    </a>
     <a href="/tutor/profil" class="nav-item-custom {{ request()->is('tutor/profil') ? 'active' : '' }}">
         <i class="bi bi-person-circle"></i> Profil Saya
     </a>
@@ -478,6 +483,35 @@
                 max-width: calc(100% - 16px) !important;
             }
         }
+
+        @media(max-width:767px) {
+            .modal-xl {
+                max-width: calc(100% - 16px) !important;
+            }
+
+            .modal-dialog {
+                margin: 8px !important;
+            }
+
+            .modal-body {
+                max-height: 65vh;
+                overflow-y: auto;
+                padding: 14px !important;
+            }
+
+            .modal-footer {
+                position: sticky;
+                bottom: 0;
+                background: #fff;
+                z-index: 10;
+                border-top: 1px solid var(--border);
+                padding: 12px 16px !important;
+            }
+
+            .option-row {
+                flex-direction: column;
+            }
+        }
     </style>
 @endpush
 
@@ -604,7 +638,8 @@
                     @forelse($soal as $i => $s)
                         <tr data-jenjang="{{ strtolower($s->materi->jenjang ?? '') }}"
                             data-mapel="{{ strtolower($s->materi->mata_pelajaran ?? '') }}"
-                            data-tingkat="{{ $s->tingkat_kesulitan }}" data-pertanyaan="{{ strtolower($s->pertanyaan) }}">
+                            data-tingkat="{{ $s->tingkat_kesulitan }}"
+                            data-pertanyaan="{{ strtolower($s->pertanyaan) }}">
                             <td>
                                 <div class="soal-num">{{ $i + 1 }}</div>
                             </td>
@@ -951,13 +986,12 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn rounded-2 fw-semibold"
-                            style="background:#f1f5f9;color:var(--muted);font-size:.85rem;border:none;"
-                            data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn rounded-2 fw-semibold"
-                            style="background:var(--primary);color:#fff;font-size:.85rem;border:none;">
-                            <i class="bi bi-check2-circle me-1"></i> Simpan Soal
+                    <div class="modal-footer"
+                        style="position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:14px 20px;display:flex;justify-content:flex-end;gap:8px;">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn fw-bold px-4"
+                            style="background:var(--primary);color:#fff;border:none;border-radius:8px;">
+                            <i class="bi bi-check-lg me-1"></i>Simpan Soal
                         </button>
                     </div>
                 </form>

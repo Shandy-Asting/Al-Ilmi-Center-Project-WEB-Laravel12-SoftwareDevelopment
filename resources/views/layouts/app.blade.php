@@ -315,17 +315,16 @@
         }
 
         .logout-btn {
-            background: var(--primary);
-            color: #fff !important;
-            border-color: var(--primary) !important;
-            padding: 0 14px;
-            font-size: 12.5px;
-            font-weight: 700;
-            white-space: nowrap;
+            background: var(--danger-soft) !important;
+            color: var(--danger) !important;
+            border-color: var(--danger-soft) !important;
+            min-width: 34px;
         }
 
         .logout-btn:hover {
-            background: var(--primary-light) !important;
+            background: var(--danger) !important;
+            color: #fff !important;
+            border-color: var(--danger) !important;
         }
 
         /* ══ CONTENT ══ */
@@ -490,24 +489,31 @@
             </div>
             <div class="topbar-right">
                 {{-- Notifikasi --}}
-                @if (auth()->user()->role === 'siswa')
-                    <a href="/siswa/notifikasi" class="icon-btn">
-                        <i class="bi bi-bell"></i>
-                        <span class="badge-dot"></span>
-                    </a>
-                @elseif(auth()->user()->role === 'tutor')
-                    <a href="/tutor/notifikasi" class="icon-btn">
-                        <i class="bi bi-bell"></i>
-                        <span class="badge-dot"></span>
-                    </a>
+                @if (auth()->check())
+                    @if (auth()->user()->role === 'siswa')
+                        <a href="/siswa/notifikasi" class="icon-btn" title="Notifikasi">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge-dot"></span>
+                        </a>
+                    @elseif(auth()->user()->role === 'tutor')
+                        <a href="/tutor/notifikasi" class="icon-btn" title="Notifikasi">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge-dot"></span>
+                        </a>
+                    @elseif(auth()->user()->role === 'admin')
+                        <a href="/admin/notifikasi" class="icon-btn" title="Notifikasi">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge-dot"></span>
+                        </a>
+                    @endif
                 @endif
 
-                {{-- Logout --}}
+                {{-- Logout — hanya icon di mobile, icon+teks di desktop --}}
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="icon-btn logout-btn">
-                        <i class="bi bi-box-arrow-right me-1"></i>
-                        <span>Logout</span>
+                    <button type="submit" class="icon-btn logout-btn" title="Logout"
+                        style="background:var(--danger-soft);color:var(--danger);border-color:var(--danger-soft);">
+                        <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
             </div>

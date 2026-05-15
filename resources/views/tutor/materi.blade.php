@@ -12,9 +12,8 @@
     </a>
     <a href="/tutor/jadwal" class="nav-item-custom {{ request()->is('tutor/jadwal') ? 'active' : '' }}">
         <i class="bi bi-calendar3"></i> Jadwal Mengajar
-        <span class="nav-badge">3</span>
     </a>
-    <a href="/tutor/daftar-siswa" class="nav-item-custom">
+    <a href="/tutor/daftar-siswa" class="nav-item-custom {{ request()->is('tutor/daftar-siswa') ? 'active' : '' }}">
         <i class="bi bi-people-fill"></i> Daftar Siswa
     </a>
     <a href="/tutor/materi" class="nav-item-custom {{ request()->is('tutor/materi') ? 'active' : '' }}">
@@ -26,9 +25,15 @@
     </a>
     <a href="/tutor/les-privat" class="nav-item-custom {{ request()->is('tutor/les-privat') ? 'active' : '' }}">
         <i class="bi bi-person-video3"></i> Les Privat
+    </a>
+    <a href="/tutor/pembayaran" class="nav-item-custom {{ request()->is('tutor/pembayaran') ? 'active' : '' }}">
+        <i class="bi bi-cash-coin"></i> Pembayaran
         <span class="nav-badge">2</span>
     </a>
     <div class="menu-label">Akun</div>
+    <a href="/tutor/notifikasi" class="nav-item-custom {{ request()->is('tutor/notifikasi') ? 'active' : '' }}">
+        <i class="bi bi-bell-fill"></i> Notifikasi
+    </a>
     <a href="/tutor/profil" class="nav-item-custom {{ request()->is('tutor/profil') ? 'active' : '' }}">
         <i class="bi bi-person-circle"></i> Profil Saya
     </a>
@@ -554,6 +559,50 @@
                 grid-template-columns: 1fr 1fr !important;
             }
         }
+
+        /* MODAL RESPONSIVE FIX */
+        @media(max-width:767px) {
+            .modal {
+                padding: 8px !important;
+            }
+
+            .modal-dialog {
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .modal-content {
+                border-radius: 14px !important;
+            }
+
+            .modal-body {
+                padding: 16px !important;
+            }
+
+            .modal-footer {
+                padding: 12px 16px !important;
+                position: sticky;
+                bottom: 0;
+                background: #fff;
+                border-top: 1px solid var(--border);
+            }
+        }
+
+        /* FORM UPLOAD ZONE */
+        .upload-drop {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 28px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            background: var(--bg);
+        }
+
+        .upload-drop:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
     </style>
 @endpush
 
@@ -838,90 +887,50 @@
                 </div>
                 <form method="POST" action="/tutor/materi" id="formTambah" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-body">
+                    <div class="modal-body" style="padding:20px 22px;max-height:70vh;overflow-y:auto;">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label-custom">Judul Materi <span class="text-danger">*</span></label>
-                                <input type="text" name="judul" class="form-control-custom"
+                                <label class="form-label fw-bold" style="font-size:13px;">Judul Materi <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="judul" class="form-control"
                                     placeholder="Contoh: Trigonometri – Dasar dan Penerapan" required />
                             </div>
                             <div class="col-12">
-                                <label class="form-label-custom">Deskripsi Singkat</label>
-                                <textarea name="deskripsi" class="form-control-custom" rows="2"
-                                    placeholder="Jelaskan isi materi secara singkat…"></textarea>
+                                <label class="form-label fw-bold" style="font-size:13px;">Deskripsi Singkat</label>
+                                <textarea name="deskripsi" class="form-control" rows="2" placeholder="Jelaskan isi materi secara singkat…"></textarea>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label-custom">Jenjang <span class="text-danger">*</span></label>
-                                <select name="jenjang" class="form-control-custom" required>
+                            <div class="col-6">
+                                <label class="form-label fw-bold" style="font-size:13px;">Jenjang <span
+                                        class="text-danger">*</span></label>
+                                <select name="jenjang" class="form-select" required>
                                     <option value="">-- Pilih Jenjang --</option>
                                     <option value="sd">SD</option>
                                     <option value="smp">SMP</option>
                                     <option value="sma">SMA</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label-custom">Mata Pelajaran <span class="text-danger">*</span></label>
-                                <input type="text" name="mata_pelajaran" class="form-control-custom"
+                            <div class="col-6">
+                                <label class="form-label fw-bold" style="font-size:13px;">Mata Pelajaran <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="mata_pelajaran" class="form-control"
                                     placeholder="Contoh: Matematika" required />
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label-custom">Kelas <span class="text-danger">*</span></label>
-                                <input type="text" name="kelas" class="form-control-custom"
-                                    placeholder="Contoh: Kelas 10" required />
+                            <div class="col-6">
+                                <label class="form-label fw-bold" style="font-size:13px;">Kelas <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="kelas" class="form-control" placeholder="Contoh: Kelas 10"
+                                    required />
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label-custom">Tipe Materi <span class="text-danger">*</span></label>
-                                <select name="tipe" class="form-control-custom" required>
-                                    <option value="">-- Pilih Tipe --</option>
-                                    <option value="pdf">PDF</option>
-                                    <option value="video">Video</option>
-                                    <option value="doc">Dokumen (Word)</option>
-                                    <option value="ppt">Presentasi (PPT)</option>
-                                    <option value="quiz">Kuis / Latihan Soal</option>
+                            <div class="col-6">
+                                <label class="form-label fw-bold" style="font-size:13px;">Status Publikasi</label>
+                                <select name="status" class="form-select">
+                                    <option value="aktif">Aktif (Publik)</option>
+                                    <option value="nonaktif">Draft (Belum Dipublikasi)</option>
                                 </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label-custom">Topik / Bab</label>
-                                <input type="text" name="topik" class="form-control-custom"
-                                    placeholder="Contoh: Bab 3 – Fungsi Trigonometri" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label-custom">Status Publikasi</label>
-                                <select name="status" id="tambah_status" class="form-control-custom">
-                                    <option value="draft">Draft (belum dipublikasikan)</option>
-                                    <option value="aktif">Aktif (langsung terbit)</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label-custom">Upload File</label>
-                                <div class="upload-zone" onclick="document.getElementById('inputFileTambah').click()">
-                                    <div style="font-size:2rem;color:var(--muted);margin-bottom:8px;">
-                                        <i class="bi bi-cloud-arrow-up-fill"></i>
-                                    </div>
-                                    <div style="font-size:.82rem;color:var(--muted);">
-                                        <strong style="color:var(--primary);">Klik untuk upload</strong> atau drag &
-                                        drop<br />
-                                        <span>PDF, DOC, PPT, MP4 – Maks. 50 MB</span>
-                                    </div>
-                                    <div id="namaFileTambah"
-                                        style="margin-top:8px;font-size:.8rem;color:var(--success);font-weight:600;"></div>
-                                </div>
-                                <input type="file" id="inputFileTambah" name="file"
-                                    accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4" style="display:none;"
-                                    onchange="document.getElementById('namaFileTambah').textContent = this.files[0] ? '✓ ' + this.files[0].name : ''" />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label-custom">Atau Masukkan Link Video</label>
-                                <input type="url" name="link_video" class="form-control-custom"
-                                    placeholder="https://www.youtube.com/watch?v=…" />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label-custom">Catatan untuk Siswa</label>
-                                <textarea name="catatan" class="form-control-custom" rows="2"
-                                    placeholder="Petunjuk belajar, hal yang perlu diperhatikan…"></textarea>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="modal-footer">
                         <button type="button" class="btn rounded-2 fw-semibold"
                             style="background:#f1f5f9;color:var(--muted);font-size:.85rem;border:none;"
