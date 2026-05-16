@@ -1,3 +1,9 @@
+@php
+    if (!isset($menunggu)) {
+        $menunggu = collect([]);
+    }
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'Dashboard Tutor - Al Ilmi Center')
@@ -12,7 +18,6 @@
     </a>
     <a href="/tutor/jadwal" class="nav-item-custom {{ request()->is('tutor/jadwal') ? 'active' : '' }}">
         <i class="bi bi-calendar3"></i> Jadwal Mengajar
-        <span class="nav-badge">3</span>
     </a>
     <a href="/tutor/daftar-siswa" class="nav-item-custom {{ request()->is('tutor/daftar-siswa') ? 'active' : '' }}">
         <i class="bi bi-people-fill"></i> Daftar Siswa
@@ -26,9 +31,15 @@
     </a>
     <a href="/tutor/les-privat" class="nav-item-custom {{ request()->is('tutor/les-privat') ? 'active' : '' }}">
         <i class="bi bi-person-video3"></i> Les Privat
+    </a>
+    <a href="/tutor/pembayaran" class="nav-item-custom {{ request()->is('tutor/pembayaran') ? 'active' : '' }}">
+        <i class="bi bi-cash-coin"></i> Pembayaran
         <span class="nav-badge">2</span>
     </a>
     <div class="menu-label">Akun</div>
+    <a href="/tutor/notifikasi" class="nav-item-custom {{ request()->is('tutor/notifikasi') ? 'active' : '' }}">
+        <i class="bi bi-bell-fill"></i> Notifikasi
+    </a>
     <a href="/tutor/profil" class="nav-item-custom {{ request()->is('tutor/profil') ? 'active' : '' }}">
         <i class="bi bi-person-circle"></i> Profil Saya
     </a>
@@ -384,6 +395,49 @@
         .card-box-title i {
             color: var(--primary);
             margin-right: 6px;
+        }
+
+        /* Tutor Dashboard Responsive */
+        @media (max-width: 991px) {
+            .jadwal-item {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .sched-time {
+                min-width: 70px;
+            }
+
+            .sched-mode {
+                margin-top: 4px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .jadwal-item {
+                padding: 12px 14px;
+            }
+
+            .activity-item {
+                padding: 10px 14px;
+            }
+
+            .progress-item {
+                padding: 10px 14px;
+            }
+
+            .mini-cal {
+                padding: 12px 14px;
+            }
+
+            .cal-day {
+                font-size: 11px;
+                padding: 5px 2px;
+            }
+
+            .d-flex.gap-3.mb-4 {
+                flex-direction: column;
+            }
         }
     </style>
 @endpush

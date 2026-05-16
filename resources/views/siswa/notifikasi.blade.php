@@ -59,6 +59,32 @@
     .card-box-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
     .card-box-title{font-size:.95rem;font-weight:700;color:var(--text);}
     .grup-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+
+    @media (max-width: 767px) {
+        .notif-item {
+            flex-wrap: wrap;
+            padding: 12px 14px;
+        }
+        .notif-actions {
+            width: 100%;
+            flex-direction: row !important;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        .filter-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 4px;
+        }
+        .filter-tab {
+            min-width: auto;
+            flex: none;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        .notif-desc { font-size: 12px; }
+        .notif-icon { width: 36px !important; height: 36px !important; font-size: 16px !important; }
+    }
 </style>
 @endpush
 
@@ -293,7 +319,6 @@
             const filter = this.dataset.filter;
             document.querySelectorAll('.notif-item').forEach(item => {
                 if (filter === 'semua') {
-                    item.closest('.card-box') && (item.style.display = '');
                     item.style.display = '';
                 } else if (filter === 'belum') {
                     item.style.display = item.dataset.baca === '0' ? '' : 'none';
@@ -306,9 +331,9 @@
             document.querySelectorAll('.card-box').forEach(box => {
                 const visible = [...box.querySelectorAll('.notif-item')].some(i => i.style.display !== 'none');
                 const label   = box.previousElementSibling;
-                box.style.display        = visible ? '' : 'none';
+                box.style.display = visible ? '' : 'none';
                 if (label && label.classList.contains('grup-label')) {
-                    label.style.display  = visible ? '' : 'none';
+                    label.style.display = visible ? '' : 'none';
                 }
             });
         });

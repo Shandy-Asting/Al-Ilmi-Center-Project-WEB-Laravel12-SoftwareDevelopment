@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <title>Laporan Hasil Belajar – Al Ilmi Center</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,8 +46,13 @@
         .ttd-box { flex: 1; text-align: center; }
         .ttd-line { border-top: 1px solid #1e293b; margin-top: 50px; padding-top: 6px; font-size: 10px; font-weight: bold; }
         .ttd-role { font-size: 9px; color: #64748b; }
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
     </style>
 </head>
+
 <body>
 
 {{-- HEADER --}}
@@ -58,7 +64,7 @@
         </div>
         <div class="header-right">
             <div>Dicetak: {{ now()->format('d M Y H:i') }}</div>
-            <div>No. Laporan: LAP-{{ now()->format('Ymd') }}-{{ str_pad(rand(1,999), 3, '0', STR_PAD_LEFT) }}</div>
+            <div>No. Laporan: LAP-{{ now()->format('Ymd') }}-{{ str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT) }}</div>
         </div>
     </div>
     <div class="header-title">
@@ -243,4 +249,5 @@
 </div>
 
 </body>
+
 </html>

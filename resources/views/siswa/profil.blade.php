@@ -335,6 +335,75 @@
         border-radius: 16px;
         padding: 20px;
     }
+
+    /* ══ RESPONSIVE GLOBAL ══ */
+    @media (max-width: 767px) {
+        .profile-header {
+            padding: 18px 16px !important;
+            border-radius: 14px !important;
+        }
+
+        .profile-header .d-flex {
+            flex-direction: column;
+            align-items: center !important;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            margin: 0 auto 12px !important;
+        }
+
+        .profile-stats {
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .section-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+        }
+
+        .section-tab {
+            min-width: 100px;
+            flex: none;
+            font-size: 12px;
+        }
+
+        .achieve-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .form-section {
+            padding: 16px !important;
+        }
+
+        .paket-aktif {
+            padding: 16px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-stats {
+            gap: 12px;
+        }
+
+        .ps-val {
+            font-size: 18px !important;
+        }
+
+        .achieve-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .section-tabs {
+            gap: 3px;
+        }
+
+        .section-tab {
+            padding: 7px 6px !important;
+            font-size: 11px !important;
+        }
+    }
 </style>
 @endpush
 
@@ -466,7 +535,7 @@
                     <label class="form-label-custom">Jenjang Pendidikan</label>
                     <select name="jenjang" class="form-control-custom select">
                         <option value="">-- Pilih Jenjang --</option>
-                        <option value="sd" {{ old('jenjang', $user->jenjang) === 'sd'  ? 'selected' : '' }}>SD / Sederajat</option>
+                        <option value="sd" {{ old('jenjang', $user->jenjang) === 'sd' ? 'selected' : '' }}>SD / Sederajat</option>
                         <option value="smp" {{ old('jenjang', $user->jenjang) === 'smp' ? 'selected' : '' }}>SMP / Sederajat</option>
                         <option value="sma" {{ old('jenjang', $user->jenjang) === 'sma' ? 'selected' : '' }}>SMA / Sederajat</option>
                     </select>
@@ -515,52 +584,101 @@
     </div>
 </div>
 
-<div class="form-section">
-    <div class="form-section-title"><i class="bi bi-key-fill"></i> Ubah Password</div>
-    <form method="POST" action="/siswa/profil/ganti-password">
-        @csrf
-        <div class="row g-3">
-            <div class="col-12">
-                <label class="form-label-custom">Password Saat Ini</label>
-                <div style="position:relative;">
-                    <input type="password" name="password_lama" id="passLama"
-                        class="form-control-custom {{ $errors->has('password_lama') ? 'border-danger' : '' }}"
-                        placeholder="Masukkan password saat ini" style="padding-right:40px;" required />
-                    <i class="bi bi-eye" id="toggleLama" onclick="togglePass('passLama','toggleLama')"
-                        style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+{{-- ══ SECTION: KEAMANAN ══ --}}
+<div id="section-keamanan" style="display:none;">
+    <div class="form-section">
+        <div class="form-section-title"><i class="bi bi-key-fill"></i> Ubah Password</div>
+        <form method="POST" action="/siswa/profil/ganti-password">
+            @csrf
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label-custom">Password Saat Ini</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password_lama" id="passLama"
+                            class="form-control-custom {{ $errors->has('password_lama') ? 'border-danger' : '' }}"
+                            placeholder="Masukkan password saat ini" style="padding-right:40px;" required />
+                        <i class="bi bi-eye" id="toggleLama" onclick="togglePass('passLama','toggleLama')"
+                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    </div>
+                    @error('password_lama')
+                    <div style="font-size:.78rem;color:var(--danger);margin-top:4px;">{{ $message }}</div>
+                    @enderror
                 </div>
-                @error('password_lama')
-                <div style="font-size:.78rem;color:var(--danger);margin-top:4px;">{{ $message }}</div>
-                @enderror
-            </div>
-            <div class="col-md-6">
-                <label class="form-label-custom">Password Baru</label>
-                <div style="position:relative;">
-                    <input type="password" name="password_baru" id="passBaru"
-                        class="form-control-custom"
-                        placeholder="Minimal 8 karakter" style="padding-right:40px;" required />
-                    <i class="bi bi-eye" id="toggleBaru" onclick="togglePass('passBaru','toggleBaru')"
-                        style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                <div class="col-md-6">
+                    <label class="form-label-custom">Password Baru</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password_baru" id="passBaru"
+                            class="form-control-custom"
+                            placeholder="Minimal 8 karakter" style="padding-right:40px;" required />
+                        <i class="bi bi-eye" id="toggleBaru" onclick="togglePass('passBaru','toggleBaru')"
+                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom">Konfirmasi Password Baru</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password_baru_confirmation" id="passKonfirm"
+                            class="form-control-custom"
+                            placeholder="Ulangi password baru" style="padding-right:40px;" required />
+                        <i class="bi bi-eye" id="toggleKonfirm" onclick="togglePass('passKonfirm','toggleKonfirm')"
+                            style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label-custom">Konfirmasi Password Baru</label>
-                <div style="position:relative;">
-                    <input type="password" name="password_baru_confirmation" id="passKonfirm"
-                        class="form-control-custom"
-                        placeholder="Ulangi password baru" style="padding-right:40px;" required />
-                    <i class="bi bi-eye" id="toggleKonfirm" onclick="togglePass('passKonfirm','toggleKonfirm')"
-                        style="position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;"></i>
+            <div class="d-flex justify-content-end mt-3">
+                <button type="submit" class="btn fw-bold px-4 py-2"
+                    style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
+                    <i class="bi bi-shield-check me-1"></i> Ubah Password
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-section">
+        <div class="form-section-title"><i class="bi bi-bell-fill"></i> Pengaturan Notifikasi</div>
+        <div class="d-flex flex-column gap-3">
+            @php
+                $notifSettings = [
+                    ['Notifikasi Tagihan & Pembayaran', 'Dapatkan pengingat jatuh tempo tagihan', true],
+                    ['Notifikasi Jadwal Les', 'Pengingat sesi les privat yang akan datang', true],
+                    ['Notifikasi Nilai & Progres', 'Update nilai kuis dan perkembangan belajar', true],
+                    ['Notifikasi Materi Baru', 'Pemberitahuan saat tutor mengunggah materi baru', false],
+                    ['Email Marketing', 'Promo dan penawaran spesial dari Al Ilmi Center', false],
+                ];
+            @endphp
+            @foreach($notifSettings as $ns)
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
+                style="background:var(--bg);">
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $ns[0] }}</div>
+                    <div style="font-size:11.5px;color:var(--muted);">{{ $ns[1] }}</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" {{ $ns[2] ? 'checked' : '' }}
+                        style="width:40px;height:22px;cursor:pointer;" />
                 </div>
             </div>
+            @endforeach
         </div>
         <div class="d-flex justify-content-end mt-3">
-            <button type="submit" class="btn fw-bold px-4 py-2"
+            <button class="btn fw-bold px-4 py-2"
                 style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                <i class="bi bi-shield-check me-1"></i> Ubah Password
+                <i class="bi bi-check2 me-1"></i> Simpan Pengaturan
             </button>
         </div>
-    </form>
+    </div>
+
+    <div class="danger-zone">
+        <div class="dz-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya</div>
+        <div class="dz-desc">
+            Menghapus akun akan menghapus semua data termasuk riwayat belajar, nilai, dan transaksi secara permanen.
+            Tindakan ini tidak dapat dibatalkan.
+        </div>
+        <button class="btn fw-bold px-4 py-2"
+            style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
+            <i class="bi bi-trash3-fill me-1"></i> Hapus Akun Saya
+        </button>
+    </div>
 </div>
 
 {{-- ══ SECTION: PAKET ══ --}}
@@ -580,9 +698,9 @@
     <div class="row g-3 mb-3">
         @php
         $pakets = [
-        ['Starter','Rp 99K','/ bulan',false,['Akses Materi TKA','50 Soal/Hari','1x Les Privat Online'],'var(--bg)','var(--primary)','Pilih Paket'],
-        ['Pro','Rp 199K','/ bulan',true,['Akses Materi Penuh','Soal Tak Terbatas','4x Les Privat Online','Feedback Tutor'],'var(--primary)','#fff','Paket Aktif'],
-        ['Premium','Rp 349K','/ bulan',false,['Semua Fitur Pro','8x Les Online/Offline','Konsultasi Karir','Laporan Mingguan'],'var(--bg)','var(--primary)','Upgrade'],
+            ['Starter','Rp 99K','/ bulan',false,['Akses Materi TKA','50 Soal/Hari','1x Les Privat Online'],'var(--bg)','var(--primary)','Pilih Paket'],
+            ['Pro','Rp 199K','/ bulan',true,['Akses Materi Penuh','Soal Tak Terbatas','4x Les Privat Online','Feedback Tutor'],'var(--primary)','#fff','Paket Aktif'],
+            ['Premium','Rp 349K','/ bulan',false,['Semua Fitur Pro','8x Les Online/Offline','Konsultasi Karir','Laporan Mingguan'],'var(--bg)','var(--primary)','Upgrade'],
         ];
         @endphp
         @foreach($pakets as $p)
@@ -615,9 +733,9 @@
         <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Riwayat Langganan</div>
         @php
         $langganan = [
-        ['Paket Pro','April 2026','Rp 199.000','var(--success-soft)','var(--success)','Aktif'],
-        ['Paket Pro','Maret 2026','Rp 199.000','var(--success-soft)','var(--success)','Lunas'],
-        ['Paket Starter','Februari 2026','Rp 99.000','var(--success-soft)','var(--success)','Lunas'],
+            ['Paket Pro','April 2026','Rp 199.000','var(--success-soft)','var(--success)','Aktif'],
+            ['Paket Pro','Maret 2026','Rp 199.000','var(--success-soft)','var(--success)','Lunas'],
+            ['Paket Starter','Februari 2026','Rp 99.000','var(--success-soft)','var(--success)','Lunas'],
         ];
         @endphp
         @foreach($langganan as $l)
@@ -637,47 +755,48 @@
 
 {{-- ══ SECTION: PENCAPAIAN ══ --}}
 <div id="section-pencapaian" style="display:none;">
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--primary);">{{ $badgeTerbuka }}</div>
-            <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
+    <div class="row g-3 mb-3">
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--primary);">{{ $badgeTerbuka }}</div>
+                <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--muted);">{{ $badgeTerkunci }}</div>
+                <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 {{ $aktivitasMinggu }}</div>
+                <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-box text-center">
+                <div style="font-size:32px;font-weight:800;color:var(--success);">{{ $rataRataNilai }}</div>
+                <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--muted);">{{ $badgeTerkunci }}</div>
-            <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 {{ $aktivitasMinggu }}</div>
-            <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-6">
-        <div class="card-box text-center">
-            <div style="font-size:32px;font-weight:800;color:var(--success);">{{ $rataRataNilai }}</div>
-            <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
-        </div>
-    </div>
-</div>
 
-<div class="card-box">
-    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
-    <div class="achieve-grid">
-        @foreach($achievements as $a)
-        <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
-            <div class="achieve-icon">{{ $a[0] }}</div>
-            <div class="achieve-title">{{ $a[1] }}</div>
-            <div class="achieve-sub">{{ $a[2] }}</div>
-            @if($a[3])
-            <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka</div>
-            @endif
+    <div class="card-box">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
+        <div class="achieve-grid">
+            @foreach($achievements as $a)
+            <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
+                <div class="achieve-icon">{{ $a[0] }}</div>
+                <div class="achieve-title">{{ $a[1] }}</div>
+                <div class="achieve-sub">{{ $a[2] }}</div>
+                @if($a[3])
+                <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka</div>
+                @endif
+            </div>
+            @endforeach
         </div>
-        @endforeach
     </div>
-</div>
 </div>
 
 @endsection
@@ -716,7 +835,7 @@
     }, 3000);
 
     // Buka tab keamanan jika ada error password
-@if(session('tab') === 'keamanan' || $errors->has('password_lama'))
+    @if(session('tab') === 'keamanan' || $errors->has('password_lama'))
     document.addEventListener('DOMContentLoaded', () => {
         const tab = document.querySelector('[onclick*="keamanan"]');
         if (tab) tab.click();
