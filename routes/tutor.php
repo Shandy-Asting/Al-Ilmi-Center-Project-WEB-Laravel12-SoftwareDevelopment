@@ -8,6 +8,8 @@ use App\Models\HasilKuis;
 use App\Models\LesPrivat;
 use App\Models\Materi;
 use App\Models\Soal;
+use App\Models\Pembayaran;
+use App\Models\Notifikasi;
 
 Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
 
@@ -255,17 +257,27 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
     });
 
     Route::post('/les-privat/{id}/selesai', function ($id) {
-        LesPrivat::where('id', $id)
+        $les = LesPrivat::where('id', $id)
             ->where('tutor_id', auth()->id())
             ->where('status', 'dikonfirmasi')
-            ->firstOrFail()
-            ->update(['status' => 'selesai']);
+            ->firstOrFail();
+
+        $les->update(['status' => 'selesai']);
+
+        // Jika pembayaran belum dikonfirmasi, otomatis konfirmasi saat selesai
+        if ($les->pembayaran_status === 'menunggu') {
+            $les->pembayaran()->where('status', 'menunggu')->update([
+                'status'          => 'dikonfirmasi',
+                'dikonfirmasi_at' => now(),
+            ]);
+            $les->update(['pembayaran_status' => 'lunas']);
+        }
 
         return redirect('/tutor/les-privat')->with('sukses', 'Sesi berhasil ditandai selesai!');
     });
 
     // ── Lainnya ────────────────────────────────────────────────────────────
-    Route::get('/jadwal', fn () => view('tutor.jadwal'));
+    Route::get('/jadwal', fn() => view('tutor.jadwal'));
 
     Route::get('/daftar-siswa', function () {
         $siswaList = LesPrivat::where('tutor_id', auth()->id())
@@ -279,7 +291,122 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         return view('tutor.daftar-siswa', compact('siswaList'));
     });
 
-    Route::get('/notifikasi', fn () => view('tutor.notifikasi'));
-    Route::get('/pembayaran', fn () => view('tutor.pembayaran'));
-    Route::get('/profil',     fn () => view('tutor.profil'));
+    // ── Pembayaran Tutor ───────────────────────────────────────────────────
+
+
+
+    Route::get('/pembayaran', function () {
+        $user = auth()->user();
+
+        $menunggu = Pembayaran::where('tutor_id', $user->id)
+            ->where('status', 'menunggu')
+            ->with(['lesPrivat', 'siswa'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $riwayat = Pembayaran::where('tutor_id', $user->id)
+            ->whereIn('status', ['dikonfirmasi', 'ditolak'])
+            ->with(['lesPrivat', 'siswa'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $stats = [
+            'menunggu'          => $menunggu->count(),
+            'total_dikonfirmasi' => Pembayaran::where('tutor_id', $user->id)->where('status', 'dikonfirmasi')->count(),
+            'penghasilan_bulan' => Pembayaran::where('tutor_id', $user->id)->where('status', 'dikonfirmasi')->whereMonth('dikonfirmasi_at', now()->month)->sum('jumlah'),
+            'total_ditolak'     => Pembayaran::where('tutor_id', $user->id)->where('status', 'ditolak')->count(),
+        ];
+
+        return view('tutor.pembayaran', compact('menunggu', 'riwayat', 'stats'));
+    });
+
+    Route::post('/pembayaran/{id}/konfirmasi', function ($id) {
+        $pembayaran = Pembayaran::where('id', $id)
+            ->where('tutor_id', auth()->id())
+            ->where('status', 'menunggu')
+            ->firstOrFail();
+
+        $pembayaran->update([
+            'status'          => 'dikonfirmasi',
+            'dikonfirmasi_at' => now(),
+        ]);
+
+        $pembayaran->lesPrivat->update(['pembayaran_status' => 'lunas']);
+
+        return back()->with('sukses', 'Pembayaran berhasil dikonfirmasi!');
+    });
+
+    Route::post('/pembayaran/{id}/tolak', function (Request $request, $id) {
+        $pembayaran = Pembayaran::where('id', $id)
+            ->where('tutor_id', auth()->id())
+            ->where('status', 'menunggu')
+            ->firstOrFail();
+
+        $pembayaran->update([
+            'status'        => 'ditolak',
+            'catatan_tutor' => $request->input('catatan', 'Bukti transfer tidak valid.'),
+        ]);
+
+        $pembayaran->lesPrivat->update(['pembayaran_status' => 'belum']);
+
+        return back()->with('sukses', 'Pembayaran ditolak.');
+    });
+
+    Route::get('/notifikasi', function () {
+        $user = auth()->user();
+
+        $notifikasi = Notifikasi::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $jumlahBelumDibaca = $notifikasi->where('sudah_dibaca', false)->count();
+
+        $hariIni   = $notifikasi->filter(fn($n) => $n->created_at->isToday());
+        $kemarin   = $notifikasi->filter(fn($n) => $n->created_at->isYesterday());
+        $mingguIni = $notifikasi->filter(
+            fn($n) =>
+            !$n->created_at->isToday() &&
+                !$n->created_at->isYesterday() &&
+                $n->created_at->diffInDays(now()) <= 7
+        );
+        $lebihLama = $notifikasi->filter(fn($n) => $n->created_at->diffInDays(now()) > 7);
+
+        $perTipe = [
+            'les_privat' => $notifikasi->where('tipe', 'les_privat')->count(),
+            'pembayaran' => $notifikasi->where('tipe', 'pembayaran')->count(),
+            'sistem'     => $notifikasi->where('tipe', 'sistem')->count(),
+        ];
+
+        return view('tutor.notifikasi', compact(
+            'notifikasi',
+            'jumlahBelumDibaca',
+            'hariIni',
+            'kemarin',
+            'mingguIni',
+            'lebihLama',
+            'perTipe'
+        ));
+    });
+
+    Route::post('/notifikasi/tandai-semua', function () {
+        Notifikasi::where('user_id', auth()->id())
+            ->where('sudah_dibaca', false)
+            ->update(['sudah_dibaca' => true]);
+
+        return back()->with('sukses', 'Semua notifikasi ditandai dibaca.');
+    });
+
+    Route::post('/notifikasi/{id}/buka', function ($id) {
+        $notif = Notifikasi::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $notif->tandaiDibaca();
+
+        return redirect($notif->url_aksi ?? '/tutor/notifikasi');
+    });
+
+    Route::get('/profil', fn() => view('tutor.profil'));
+
+    Route::get('/profil',     fn() => view('tutor.profil'));
 });

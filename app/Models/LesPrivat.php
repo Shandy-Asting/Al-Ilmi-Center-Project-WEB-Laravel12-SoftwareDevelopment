@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -43,7 +44,7 @@ class LesPrivat extends Model
     // Helper status label
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'menunggu'     => 'Menunggu Konfirmasi',
             'dikonfirmasi' => 'Dikonfirmasi',
             'selesai'      => 'Selesai',
@@ -71,5 +72,14 @@ class LesPrivat extends Model
     public function scopeSelesai($query)
     {
         return $query->where('status', 'selesai');
+    }
+    public function pembayaran()
+    {
+        return $this->hasMany(Pembayaran::class, 'les_privat_id');
+    }
+
+    public function pembayaranTerakhir()
+    {
+        return $this->hasOne(Pembayaran::class, 'les_privat_id')->latestOfMany();
     }
 }
