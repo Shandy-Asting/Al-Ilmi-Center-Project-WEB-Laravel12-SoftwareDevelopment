@@ -18,6 +18,8 @@ use App\Models\Notifikasi;
 use App\Models\Paket;
 use App\Models\User;
 use App\Services\NotifikasiService;
+use App\Models\Pembayaran;
+use App\Models\RekeningBank;
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
@@ -289,14 +291,14 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $semuaNilai = HasilKuis::where('user_id', $userId)->pluck('nilai');
         $totalHasil = $semuaNilai->count();
         $distribusi = [
-            'A' => $totalHasil > 0 ? round($semuaNilai->filter(fn ($n) => $n >= 87)->count() / $totalHasil * 100) : 0,
-            'B' => $totalHasil > 0 ? round($semuaNilai->filter(fn ($n) => $n >= 70 && $n < 87)->count() / $totalHasil * 100) : 0,
-            'C' => $totalHasil > 0 ? round($semuaNilai->filter(fn ($n) => $n >= 55 && $n < 70)->count() / $totalHasil * 100) : 0,
-            'D' => $totalHasil > 0 ? round($semuaNilai->filter(fn ($n) => $n < 55)->count() / $totalHasil * 100) : 0,
+            'A' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n >= 87)->count() / $totalHasil * 100) : 0,
+            'B' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n >= 70 && $n < 87)->count() / $totalHasil * 100) : 0,
+            'C' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n >= 55 && $n < 70)->count() / $totalHasil * 100) : 0,
+            'D' => $totalHasil > 0 ? round($semuaNilai->filter(fn($n) => $n < 55)->count() / $totalHasil * 100) : 0,
         ];
 
         // Progres per mata pelajaran
-        $semuaMapel   = HasilKuis::where('user_id', $userId)->with('materi')->get()->groupBy(fn ($h) => $h->materi->mata_pelajaran ?? 'Lainnya');
+        $semuaMapel   = HasilKuis::where('user_id', $userId)->with('materi')->get()->groupBy(fn($h) => $h->materi->mata_pelajaran ?? 'Lainnya');
         $progresMapel = [];
 
         foreach ($semuaMapel as $mapel => $hasilList) {
@@ -335,20 +337,36 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         // Kemampuan per topik & rekomendasi
         $kemampuanTopik   = HasilKuis::where('user_id', $userId)->with('materi')->get()
-            ->groupBy(fn ($h) => $h->materi->topik ?? $h->materi->mata_pelajaran ?? 'Umum')
-            ->map(fn ($list) => round($list->avg('nilai')))
+            ->groupBy(fn($h) => $h->materi->topik ?? $h->materi->mata_pelajaran ?? 'Umum')
+            ->map(fn($list) => round($list->avg('nilai')))
             ->sortDesc()
             ->take(8);
 
         $rekomendasiMapel = collect($progresMapel)->sortBy('rata')->first();
 
         return view('siswa.hasil-progres', compact(
-            'rataRataNilai', 'latihanSelesai', 'kuisDikerjakan', 'jamBelajar',
-            'selisihNilai', 'latihanMingguIni', 'selisihKuis', 'jamBulanIni',
-            'aktivitasMingguan', 'totalAktivitasMinggu', 'rataHari',
-            'distribusi', 'progresMapel', 'riwayatNilai',
-            'nilaiTertinggi', 'nilaiTerendah', 'tren6Terakhir',
-            'trenJam', 'maxJam', 'kemampuanTopik', 'rekomendasiMapel', 'totalHasil'
+            'rataRataNilai',
+            'latihanSelesai',
+            'kuisDikerjakan',
+            'jamBelajar',
+            'selisihNilai',
+            'latihanMingguIni',
+            'selisihKuis',
+            'jamBulanIni',
+            'aktivitasMingguan',
+            'totalAktivitasMinggu',
+            'rataHari',
+            'distribusi',
+            'progresMapel',
+            'riwayatNilai',
+            'nilaiTertinggi',
+            'nilaiTerendah',
+            'tren6Terakhir',
+            'trenJam',
+            'maxJam',
+            'kemampuanTopik',
+            'rekomendasiMapel',
+            'totalHasil'
         ));
     });
 
@@ -385,8 +403,8 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         }
         $hasilKuis = $query->get();
 
-        $perMapel = $hasilKuis->groupBy(fn ($h) => $h->materi->mata_pelajaran ?? 'Lainnya')
-            ->map(fn ($list, $mapel) => [
+        $perMapel = $hasilKuis->groupBy(fn($h) => $h->materi->mata_pelajaran ?? 'Lainnya')
+            ->map(fn($list, $mapel) => [
                 'nama'       => $mapel,
                 'total'      => $list->count(),
                 'rata'       => round($list->avg('nilai')),
@@ -419,10 +437,10 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         return view('siswa.notifikasi', [
             'jumlahBelumDibaca' => $notifikasi->where('sudah_dibaca', false)->count(),
-            'hariIni'           => $notifikasi->filter(fn ($n) => $n->created_at->isToday()),
-            'kemarin'           => $notifikasi->filter(fn ($n) => $n->created_at->isYesterday()),
-            'mingguIni'         => $notifikasi->filter(fn ($n) => ! $n->created_at->isToday() && ! $n->created_at->isYesterday() && $n->created_at->diffInDays(now()) <= 7),
-            'lebihLama'         => $notifikasi->filter(fn ($n) => $n->created_at->diffInDays(now()) > 7),
+            'hariIni'           => $notifikasi->filter(fn($n) => $n->created_at->isToday()),
+            'kemarin'           => $notifikasi->filter(fn($n) => $n->created_at->isYesterday()),
+            'mingguIni'         => $notifikasi->filter(fn($n) => ! $n->created_at->isToday() && ! $n->created_at->isYesterday() && $n->created_at->diffInDays(now()) <= 7),
+            'lebihLama'         => $notifikasi->filter(fn($n) => $n->created_at->diffInDays(now()) > 7),
         ]);
     });
 
@@ -469,12 +487,18 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ['👑', 'Legend',          'Raih semua badge',         false],
         ];
 
-        $badgeTerbuka  = collect($achievements)->filter(fn ($a) => $a[3])->count();
+        $badgeTerbuka  = collect($achievements)->filter(fn($a) => $a[3])->count();
         $badgeTerkunci = count($achievements) - $badgeTerbuka;
 
         return view('siswa.profil', compact(
-            'user', 'rataRataNilai', 'soalSelesai', 'sesiLes',
-            'badgeTerbuka', 'badgeTerkunci', 'achievements', 'aktivitasMinggu'
+            'user',
+            'rataRataNilai',
+            'soalSelesai',
+            'sesiLes',
+            'badgeTerbuka',
+            'badgeTerkunci',
+            'achievements',
+            'aktivitasMinggu'
         ));
     });
 
@@ -492,8 +516,15 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ]);
 
         auth()->user()->update($request->only([
-            'name', 'no_hp', 'tanggal_lahir', 'jenjang',
-            'kelas', 'kota', 'provinsi', 'tujuan_belajar', 'bio',
+            'name',
+            'no_hp',
+            'tanggal_lahir',
+            'jenjang',
+            'kelas',
+            'kota',
+            'provinsi',
+            'tujuan_belajar',
+            'bio',
         ]));
 
         return redirect('/siswa/profil')->with('sukses_info', 'Informasi pribadi berhasil diperbarui!');
@@ -570,5 +601,113 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     });
 
     // ── Pembayaran ─────────────────────────────────────────────────────────
-    Route::get('/pembayaran', fn () => view('siswa.pembayaran'));
+
+    Route::get('/pembayaran', function () {
+        $user = auth()->user();
+
+        // Tagihan = les yang sudah dikonfirmasi tutor tapi belum lunas
+        $tagihan = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->with(['tutor', 'pembayaranTerakhir'])
+            ->orderBy('jadwal', 'asc')
+            ->get();
+
+        // Riwayat pembayaran
+        $riwayat = Pembayaran::where('siswa_id', $user->id)
+            ->with(['lesPrivat.tutor'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Rekening bank aktif
+        $rekening = RekeningBank::where('aktif', true)->get();
+
+        // Statistik
+        $totalTagihan       = $tagihan->sum('harga');
+        $totalBelumBayar    = $tagihan->where('pembayaran_status', 'belum')->count();
+        $totalTransaksi     = $riwayat->count();
+        $jatuhTempoTerdekat = $tagihan->first()?->jadwal?->format('d M Y');
+
+        return view('siswa.pembayaran', compact(
+            'tagihan',
+            'riwayat',
+            'rekening',
+            'totalTagihan',
+            'totalBelumBayar',
+            'totalTransaksi',
+            'jatuhTempoTerdekat'
+        ));
+    });
+
+    // ── Pembayaran ─────────────────────────────────────────────────────────
+
+    Route::get('/pembayaran', function () {
+        $user = auth()->user();
+
+        $tagihan = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->with(['tutor', 'pembayaranTerakhir'])
+            ->orderBy('jadwal', 'asc')
+            ->get();
+
+        $riwayat = Pembayaran::where('siswa_id', $user->id)
+            ->with(['lesPrivat.tutor'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $rekening = RekeningBank::where('aktif', true)->get();
+
+        $totalTagihan       = $tagihan->sum('harga');
+        $totalBelumBayar    = $tagihan->where('pembayaran_status', 'belum')->count();
+        $totalTransaksi     = $riwayat->count();
+        $jatuhTempoTerdekat = $tagihan->first()?->jadwal?->format('d M Y');
+
+        $totalTerbayar  = $riwayat->where('status', 'dikonfirmasi')->sum('jumlah');
+        $totalDitolak   = $riwayat->where('status', 'ditolak')->count();
+
+        return view('siswa.pembayaran', compact(
+            'tagihan',
+            'riwayat',
+            'rekening',
+            'totalTagihan',
+            'totalBelumBayar',
+            'totalTransaksi',
+            'jatuhTempoTerdekat',
+            'totalTerbayar',
+            'totalDitolak'
+        ));
+    });
+
+    Route::post('/pembayaran/{les_id}/upload-bukti', function (Request $request, $les_id) {
+        $request->validate([
+            'bukti_transfer' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'bank_tujuan'    => 'required|string',
+            'nomor_rekening' => 'required|string',
+        ]);
+
+        $les = LesPrivat::where('id', $les_id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->firstOrFail();
+
+        $path = $request->file('bukti_transfer')->store('bukti-pembayaran', 'public');
+
+        Pembayaran::create([
+            'les_privat_id'         => $les->id,
+            'siswa_id'              => auth()->id(),
+            'tutor_id'              => $les->tutor_id,
+            'nomor_invoice'         => Pembayaran::generateInvoice(),
+            'jumlah'                => $les->harga,
+            'bank_tujuan'           => $request->bank_tujuan,
+            'nomor_rekening_tujuan' => $request->nomor_rekening,
+            'bukti_transfer'        => $path,
+            'status'                => 'menunggu',
+        ]);
+
+        $les->update(['pembayaran_status' => 'menunggu']);
+
+        return back()->with('sukses', 'Bukti transfer berhasil dikirim! Menunggu konfirmasi tutor.');
+    });
 });
