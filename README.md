@@ -1,4 +1,4 @@
-# [Nama Aplikasi]
+# [Al Ilmi Center]
 
 ## Deskripsi Proyek
 Aplikasi ini merupakan sistem bimbingan belajar berbasis web yang dirancang untuk membantu siswa dalam mempersiapkan Tes Kemampuan Akademik (TKA) secara lebih efektif dan terarah. Sistem menyediakan fitur pembelajaran online, latihan soal, kuis evaluasi, monitoring progres belajar, serta layanan tutor atau les privat yang dapat diakses secara fleksibel melalui internet.
@@ -11,9 +11,9 @@ Pengembangan aplikasi dilakukan untuk mendukung proses belajar yang lebih modern
 
 | Nama Anggota | NIM / Peran |
 |---|---|
-| [Nama Anggota 1] | [NIM / Project Manager] |
-| [Nama Anggota 2] | [NIM / Front-End Developer] |
-| [Nama Anggota 3] | [NIM / Back-End Developer] |
+| [Shandy Prasetyo] | [2313020069 / Project Manager] |
+| [Mohamad Yusuf] | [2313020037 / Front-End Developer] |
+| [Frika Alditiyo] | [2313020008 / Back-End Developer] |
 
 ---
 
