@@ -467,19 +467,26 @@
             border-color: var(--primary);
         }
 
-        .upload-zone {
+        /* ── UPLOAD DROP ZONE ── */
+        .upload-drop {
             border: 2px dashed var(--border);
             border-radius: 12px;
-            padding: 24px;
+            padding: 28px 16px;
             text-align: center;
             cursor: pointer;
             transition: all .2s;
             background: var(--bg);
         }
 
-        .upload-zone:hover {
+        .upload-drop:hover {
             border-color: var(--primary);
             background: #eff6ff;
+        }
+
+        .upload-drop.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+            transform: scale(1.01);
         }
 
         /* ── CARD BOX ── */
@@ -510,98 +517,228 @@
             margin-right: 6px;
         }
 
-        @media (max-width: 767px) {
-            .filter-bar {
-                gap: 8px;
-            }
-
-            .filter-select {
-                width: 100% !important;
-            }
-
-            .search-wrap {
-                min-width: 100% !important;
-            }
-
-            .table-responsive {
-                font-size: 12px;
-            }
-
-            .materi-title {
-                font-size: .82rem;
-            }
-
-            .view-toggle {
-                margin-left: 0 !important;
-            }
-
-            .card-box-header .d-flex {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .materi-icon-wrap {
-                width: 32px !important;
-                height: 32px !important;
-            }
-
-            .tutor-grid {
-                grid-template-columns: 1fr 1fr !important;
-            }
+        /* ── TIPE SELECTOR ── */
+        .tipe-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
         }
 
-        @media (max-width: 480px) {
-            .tutor-grid {
-                grid-template-columns: 1fr !important;
-            }
-
-            .achieve-grid {
-                grid-template-columns: 1fr 1fr !important;
-            }
-        }
-
-        /* MODAL RESPONSIVE FIX */
-        @media(max-width:767px) {
-            .modal {
-                padding: 8px !important;
-            }
-
-            .modal-dialog {
-                margin: 0 !important;
-                max-width: 100% !important;
-            }
-
-            .modal-content {
-                border-radius: 14px !important;
-            }
-
-            .modal-body {
-                padding: 16px !important;
-            }
-
-            .modal-footer {
-                padding: 12px 16px !important;
-                position: sticky;
-                bottom: 0;
-                background: #fff;
-                border-top: 1px solid var(--border);
-            }
-        }
-
-        /* FORM UPLOAD ZONE */
-        .upload-drop {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 28px 16px;
+        .tipe-btn {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 6px;
             text-align: center;
             cursor: pointer;
             transition: all .2s;
             background: var(--bg);
         }
 
-        .upload-drop:hover {
+        .tipe-btn:hover {
             border-color: var(--primary);
             background: #eff6ff;
+        }
+
+        .tipe-btn.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .tipe-btn i {
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .tipe-btn span {
+            font-size: .68rem;
+            font-weight: 700;
+        }
+
+        .tipe-btn.pdf i    { color: #dc2626; }
+        .tipe-btn.video i  { color: #2563eb; }
+        .tipe-btn.doc i    { color: #0369a1; }
+        .tipe-btn.ppt i    { color: #d97706; }
+        .tipe-btn.quiz i   { color: #16a34a; }
+
+        /* ══════════════════════════════════════
+           MODAL SCROLL – berlaku semua ukuran
+           ══════════════════════════════════════ */
+
+        /* Pastikan modal dialog tidak melebihi tinggi viewport */
+        .modal-custom .modal-dialog {
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 56px); /* 28px margin atas+bawah */
+        }
+
+        /* Struktur flex agar header+footer tetap, body scroll */
+        .modal-custom .modal-content {
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 56px);
+            overflow: hidden; /* cegah konten bocor */
+        }
+
+        .modal-custom .modal-header {
+            flex-shrink: 0; /* header tidak ikut scroll */
+        }
+
+        /* MODAL BODY SCROLL – inti perbaikan */
+        .modal-custom .modal-body {
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; /* smooth scroll iOS */
+            flex: 1 1 auto;
+            /* Batasi tinggi agar footer selalu terlihat */
+            max-height: 65vh;
+        }
+
+        .modal-custom .modal-footer {
+            flex-shrink: 0; /* footer tidak ikut scroll */
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            z-index: 2;
+        }
+
+        /* Scrollbar tipis di dalam modal body */
+        .modal-custom .modal-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-custom .modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .modal-custom .modal-body::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        .modal-custom .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Indikator scroll jika masih ada konten di bawah */
+        .modal-scroll-hint {
+            text-align: center;
+            padding: 6px;
+            font-size: .72rem;
+            color: var(--muted);
+            background: linear-gradient(transparent, #f8faff);
+            position: sticky;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        /* ══════════════════════════════════════
+           RESPONSIVE BREAKPOINTS
+           ══════════════════════════════════════ */
+
+        /* ≤ 991px – tablet landscape / kecil */
+        @media (max-width: 991px) {
+            .filter-bar { flex-wrap: wrap; gap: 8px; }
+        }
+
+        /* ≤ 767px – tablet portrait / HP besar */
+        @media (max-width: 767px) {
+            /* Filter bar */
+            .filter-bar { gap: 8px; padding: 12px 14px; }
+            .search-wrap { min-width: 100% !important; flex: 0 0 100%; }
+            .filter-select { width: calc(50% - 4px) !important; }
+            .view-toggle { margin-left: 0 !important; }
+
+            /* Table */
+            .table-responsive { font-size: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .materi-title { font-size: .82rem; }
+            .materi-icon-wrap { width: 32px !important; height: 32px !important; }
+
+            /* Card box header */
+            .card-box-header { flex-direction: column; align-items: flex-start; }
+            .card-box-header .d-flex { flex-wrap: wrap; width: 100%; gap: 6px; }
+
+            /* Pagination – wrap agar tidak kepotong */
+            .page-btn { width: 30px; height: 30px; font-size: .75rem; }
+
+            /* Grid kartu */
+            .tutor-grid { grid-template-columns: 1fr 1fr !important; }
+            .tipe-grid   { grid-template-columns: repeat(3, 1fr) !important; }
+
+            /* MODAL – hampir full screen di HP */
+            .modal-custom .modal-dialog {
+                margin: 8px !important;
+                max-width: calc(100% - 16px) !important;
+                max-height: calc(100vh - 16px);
+            }
+            .modal-custom .modal-content {
+                border-radius: 16px !important;
+                max-height: calc(100vh - 16px);
+            }
+            .modal-custom .modal-body {
+                padding: 14px 16px !important;
+                max-height: calc(100vh - 170px); /* tinggi - header - footer */
+            }
+            .modal-custom .modal-header {
+                padding: 14px 16px !important;
+            }
+            .modal-custom .modal-footer {
+                padding: 10px 16px !important;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            /* Footer button full-width di HP kecil */
+            .modal-custom .modal-footer .btn {
+                flex: 1;
+                min-width: 0;
+                font-size: .78rem !important;
+            }
+
+            /* Form grid jadi 1 kolom di HP */
+            .modal-custom .row.g-3 > [class*='col-md-'] {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            /* Tipe selector – 3 kolom */
+            .tipe-grid { gap: 6px; }
+            .tipe-btn  { padding: 8px 4px; }
+            .tipe-btn i { font-size: 1.1rem; }
+            .tipe-btn span { font-size: .62rem; }
+
+            /* Upload drop zone lebih compact */
+            .upload-drop { padding: 18px 12px; }
+
+            /* Stat cards */
+            .stat-card { padding: 14px 14px; gap: 10px; }
+            .stat-val  { font-size: 1.35rem; }
+        }
+
+        /* ≤ 480px – HP kecil */
+        @media (max-width: 480px) {
+            .filter-select { width: 100% !important; }
+            .tutor-grid    { grid-template-columns: 1fr !important; }
+            .tipe-grid     { grid-template-columns: repeat(3, 1fr) !important; }
+
+            /* Pagination singkat */
+            .page-btn-hide-xs { display: none !important; }
+
+            /* Bulk action stack */
+            .bulk-action-wrap { flex-direction: column; gap: 6px; }
+            .bulk-action-wrap .btn { width: 100%; }
+
+            /* Modal hampir full screen */
+            .modal-custom .modal-dialog {
+                margin: 4px !important;
+                max-width: calc(100% - 8px) !important;
+                max-height: calc(100vh - 8px);
+            }
+            .modal-custom .modal-content {
+                border-radius: 12px !important;
+                max-height: calc(100vh - 8px);
+            }
+            .modal-custom .modal-body {
+                max-height: calc(100vh - 160px);
+                padding: 12px !important;
+            }
         }
     </style>
 @endpush
@@ -699,9 +836,7 @@
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════ --}}
-    {{-- TABLE VIEW                             --}}
-    {{-- ══════════════════════════════════════ --}}
+    {{-- TABLE VIEW --}}
     <div id="tableView">
         <div class="card-box mb-4">
             <div class="card-box-header">
@@ -789,10 +924,10 @@
                 </table>
             </div>
 
-            {{-- Bulk Action + Pagination --}}
-            <div class="d-flex align-items-center justify-content-between px-4 py-3 flex-wrap gap-2"
-                style="border-top:1px solid var(--border);">
-                <div class="d-flex gap-2">
+            {{-- Bottom Bar: Bulk Action + Pagination (responsive) --}}
+            <div class="px-3 px-md-4 py-3" style="border-top:1px solid var(--border);">
+                {{-- Baris 1: Bulk action --}}
+                <div class="bulk-action-wrap d-flex gap-2 mb-2">
                     <button class="btn btn-sm rounded-2 fw-semibold"
                         style="background:var(--danger-soft);color:var(--danger);border:none;font-size:.78rem;"
                         onclick="bukaHapusMassal()">
@@ -803,25 +938,24 @@
                         <i class="bi bi-archive me-1"></i> Arsipkan
                     </button>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                {{-- Baris 2: Pagination --}}
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <span style="font-size:.78rem;color:var(--muted);">Halaman 1 dari 5</span>
-                    <div class="d-flex gap-1">
+                    <div class="d-flex gap-1 flex-wrap">
                         <a href="#" class="page-btn disabled"><i class="bi bi-chevron-left"></i></a>
                         <a href="#" class="page-btn active">1</a>
-                        <a href="#" class="page-btn">2</a>
-                        <a href="#" class="page-btn">3</a>
-                        <span class="page-btn" style="cursor:default;">…</span>
-                        <a href="#" class="page-btn">5</a>
+                        <a href="#" class="page-btn page-btn-hide-xs">2</a>
+                        <a href="#" class="page-btn page-btn-hide-xs">3</a>
+                        <span class="page-btn page-btn-hide-xs" style="cursor:default;">…</span>
+                        <a href="#" class="page-btn page-btn-hide-xs">5</a>
                         <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
                     </div>
                 </div>
             </div>
-        </div>{{-- /.card-box --}}
-    </div>{{-- /#tableView --}}
+        </div>
+    </div>
 
-    {{-- ══════════════════════════════════════ --}}
-    {{-- GRID VIEW                              --}}
-    {{-- ══════════════════════════════════════ --}}
+    {{-- GRID VIEW --}}
     <div id="gridView" style="display:none;">
         <div class="row g-3 mb-4">
             @forelse($materi as $m)
@@ -870,12 +1004,12 @@
                 </div>
             @endforelse
         </div>
-    </div>{{-- /#gridView --}}
+    </div>
 
 
-    {{-- ══════════════════════════════════════ --}}
-    {{-- MODAL TAMBAH                           --}}
-    {{-- ══════════════════════════════════════ --}}
+    {{-- ══════════════════════════════════════════════════════════
+         MODAL TAMBAH  ← PERBAIKAN UTAMA: semua field $fillable
+         ══════════════════════════════════════════════════════════ --}}
     <div class="modal fade modal-custom" id="modalTambah" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -885,78 +1019,225 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+
                 <form method="POST" action="/tutor/materi" id="formTambah" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-body" style="padding:20px 22px;max-height:70vh;overflow-y:auto;">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-bold" style="font-size:13px;">Judul Materi <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="judul" class="form-control"
-                                    placeholder="Contoh: Trigonometri – Dasar dan Penerapan" required />
+                    <div class="modal-body" style="padding:20px 22px;overflow-y:auto;overflow-x:hidden;">
+
+                        {{-- ① JUDUL --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">
+                                Judul Materi <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="judul" class="form-control"
+                                placeholder="Contoh: Trigonometri – Dasar dan Penerapan"
+                                value="{{ old('judul') }}" required />
+                        </div>
+
+                        {{-- ② DESKRIPSI --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">Deskripsi Singkat</label>
+                            <textarea name="deskripsi" class="form-control" rows="2"
+                                placeholder="Jelaskan isi materi secara singkat…">{{ old('deskripsi') }}</textarea>
+                        </div>
+
+                        {{-- ③ TIPE — pilihan visual --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">
+                                Tipe Materi <span class="text-danger">*</span>
+                            </label>
+                            <input type="hidden" name="tipe" id="tambah_tipe_val" value="{{ old('tipe') }}" required />
+                            <div class="tipe-grid">
+                                <div class="tipe-btn pdf {{ old('tipe') == 'pdf' ? 'selected' : '' }}"
+                                    onclick="pilihTipe('pdf')">
+                                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                                    <span>PDF</span>
+                                </div>
+                                <div class="tipe-btn video {{ old('tipe') == 'video' ? 'selected' : '' }}"
+                                    onclick="pilihTipe('video')">
+                                    <i class="bi bi-camera-video-fill"></i>
+                                    <span>Video</span>
+                                </div>
+                                <div class="tipe-btn doc {{ old('tipe') == 'doc' ? 'selected' : '' }}"
+                                    onclick="pilihTipe('doc')">
+                                    <i class="bi bi-file-earmark-word-fill"></i>
+                                    <span>Dokumen</span>
+                                </div>
+                                <div class="tipe-btn ppt {{ old('tipe') == 'ppt' ? 'selected' : '' }}"
+                                    onclick="pilihTipe('ppt')">
+                                    <i class="bi bi-file-earmark-slides-fill"></i>
+                                    <span>Presentasi</span>
+                                </div>
+                                <div class="tipe-btn quiz {{ old('tipe') == 'quiz' ? 'selected' : '' }}"
+                                    onclick="pilihTipe('quiz')">
+                                    <i class="bi bi-patch-question-fill"></i>
+                                    <span>Kuis</span>
+                                </div>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold" style="font-size:13px;">Deskripsi Singkat</label>
-                                <textarea name="deskripsi" class="form-control" rows="2" placeholder="Jelaskan isi materi secara singkat…"></textarea>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold" style="font-size:13px;">Jenjang <span
-                                        class="text-danger">*</span></label>
-                                <select name="jenjang" class="form-select" required>
-                                    <option value="">-- Pilih Jenjang --</option>
-                                    <option value="sd">SD</option>
-                                    <option value="smp">SMP</option>
-                                    <option value="sma">SMA</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold" style="font-size:13px;">Mata Pelajaran <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="mata_pelajaran" class="form-control"
-                                    placeholder="Contoh: Matematika" required />
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold" style="font-size:13px;">Kelas <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="kelas" class="form-control" placeholder="Contoh: Kelas 10"
-                                    required />
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold" style="font-size:13px;">Status Publikasi</label>
-                                <select name="status" class="form-select">
-                                    <option value="aktif">Aktif (Publik)</option>
-                                    <option value="nonaktif">Draft (Belum Dipublikasi)</option>
-                                </select>
+                            <div id="tipe_error" style="font-size:.75rem;color:var(--danger);margin-top:4px;display:none;">
+                                Pilih tipe materi terlebih dahulu.
                             </div>
                         </div>
-                    </div>
-                    
+
+                        <div class="row g-3 mb-3">
+                            {{-- ④ JENJANG --}}
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold" style="font-size:13px;">
+                                    Jenjang <span class="text-danger">*</span>
+                                </label>
+                                <select name="jenjang" class="form-select" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="sd"  {{ old('jenjang') == 'sd'  ? 'selected' : '' }}>SD</option>
+                                    <option value="smp" {{ old('jenjang') == 'smp' ? 'selected' : '' }}>SMP</option>
+                                    <option value="sma" {{ old('jenjang') == 'sma' ? 'selected' : '' }}>SMA</option>
+                                </select>
+                            </div>
+
+                            {{-- ⑤ MATA PELAJARAN --}}
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold" style="font-size:13px;">
+                                    Mata Pelajaran <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="mata_pelajaran" class="form-control"
+                                    placeholder="Contoh: Matematika"
+                                    value="{{ old('mata_pelajaran') }}" required />
+                            </div>
+
+                            {{-- ⑥ KELAS --}}
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold" style="font-size:13px;">
+                                    Kelas <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="kelas" class="form-control"
+                                    placeholder="Contoh: Kelas 10"
+                                    value="{{ old('kelas') }}" required />
+                            </div>
+                        </div>
+
+                        {{-- ⑦ TOPIK / BAB --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">Topik / Bab</label>
+                            <input type="text" name="topik" class="form-control"
+                                placeholder="Contoh: Bab 3 – Persamaan Kuadrat"
+                                value="{{ old('topik') }}" />
+                        </div>
+
+                        {{-- ⑧ UPLOAD FILE (tampil jika tipe bukan video) --}}
+                        <div class="mb-3" id="tambah_wrap_file" style="display:none;">
+                            <label class="form-label fw-bold" style="font-size:13px;">
+                                Upload File
+                                <span style="font-weight:400;color:var(--muted);font-size:11px;">
+                                    (PDF, DOC, DOCX, PPT, PPTX – maks. 20 MB)
+                                </span>
+                            </label>
+                            <div class="upload-drop" id="tambah_drop_zone"
+                                onclick="document.getElementById('tambah_file_input').click()"
+                                ondragover="event.preventDefault();this.classList.add('dragover')"
+                                ondragleave="this.classList.remove('dragover')"
+                                ondrop="handleDrop(event)">
+                                <i class="bi bi-cloud-arrow-up"
+                                    style="font-size:2rem;color:var(--primary);display:block;margin-bottom:8px;"></i>
+                                <div style="font-size:.85rem;font-weight:600;color:var(--text);">
+                                    Klik atau seret file ke sini
+                                </div>
+                                <div style="font-size:.75rem;color:var(--muted);margin-top:4px;" id="tambah_accept_hint">
+                                    PDF, DOC, DOCX, PPT, PPTX
+                                </div>
+                            </div>
+                            <input type="file" name="file" id="tambah_file_input"
+                                accept=".pdf,.doc,.docx,.ppt,.pptx"
+                                style="display:none;"
+                                onchange="tampilkanNamaFile(this)" />
+                            <div id="tambah_file_info" style="display:none;margin-top:8px;">
+                                <div class="d-flex align-items-center gap-2 p-2 rounded-2"
+                                    style="background:var(--success-soft);border:1px solid #a7f3d0;">
+                                    <i class="bi bi-file-earmark-check-fill" style="color:var(--success);font-size:1.1rem;"></i>
+                                    <div>
+                                        <div id="tambah_file_nama"
+                                            style="font-size:.8rem;font-weight:600;color:var(--text);"></div>
+                                        <div id="tambah_file_size"
+                                            style="font-size:.72rem;color:var(--muted);"></div>
+                                    </div>
+                                    <button type="button" class="ms-auto btn-action del"
+                                        style="width:24px;height:24px;font-size:.7rem;"
+                                        onclick="hapusFileTerpilih()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ⑨ LINK VIDEO (tampil jika tipe = video) --}}
+                        <div class="mb-3" id="tambah_wrap_video" style="display:none;">
+                            <label class="form-label fw-bold" style="font-size:13px;">
+                                Link Video <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#dbeafe;">
+                                    <i class="bi bi-camera-video-fill" style="color:#1d4ed8;"></i>
+                                </span>
+                                <input type="url" name="link_video" id="tambah_link_video"
+                                    class="form-control"
+                                    placeholder="https://youtube.com/watch?v=..."
+                                    value="{{ old('link_video') }}"
+                                    style="border-radius:0 10px 10px 0;" />
+                            </div>
+                            <div style="font-size:.73rem;color:var(--muted);margin-top:4px;">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Mendukung YouTube, Google Drive, atau link video lainnya.
+                            </div>
+                        </div>
+
+                        {{-- ⑩ STATUS --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">Status Publikasi</label>
+                            <select name="status" id="tambah_status" class="form-select">
+                                <option value="aktif"  {{ old('status') == 'aktif'  ? 'selected' : '' }}>
+                                    Aktif (Publik)
+                                </option>
+                                <option value="draft"  {{ old('status', 'draft') == 'draft'  ? 'selected' : '' }}>
+                                    Draft (Belum Dipublikasi)
+                                </option>
+                                <option value="arsip"  {{ old('status') == 'arsip'  ? 'selected' : '' }}>
+                                    Arsip
+                                </option>
+                            </select>
+                        </div>
+
+                        {{-- ⑪ CATATAN UNTUK SISWA --}}
+                        <div class="mb-1">
+                            <label class="form-label fw-bold" style="font-size:13px;">Catatan untuk Siswa</label>
+                            <textarea name="catatan" class="form-control" rows="2"
+                                placeholder="Catatan tambahan yang akan ditampilkan kepada siswa…">{{ old('catatan') }}</textarea>
+                        </div>
+
+                    </div>{{-- /.modal-body --}}
+
                     <div class="modal-footer">
                         <button type="button" class="btn rounded-2 fw-semibold"
                             style="background:#f1f5f9;color:var(--muted);font-size:.85rem;border:none;"
                             data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn rounded-2 fw-semibold"
-                            onclick="document.getElementById('tambah_status').value='draft'"
+                            onclick="setStatusDanSubmit('draft', event)"
                             style="background:var(--bg);color:var(--primary);font-size:.85rem;border:1px solid var(--primary);">
                             <i class="bi bi-floppy me-1"></i> Simpan Draft
                         </button>
                         <button type="submit" class="btn rounded-2 fw-semibold"
-                            onclick="document.getElementById('tambah_status').value='aktif'"
+                            onclick="setStatusDanSubmit('aktif', event)"
                             style="background:var(--primary);color:#fff;font-size:.85rem;border:none;">
                             <i class="bi bi-check2-circle me-1"></i> Simpan & Terbitkan
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>{{-- /#modalTambah --}}
 
 
-    {{-- ══════════════════════════════════════ --}}
-    {{-- MODAL DETAIL                           --}}
-    {{-- ══════════════════════════════════════ --}}
+    {{-- MODAL DETAIL --}}
     <div class="modal fade modal-custom" id="modalDetail" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">
@@ -964,8 +1245,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    {{-- Header Info --}}
+                <div class="modal-body" style="overflow-y:auto;overflow-x:hidden;">
                     <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-4"
                         style="background:var(--bg);border:1px solid var(--border);">
                         <div id="detail_ikon_wrap" class="materi-icon-wrap"
@@ -978,59 +1258,40 @@
                         </div>
                         <span id="detail_status" class="badge-status"></span>
                     </div>
-                    {{-- Grid Info --}}
                     <div class="row g-3 mb-3">
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Jenjang</div>
-                            <span id="detail_jenjang" class="badge-jenjang"
-                                style="background:#dbeafe;color:#1d4ed8;font-size:.75rem;"></span>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Jenjang</div>
+                            <span id="detail_jenjang" class="badge-jenjang" style="background:#dbeafe;color:#1d4ed8;font-size:.75rem;"></span>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Mata Pelajaran</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Mata Pelajaran</div>
                             <span id="detail_mapel" class="badge-mapel" style="font-size:.75rem;"></span>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Kelas</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Kelas</div>
                             <div id="detail_kelas" style="font-size:.84rem;font-weight:600;color:var(--text);"></div>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Tipe</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Tipe</div>
                             <span id="detail_tipe" class="badge-tipe" style="font-size:.75rem;"></span>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Topik / Bab</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Topik / Bab</div>
                             <div id="detail_topik" style="font-size:.84rem;color:var(--text);"></div>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Ukuran</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Ukuran</div>
                             <div id="detail_ukuran" style="font-size:.84rem;color:var(--text);"></div>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                Dibuat</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Dibuat</div>
                             <div id="detail_tanggal" style="font-size:.84rem;color:var(--text);"></div>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div
-                                style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">
-                                File / Link</div>
+                            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">File / Link</div>
                             <div id="detail_link_wrap"></div>
                         </div>
                     </div>
-                    {{-- Catatan --}}
                     <div class="p-3 rounded-3" style="background:var(--success-soft);border:1px solid #a7f3d0;">
                         <div style="font-size:.73rem;font-weight:700;color:var(--success);margin-bottom:6px;">
                             <i class="bi bi-chat-left-text-fill me-1"></i> Catatan untuk Siswa
@@ -1045,12 +1306,9 @@
                 </div>
             </div>
         </div>
-    </div>{{-- /#modalDetail --}}
+    </div>
 
-
-    {{-- ══════════════════════════════════════ --}}
-    {{-- MODAL UBAH                             --}}
-    {{-- ══════════════════════════════════════ --}}
+    {{-- MODAL UBAH --}}
     <div class="modal fade modal-custom" id="modalUbah" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -1063,12 +1321,11 @@
                 <form method="POST" id="formEdit" action="" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    <div class="modal-body">
+                    <div class="modal-body" style="overflow-y:auto;overflow-x:hidden;">
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label-custom">Judul Materi <span class="text-danger">*</span></label>
-                                <input type="text" name="judul" id="edit_judul" class="form-control-custom"
-                                    required />
+                                <input type="text" name="judul" id="edit_judul" class="form-control-custom" required />
                             </div>
                             <div class="col-12">
                                 <label class="form-label-custom">Deskripsi</label>
@@ -1084,13 +1341,11 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label-custom">Mata Pelajaran <span class="text-danger">*</span></label>
-                                <input type="text" name="mata_pelajaran" id="edit_mapel" class="form-control-custom"
-                                    required />
+                                <input type="text" name="mata_pelajaran" id="edit_mapel" class="form-control-custom" required />
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label-custom">Kelas <span class="text-danger">*</span></label>
-                                <input type="text" name="kelas" id="edit_kelas" class="form-control-custom"
-                                    required />
+                                <input type="text" name="kelas" id="edit_kelas" class="form-control-custom" required />
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label-custom">Tipe <span class="text-danger">*</span></label>
@@ -1123,8 +1378,7 @@
                                 <label class="form-label-custom">Ganti File (opsional)</label>
                                 <input type="file" name="file" class="form-control-custom"
                                     accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4" />
-                                <div id="edit_file_info" style="font-size:.75rem;color:var(--success);margin-top:4px;">
-                                </div>
+                                <div id="edit_file_info" style="font-size:.75rem;color:var(--success);margin-top:4px;"></div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label-custom">Catatan untuk Siswa</label>
@@ -1144,12 +1398,9 @@
                 </form>
             </div>
         </div>
-    </div>{{-- /#modalUbah --}}
+    </div>
 
-
-    {{-- ══════════════════════════════════════ --}}
-    {{-- MODAL HAPUS                            --}}
-    {{-- ══════════════════════════════════════ --}}
+    {{-- MODAL HAPUS --}}
     <div class="modal fade modal-custom" id="modalHapus" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-4 text-center">
@@ -1180,7 +1431,7 @@
                 </form>
             </div>
         </div>
-    </div>{{-- /#modalHapus --}}
+    </div>
 
 @endsection
 
@@ -1188,19 +1439,19 @@
     <script>
         // ── Toggle Table / Grid View ──
         const btnTable = document.getElementById('btnTable');
-        const btnGrid = document.getElementById('btnGrid');
+        const btnGrid  = document.getElementById('btnGrid');
         const tableView = document.getElementById('tableView');
-        const gridView = document.getElementById('gridView');
+        const gridView  = document.getElementById('gridView');
 
         btnTable.addEventListener('click', () => {
             tableView.style.display = 'block';
-            gridView.style.display = 'none';
+            gridView.style.display  = 'none';
             btnTable.classList.add('active');
             btnGrid.classList.remove('active');
         });
         btnGrid.addEventListener('click', () => {
             tableView.style.display = 'none';
-            gridView.style.display = 'block';
+            gridView.style.display  = 'block';
             btnGrid.classList.add('active');
             btnTable.classList.remove('active');
         });
@@ -1221,24 +1472,136 @@
         function applyFilter() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const jenjang = document.getElementById('filterJenjang').value.toLowerCase();
-            const mapel = document.getElementById('filterMapel').value.toLowerCase();
-            const tipe = document.getElementById('filterTipe').value.toLowerCase();
-            const status = document.getElementById('filterStatus').value.toLowerCase();
+            const mapel   = document.getElementById('filterMapel').value.toLowerCase();
+            const tipe    = document.getElementById('filterTipe').value.toLowerCase();
+            const status  = document.getElementById('filterStatus').value.toLowerCase();
 
             document.querySelectorAll('#tableView tbody tr').forEach(row => {
                 if (!row.dataset.judul) return;
                 const ok =
-                    (!search || row.dataset.judul.includes(search)) &&
+                    (!search  || row.dataset.judul.includes(search)) &&
                     (!jenjang || row.dataset.jenjang === jenjang) &&
-                    (!mapel || row.dataset.mapel === mapel) &&
-                    (!tipe || row.dataset.tipe === tipe) &&
-                    (!status || row.dataset.status === status);
+                    (!mapel   || row.dataset.mapel   === mapel) &&
+                    (!tipe    || row.dataset.tipe    === tipe) &&
+                    (!status  || row.dataset.status  === status);
                 row.style.display = ok ? '' : 'none';
             });
         }
         document.getElementById('searchInput').addEventListener('input', applyFilter);
-        ['filterJenjang', 'filterMapel', 'filterTipe', 'filterStatus'].forEach(id => {
+        ['filterJenjang','filterMapel','filterTipe','filterStatus'].forEach(id => {
             document.getElementById(id).addEventListener('change', applyFilter);
+        });
+
+        // ════════════════════════════════════════════
+        // TAMBAH MATERI – LOGIC BARU
+        // ════════════════════════════════════════════
+
+        // Pilih tipe visual
+        function pilihTipe(tipe) {
+            document.getElementById('tambah_tipe_val').value = tipe;
+
+            // Reset semua tombol tipe
+            document.querySelectorAll('#modalTambah .tipe-btn').forEach(b => b.classList.remove('selected'));
+            // Tandai yang dipilih
+            document.querySelector(`#modalTambah .tipe-btn.${tipe}`).classList.add('selected');
+
+            // Sembunyikan error
+            document.getElementById('tipe_error').style.display = 'none';
+
+            // Tampilkan bagian yang sesuai
+            const wrapFile  = document.getElementById('tambah_wrap_file');
+            const wrapVideo = document.getElementById('tambah_wrap_video');
+            const linkVideo = document.getElementById('tambah_link_video');
+            const fileInput = document.getElementById('tambah_file_input');
+
+            if (tipe === 'video') {
+                wrapFile.style.display  = 'none';
+                wrapVideo.style.display = 'block';
+                linkVideo.required = true;
+                fileInput.required = false;
+            } else {
+                wrapFile.style.display  = 'block';
+                wrapVideo.style.display = 'none';
+                linkVideo.required = false;
+                // File tidak wajib (boleh opsional), hapus required jika tidak ingin wajib
+                fileInput.required = false;
+            }
+
+            // Sesuaikan accept berdasarkan tipe
+            const acceptMap = {
+                pdf:   '.pdf',
+                doc:   '.doc,.docx',
+                ppt:   '.ppt,.pptx',
+                quiz:  '.pdf,.doc,.docx',
+            };
+            fileInput.accept = acceptMap[tipe] || '.pdf,.doc,.docx,.ppt,.pptx';
+
+            const hintMap = {
+                pdf:  'Format: PDF',
+                doc:  'Format: DOC, DOCX',
+                ppt:  'Format: PPT, PPTX',
+                quiz: 'Format: PDF, DOC, DOCX',
+            };
+            document.getElementById('tambah_accept_hint').textContent =
+                hintMap[tipe] || 'PDF, DOC, DOCX, PPT, PPTX';
+        }
+
+        // Tampilkan nama file setelah dipilih
+        function tampilkanNamaFile(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const mb   = (file.size / 1024 / 1024).toFixed(2);
+            document.getElementById('tambah_file_nama').textContent  = file.name;
+            document.getElementById('tambah_file_size').textContent  = mb + ' MB';
+            document.getElementById('tambah_file_info').style.display = 'block';
+            document.getElementById('tambah_drop_zone').style.display = 'none';
+        }
+
+        // Drag & drop
+        function handleDrop(event) {
+            event.preventDefault();
+            document.getElementById('tambah_drop_zone').classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            if (files && files[0]) {
+                const input = document.getElementById('tambah_file_input');
+                // Buat DataTransfer baru
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                input.files = dt.files;
+                tampilkanNamaFile(input);
+            }
+        }
+
+        // Hapus file terpilih
+        function hapusFileTerpilih() {
+            document.getElementById('tambah_file_input').value = '';
+            document.getElementById('tambah_file_info').style.display = 'none';
+            document.getElementById('tambah_drop_zone').style.display = 'block';
+        }
+
+        // Submit dengan set status
+        function setStatusDanSubmit(status, event) {
+            // Validasi tipe dulu
+            const tipeVal = document.getElementById('tambah_tipe_val').value;
+            if (!tipeVal) {
+                event.preventDefault();
+                document.getElementById('tipe_error').style.display = 'block';
+                document.querySelector('#modalTambah .tipe-grid').scrollIntoView({ behavior: 'smooth' });
+                return false;
+            }
+            document.getElementById('tambah_status').value = status;
+        }
+
+        // Reset modal saat ditutup
+        document.getElementById('modalTambah').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('formTambah').reset();
+            document.getElementById('tambah_tipe_val').value = '';
+            document.querySelectorAll('#modalTambah .tipe-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('tambah_wrap_file').style.display  = 'none';
+            document.getElementById('tambah_wrap_video').style.display = 'none';
+            document.getElementById('tambah_file_info').style.display  = 'none';
+            document.getElementById('tambah_drop_zone').style.display  = 'block';
+            document.getElementById('tipe_error').style.display        = 'none';
         });
 
         // ── Buka Modal Detail ──
@@ -1247,63 +1610,35 @@
                 .then(r => r.json())
                 .then(m => {
                     const ikonMap = {
-                        pdf: {
-                            ikon: 'bi-file-earmark-pdf-fill',
-                            bg: '#fee2e2',
-                            warna: '#dc2626'
-                        },
-                        video: {
-                            ikon: 'bi-camera-video-fill',
-                            bg: '#dbeafe',
-                            warna: '#2563eb'
-                        },
-                        doc: {
-                            ikon: 'bi-file-earmark-word-fill',
-                            bg: '#e0f2fe',
-                            warna: '#0369a1'
-                        },
-                        ppt: {
-                            ikon: 'bi-file-earmark-slides-fill',
-                            bg: '#fef3c7',
-                            warna: '#d97706'
-                        },
-                        quiz: {
-                            ikon: 'bi-patch-question-fill',
-                            bg: '#dcfce7',
-                            warna: '#16a34a'
-                        },
+                        pdf:   { ikon: 'bi-file-earmark-pdf-fill',    bg: '#fee2e2', warna: '#dc2626' },
+                        video: { ikon: 'bi-camera-video-fill',         bg: '#dbeafe', warna: '#2563eb' },
+                        doc:   { ikon: 'bi-file-earmark-word-fill',    bg: '#e0f2fe', warna: '#0369a1' },
+                        ppt:   { ikon: 'bi-file-earmark-slides-fill',  bg: '#fef3c7', warna: '#d97706' },
+                        quiz:  { ikon: 'bi-patch-question-fill',       bg: '#dcfce7', warna: '#16a34a' },
                     };
-                    const ti = ikonMap[m.tipe] || {
-                        ikon: 'bi-file-earmark',
-                        bg: '#f1f5f9',
-                        warna: '#64748b'
-                    };
+                    const ti = ikonMap[m.tipe] || { ikon: 'bi-file-earmark', bg: '#f1f5f9', warna: '#64748b' };
 
-                    document.getElementById('detail_ikon').className = 'bi ' + ti.ikon;
+                    document.getElementById('detail_ikon').className            = 'bi ' + ti.ikon;
                     document.getElementById('detail_ikon_wrap').style.background = ti.bg;
-                    document.getElementById('detail_ikon').style.color = ti.warna;
-                    document.getElementById('detail_judul').textContent = m.judul;
-                    document.getElementById('detail_deskripsi').textContent = m.deskripsi ?? '-';
-                    document.getElementById('detail_jenjang').textContent = m.jenjang.toUpperCase();
-                    document.getElementById('detail_mapel').textContent = m.mata_pelajaran;
-                    document.getElementById('detail_kelas').textContent = m.kelas;
-                    document.getElementById('detail_tipe').textContent = m.tipe.toUpperCase();
-                    document.getElementById('detail_tipe').className = 'badge-tipe ' + m.tipe;
-                    document.getElementById('detail_topik').textContent = m.topik ?? '-';
-                    document.getElementById('detail_catatan').textContent = m.catatan ?? '-';
-                    document.getElementById('detail_status').textContent = m.status.charAt(0).toUpperCase() + m.status
-                        .slice(1);
-                    document.getElementById('detail_status').className = 'badge-status ' + m.status;
-                    document.getElementById('detail_ukuran').textContent = m.file_size ?? (m.link_video ? 'Link Video' :
-                        '-');
+                    document.getElementById('detail_ikon').style.color           = ti.warna;
+                    document.getElementById('detail_judul').textContent          = m.judul;
+                    document.getElementById('detail_deskripsi').textContent      = m.deskripsi ?? '-';
+                    document.getElementById('detail_jenjang').textContent        = m.jenjang.toUpperCase();
+                    document.getElementById('detail_mapel').textContent          = m.mata_pelajaran;
+                    document.getElementById('detail_kelas').textContent          = m.kelas;
+                    document.getElementById('detail_tipe').textContent           = m.tipe.toUpperCase();
+                    document.getElementById('detail_tipe').className             = 'badge-tipe ' + m.tipe;
+                    document.getElementById('detail_topik').textContent          = m.topik ?? '-';
+                    document.getElementById('detail_catatan').textContent        = m.catatan ?? '-';
+                    document.getElementById('detail_status').textContent         =
+                        m.status.charAt(0).toUpperCase() + m.status.slice(1);
+                    document.getElementById('detail_status').className  = 'badge-status ' + m.status;
+                    document.getElementById('detail_ukuran').textContent =
+                        m.file_size ?? (m.link_video ? 'Link Video' : '-');
 
                     const tgl = new Date(m.created_at);
                     document.getElementById('detail_tanggal').textContent =
-                        tgl.toLocaleDateString('id-ID', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric'
-                        });
+                        tgl.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
                     const linkWrap = document.getElementById('detail_link_wrap');
                     if (m.file_path) {
@@ -1331,21 +1666,21 @@
             fetch('/tutor/materi/' + id + '/json')
                 .then(r => r.json())
                 .then(m => {
-                    document.getElementById('edit_judul').value = m.judul;
-                    document.getElementById('edit_deskripsi').value = m.deskripsi ?? '';
-                    document.getElementById('edit_jenjang').value = m.jenjang;
-                    document.getElementById('edit_mapel').value = m.mata_pelajaran;
-                    document.getElementById('edit_kelas').value = m.kelas;
-                    document.getElementById('edit_tipe').value = m.tipe ?? 'pdf';
-                    document.getElementById('edit_topik').value = m.topik ?? '';
-                    document.getElementById('edit_status').value = m.status;
-                    document.getElementById('edit_link_video').value = m.link_video ?? '';
-                    document.getElementById('edit_catatan').value = m.catatan ?? '';
+                    document.getElementById('edit_judul').value       = m.judul;
+                    document.getElementById('edit_deskripsi').value   = m.deskripsi ?? '';
+                    document.getElementById('edit_jenjang').value     = m.jenjang;
+                    document.getElementById('edit_mapel').value       = m.mata_pelajaran;
+                    document.getElementById('edit_kelas').value       = m.kelas;
+                    document.getElementById('edit_tipe').value        = m.tipe ?? 'pdf';
+                    document.getElementById('edit_topik').value       = m.topik ?? '';
+                    document.getElementById('edit_status').value      = m.status;
+                    document.getElementById('edit_link_video').value  = m.link_video ?? '';
+                    document.getElementById('edit_catatan').value     = m.catatan ?? '';
                     document.getElementById('edit_file_info').textContent =
-                        m.file_path ?
-                        '📎 File saat ini: ' + m.file_path.split('/').pop() + (m.file_size ? ' (' + m.file_size + ')' :
-                            '') :
-                        '';
+                        m.file_path
+                            ? '📎 File saat ini: ' + m.file_path.split('/').pop() +
+                              (m.file_size ? ' (' + m.file_size + ')' : '')
+                            : '';
                     document.getElementById('formEdit').action = '/tutor/materi/' + id;
                     new bootstrap.Modal(document.getElementById('modalUbah')).show();
                 });
@@ -1357,5 +1692,54 @@
             document.getElementById('formHapus').action = '/tutor/materi/' + id;
             new bootstrap.Modal(document.getElementById('modalHapus')).show();
         }
+
+        // ══════════════════════════════════════
+        // SCROLL INDICATOR – tampilkan panah ↓
+        // jika modal body masih ada konten di bawah
+        // ══════════════════════════════════════
+        function setupScrollIndicator(modalId) {
+            const modal   = document.getElementById(modalId);
+            const body    = modal.querySelector('.modal-body');
+            if (!body) return;
+
+            // Buat elemen hint sekali
+            let hint = modal.querySelector('.modal-scroll-hint');
+            if (!hint) {
+                hint = document.createElement('div');
+                hint.className = 'modal-scroll-hint';
+                hint.innerHTML = '<i class="bi bi-chevron-double-down"></i> Gulir untuk melihat lebih';
+                body.parentNode.insertBefore(hint, body.nextSibling);
+            }
+
+            function cekScroll() {
+                const bisa = body.scrollHeight > body.clientHeight + 8;
+                const sudahBawah = body.scrollTop + body.clientHeight >= body.scrollHeight - 8;
+                hint.style.display = (bisa && !sudahBawah) ? 'block' : 'none';
+            }
+
+            body.addEventListener('scroll', cekScroll);
+
+            // Cek ulang setiap modal dibuka
+            modal.addEventListener('shown.bs.modal', () => {
+                body.scrollTop = 0;
+                setTimeout(cekScroll, 100);
+            });
+        }
+
+        // Pasang indikator pada semua modal form
+        ['modalTambah', 'modalUbah', 'modalDetail'].forEach(setupScrollIndicator);
+
+        // ── Koreksi tinggi modal-body dinamis sesuai viewport ──
+        function sesuaikanTinggiModal() {
+            const vh = window.innerHeight;
+            document.querySelectorAll('.modal-custom .modal-body').forEach(body => {
+                // header + footer ≈ 130-160px; sisakan 24px margin atas-bawah
+                const tersedia = vh - 160;
+                body.style.maxHeight = Math.max(200, tersedia) + 'px';
+            });
+        }
+
+        window.addEventListener('resize', sesuaikanTinggiModal);
+        sesuaikanTinggiModal(); // jalankan sekali saat load
     </script>
 @endpush
