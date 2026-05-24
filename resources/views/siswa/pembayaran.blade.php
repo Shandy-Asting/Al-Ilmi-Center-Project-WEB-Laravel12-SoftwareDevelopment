@@ -571,7 +571,9 @@
 <div class="main-tabs no-print">
     <button class="main-tab active" onclick="switchTab(this,'tagihan')">
         <i class="bi bi-receipt me-1"></i> Tagihan
-        <span style="background:var(--danger);color:#fff;font-size:10px;padding:1px 5px;border-radius:20px;margin-left:3px;">2</span>
+        @if($totalBelumBayar > 0)
+        <span style="background:var(--danger);color:#fff;font-size:10px;padding:1px 5px;border-radius:20px;margin-left:3px;">{{ $totalBelumBayar }}</span>
+        @endif
     </button>
     <button class="main-tab" onclick="switchTab(this,'riwayat')">
         <i class="bi bi-clock-history me-1"></i> Riwayat
@@ -579,73 +581,99 @@
 </div>
 
 {{-- ══ TAB TAGIHAN ══ --}}
-@forelse($tagihan as $t)
-@php
-$isUrgent = $t->jadwal->isPast();
-$sudahUpload = $t->pembayaran_status === 'menunggu';
-@endphp
-<div class="tagihan-card {{ $isUrgent ? 'urgent' : '' }}">
-    <div class="th-header {{ $isUrgent ? 'urgent' : 'normal' }}">
-        <span class="th-id">#{{ $t->pembayaranTerakhir?->nomor_invoice ?? 'INV-' . strtoupper(substr($t->id, 0, 8)) }}</span>
-        <div class="d-flex align-items-center gap-2">
-            @if($isUrgent && !$sudahUpload)
-            <span style="background:var(--danger-soft);color:var(--danger);font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;">
-                <i class="bi bi-alarm-fill me-1"></i>Segera!
+<div id="tab-tagihan">
+    @forelse($tagihan as $t)
+    @php
+    $isUrgent = $t->jadwal->isPast();
+    $sudahUpload = $t->pembayaran_status === 'menunggu';
+    @endphp
+    <div class="tagihan-card {{ $isUrgent ? 'urgent' : '' }}">
+        <div class="th-header {{ $isUrgent ? 'urgent' : 'normal' }}">
+            <span class="th-id">#{{ $t->pembayaranTerakhir?->nomor_invoice ?? 'INV-' . strtoupper(substr($t->id, 0, 8)) }}</span>
+            <div class="d-flex align-items-center gap-2">
+                @if($isUrgent && !$sudahUpload)
+                <span style="background:var(--danger-soft);color:var(--danger);font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;">
+                    <i class="bi bi-alarm-fill me-1"></i>Segera!
+                </span>
+                @endif
+                <span class="status-badge" style="background:{{ $sudahUpload ? 'var(--accent-soft)' : 'var(--danger-soft)' }};color:{{ $sudahUpload ? 'var(--warning)' : 'var(--danger)' }};">
+                    <i class="bi bi-clock-fill"></i> {{ $sudahUpload ? 'Menunggu Verifikasi' : 'Belum Dibayar' }}
+                </span>
+            </div>
+        </div>
+        <div class="th-body">
+            <div class="th-row">
+                <div class="th-icon" style="background:#eff6ff;color:var(--primary);">
+                    <i class="bi bi-person-video3"></i>
+                </div>
+                <div class="th-info">
+                    <div class="th-title">Les Privat – {{ $t->mata_pelajaran }}{{ $t->topik ? ' – '.$t->topik : '' }}</div>
+                    <div class="th-sub"><i class="bi bi-person-fill"></i> {{ $t->tutor->name ?? '-' }}</div>
+                    <div class="th-sub"><i class="bi bi-calendar3"></i> {{ $t->jadwal->translatedFormat('l, d M Y · H:i') }} WIB</div>
+                    <div class="th-sub"><i class="bi bi-clock"></i> {{ $t->durasi_menit }} mnt · {{ $t->getModeLabel() }}</div>
+                    <div class="th-sub" style="color:{{ $isUrgent ? 'var(--danger)' : 'var(--warning)' }};font-weight:600;">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        Jatuh tempo: {{ $t->jadwal->format('d M Y') }}
+                    </div>
+                </div>
+                <div class="th-amount">
+                    <div class="amount-val" style="color:{{ $isUrgent ? 'var(--danger)' : 'var(--primary)' }};">
+                        Rp {{ number_format($t->harga, 0, ',', '.') }}
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);">{{ $sudahUpload ? 'Menunggu Verifikasi' : 'Belum Lunas' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="th-footer">
+            <div style="font-size:12px;color:var(--muted);">
+                <i class="bi bi-shield-check me-1"></i>Transfer ke rekening Al Ilmi Center lalu upload bukti
+            </div>
+            @if(!$sudahUpload)
+            <button
+                onclick="openModalBayar('{{ $t->id }}','{{ addslashes($t->mata_pelajaran . ($t->topik ? ' – '.$t->topik : '')) }}','Rp {{ number_format($t->harga,0,',','.') }}','{{ addslashes($t->tutor->name ?? '') }}')"
+                class="btn btn-sm fw-bold"
+                style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;padding:8px 20px;box-shadow:0 4px 12px rgba(30,58,95,.3);">
+                <i class="bi bi-send-fill me-1"></i> Bayar Sekarang
+            </button>
+            @else
+            <span style="font-size:12px;font-weight:700;color:var(--warning);">
+                <i class="bi bi-hourglass-split me-1"></i>Menunggu konfirmasi tutor
             </span>
             @endif
-            <span class="status-badge" style="background:{{ $sudahUpload ? 'var(--accent-soft)' : 'var(--danger-soft)' }};color:{{ $sudahUpload ? 'var(--warning)' : 'var(--danger)' }};">
-                <i class="bi bi-clock-fill"></i> {{ $sudahUpload ? 'Menunggu Verifikasi' : 'Belum Dibayar' }}
-            </span>
         </div>
     </div>
-    <div class="th-body">
-        <div class="th-row">
-            <div class="th-icon" style="background:#eff6ff;color:var(--primary);">
-                <i class="bi bi-person-video3"></i>
-            </div>
-            <div class="th-info">
-                <div class="th-title">Les Privat – {{ $t->mata_pelajaran }}{{ $t->topik ? ' – '.$t->topik : '' }}</div>
-                <div class="th-sub"><i class="bi bi-person-fill"></i> {{ $t->tutor->name ?? '-' }}</div>
-                <div class="th-sub"><i class="bi bi-calendar3"></i> {{ $t->jadwal->translatedFormat('l, d M Y · H:i') }} WIB</div>
-                <div class="th-sub"><i class="bi bi-clock"></i> {{ $t->durasi_menit }} mnt · {{ $t->getModeLabel() }}</div>
-                <div class="th-sub" style="color:{{ $isUrgent ? 'var(--danger)' : 'var(--warning)' }};font-weight:600;">
-                    <i class="bi bi-exclamation-circle-fill"></i>
-                    Jatuh tempo: {{ $t->jadwal->format('d M Y') }}
-                </div>
-            </div>
-            <div class="th-amount">
-                <div class="amount-val" style="color:{{ $isUrgent ? 'var(--danger)' : 'var(--primary)' }};">
-                    Rp {{ number_format($t->harga, 0, ',', '.') }}
-                </div>
-                <div style="font-size:11px;color:var(--muted);">{{ $sudahUpload ? 'Menunggu Verifikasi' : 'Belum Lunas' }}</div>
-            </div>
-        </div>
+    @empty
+    <div style="text-align:center;padding:48px;color:var(--muted);background:var(--card-bg);border-radius:16px;border:1px solid var(--border);">
+        <i class="bi bi-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;color:var(--success);"></i>
+        <div style="font-size:15px;font-weight:700;">Tidak Ada Tagihan</div>
+        <div style="font-size:13px;margin-top:4px;">Semua pembayaran sudah lunas 🎉</div>
     </div>
-    <div class="th-footer">
-        <div style="font-size:12px;color:var(--muted);">
-            <i class="bi bi-shield-check me-1"></i>Transfer ke rekening Al Ilmi Center lalu upload bukti
-        </div>
-        @if(!$sudahUpload)
-        <button
-            onclick="openModalBayar('{{ $t->id }}','{{ $t->mata_pelajaran }}{{ $t->topik ? ' – '.$t->topik : '' }}','Rp {{ number_format($t->harga,0,',','.') }}','{{ $t->tutor->name ?? '' }}')"
-            class="btn btn-sm fw-bold"
-            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;padding:8px 20px;box-shadow:0 4px 12px rgba(30,58,95,.3);">
-            <i class="bi bi-send-fill me-1"></i> Bayar Sekarang
-        </button>
-        @else
-        <span style="font-size:12px;font-weight:700;color:var(--warning);">
-            <i class="bi bi-hourglass-split me-1"></i>Menunggu konfirmasi tutor
+    @endforelse
+
+    @if($tagihan->total() > 0)
+    <div class="d-flex align-items-center justify-content-between px-2 py-3 mt-2">
+        <span style="font-size:12.5px;color:var(--muted);">
+            Menampilkan {{ $tagihan->firstItem() }}–{{ $tagihan->lastItem() }} dari {{ $tagihan->total() }} tagihan
         </span>
-        @endif
+        <div class="d-flex gap-1">
+            <a href="{{ $tagihan->previousPageUrl() }}"
+                style="border-radius:8px;background:var(--card-bg);border:1.5px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;width:32px;height:32px;display:flex;align-items:center;justify-content:center;text-decoration:none;{{ !$tagihan->onFirstPage() ? '' : 'opacity:.4;pointer-events:none;' }}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            @foreach($tagihan->getUrlRange(1, $tagihan->lastPage()) as $page => $url)
+            <a href="{{ $url }}"
+                style="border-radius:8px;{{ $page == $tagihan->currentPage() ? 'background:var(--primary);color:#fff;border:none;' : 'background:var(--card-bg);border:1.5px solid var(--border);color:var(--muted);' }}font-size:12px;font-weight:700;width:32px;height:32px;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                {{ $page }}
+            </a>
+            @endforeach
+            <a href="{{ $tagihan->nextPageUrl() }}"
+                style="border-radius:8px;background:var(--card-bg);border:1.5px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;width:32px;height:32px;display:flex;align-items:center;justify-content:center;text-decoration:none;{{ $tagihan->hasMorePages() ? '' : 'opacity:.4;pointer-events:none;' }}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
     </div>
+    @endif
 </div>
-@empty
-<div style="text-align:center;padding:48px;color:var(--muted);background:var(--card-bg);border-radius:16px;border:1px solid var(--border);">
-    <i class="bi bi-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;color:var(--success);"></i>
-    <div style="font-size:15px;font-weight:700;">Tidak Ada Tagihan</div>
-    <div style="font-size:13px;margin-top:4px;">Semua pembayaran sudah lunas 🎉</div>
-</div>
-@endforelse
 
 {{-- ══ TAB RIWAYAT ══ --}}
 <div id="tab-riwayat" style="display:none;">
@@ -674,63 +702,80 @@ $sudahUpload = $t->pembayaran_status === 'menunggu';
         </div>
     </div>
 
-    {{-- Lanjut tabel --}}
-    @forelse($riwayat as $r)
-    <tr>
-        <td style="font-weight:700;font-size:12px;color:var(--primary);">#{{ $r->nomor_invoice }}</td>
-        <td>
-            <div style="font-weight:600;">{{ $r->lesPrivat?->mata_pelajaran }}</div>
-            @if($r->lesPrivat?->topik)
-            <div style="font-size:11px;color:var(--muted);">– {{ $r->lesPrivat->topik }}</div>
-            @endif
-        </td>
-        <td style="font-size:12.5px;">{{ $r->lesPrivat?->tutor?->name ?? '-' }}</td>
-        <td style="font-size:12.5px;">{{ $r->bank_tujuan }}</td>
-        <td style="font-weight:700;">Rp {{ number_format($r->jumlah, 0, ',', '.') }}</td>
-        <td>
-            @if($r->status === 'dikonfirmasi')
-            <span style="background:var(--success-soft);color:var(--success);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;">
-                <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Lunas
-            </span>
-            @elseif($r->status === 'menunggu')
-            <span style="background:var(--accent-soft);color:var(--warning);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
-                ⏳ Menunggu
-            </span>
-            @else
-            <span style="background:var(--danger-soft);color:var(--danger);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
-                ❌ Ditolak
-            </span>
-            @endif
-        </td>
-        <td style="font-size:12px;color:var(--muted);">{{ $r->created_at->format('d M Y') }}</td>
-        <td>
-            @if($r->bukti_transfer)
-            <button onclick="openModalBuktiUrl('{{ $r->bukti_url }}')"
-                style="border:none;background:#eff6ff;color:var(--primary);border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;">
-                <i class="bi bi-image me-1"></i>Bukti
+    <div class="card-box">
+        <div class="card-box-header">
+            <div class="card-box-title"><i class="bi bi-clock-history"></i> Riwayat Pembayaran</div>
+            <button onclick="window.print()"
+                style="background:var(--danger-soft);color:var(--danger);border:1.5px solid var(--danger);border-radius:8px;font-size:12px;font-weight:600;padding:5px 12px;cursor:pointer;">
+                <i class="bi bi-printer-fill me-1"></i> Cetak
             </button>
-            @endif
-        </td>
-    </tr>
-    @empty
-    <tr>
-        <td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">Belum ada riwayat transaksi.</td>
-    </tr>
-    @endforelse
-    </tbody>
-    </table>
-</div>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="tbl-riwayat">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Layanan</th>
+                        <th>Tutor</th>
+                        <th>Bank</th>
+                        <th>Jumlah</th>
+                        <th>Status</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($riwayat as $r)
+                    <tr>
+                        <td style="font-weight:700;font-size:12px;color:var(--primary);">#{{ $r->nomor_invoice }}</td>
+                        <td>
+                            <div style="font-weight:600;">{{ $r->lesPrivat?->mata_pelajaran }}</div>
+                            @if($r->lesPrivat?->topik)
+                            <div style="font-size:11px;color:var(--muted);">– {{ $r->lesPrivat->topik }}</div>
+                            @endif
+                        </td>
+                        <td style="font-size:12.5px;">{{ $r->lesPrivat?->tutor?->name ?? '-' }}</td>
+                        <td style="font-size:12.5px;">{{ $r->bank_tujuan }}</td>
+                        <td style="font-weight:700;">Rp {{ number_format($r->jumlah, 0, ',', '.') }}</td>
+                        <td>
+                            @if($r->status === 'dikonfirmasi')
+                            <span style="background:var(--success-soft);color:var(--success);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Lunas
+                            </span>
+                            @elseif($r->status === 'menunggu')
+                            <span style="background:var(--accent-soft);color:var(--warning);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                                ⏳ Menunggu
+                            </span>
+                            @else
+                            <span style="background:var(--danger-soft);color:var(--danger);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                                ❌ Ditolak
+                            </span>
+                            @endif
+                        </td>
+                        <td style="font-size:12px;color:var(--muted);">{{ $r->created_at->format('d M Y') }}</td>
+                        <td>
+                            @if($r->bukti_transfer)
+                            <button onclick="openModalBuktiUrl('{{ $r->bukti_url }}')"
+                                style="border:none;background:#eff6ff;color:var(--primary);border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;">
+                                <i class="bi bi-image me-1"></i>Bukti
+                            </button>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">Belum ada riwayat transaksi.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-{{-- Pagination --}}
-<div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-top:1px solid var(--border);">
-    <span style="font-size:12.5px;color:var(--muted);">Menampilkan 1–8 dari 8 transaksi</span>
-    <div class="d-flex gap-1">
-        @foreach(['<i class="bi bi-chevron-left"></i>','1','2','<i class="bi bi-chevron-right"></i>'] as $pg)
-        <button style="border-radius:8px;{{ $pg==='1' ? 'background:var(--primary);color:#fff;border:none;' : 'background:var(--card-bg);border:1.5px solid var(--border);color:var(--muted);' }}font-size:12px;font-weight:700;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;">{!! $pg !!}</button>
-        @endforeach
+        {{-- Pagination --}}
+        <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);">
+            Total {{ $riwayat->count() }} transaksi
+        </div>
     </div>
-</div>
-</div>
 </div>
 
 {{-- ══ MODAL BAYAR ══ --}}
@@ -745,9 +790,9 @@ $sudahUpload = $t->pembayaran_status === 'menunggu';
             {{-- Info Tagihan --}}
             <div style="background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:20px;border-left:4px solid var(--primary);">
                 <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Detail Tagihan</div>
-                <div style="font-size:14px;font-weight:700;color:var(--text);" id="modal-layanan">Les Privat – Matematika</div>
-                <div style="font-size:12.5px;color:var(--muted);margin-top:2px;" id="modal-tutor">Tutor: Pak Budi Santoso</div>
-                <div style="font-size:20px;font-weight:800;color:var(--primary);margin-top:8px;" id="modal-jumlah">Rp 75.000</div>
+                <div style="font-size:14px;font-weight:700;color:var(--text);" id="modal-layanan">-</div>
+                <div style="font-size:12.5px;color:var(--muted);margin-top:2px;" id="modal-tutor">-</div>
+                <div style="font-size:20px;font-weight:800;color:var(--primary);margin-top:8px;" id="modal-jumlah">-</div>
             </div>
 
             {{-- STEP 1: Pilih Rekening --}}
@@ -843,12 +888,8 @@ $sudahUpload = $t->pembayaran_status === 'menunggu';
             <button class="modal-close-btn" onclick="closeModal('modal-bukti')"><i class="bi bi-x-lg"></i></button>
         </div>
         <div style="padding:20px 22px;text-align:center;">
-            {{-- Placeholder bukti --}}
             <img id="bukti-img" src="" alt="Bukti Transfer"
                 style="max-width:100%;max-height:300px;border-radius:12px;border:2px solid var(--border);margin-bottom:14px;" />
-            <div style="background:var(--success-soft);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--success);font-weight:600;">
-                <i class="bi bi-check-circle-fill me-1"></i> Pembayaran Dikonfirmasi Lunas
-            </div>
             <button onclick="closeModal('modal-bukti')" class="btn fw-bold w-100 mt-3"
                 style="background:var(--bg);color:var(--muted);border-radius:10px;border:1.5px solid var(--border);font-size:13px;">
                 Tutup
@@ -887,6 +928,8 @@ $sudahUpload = $t->pembayaran_status === 'menunggu';
 
 @push('scripts')
 <script>
+    let currentLesId = '';
+
     function switchTab(el, id) {
         document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
@@ -895,20 +938,16 @@ $sudahUpload = $t->pembayaran_status === 'menunggu';
     }
 
     function openModalBayar(id, layanan, jumlah, tutor) {
+        currentLesId = id;
         document.getElementById('modal-layanan').textContent = 'Les Privat – ' + layanan;
         document.getElementById('modal-tutor').textContent = 'Tutor: ' + tutor;
         document.getElementById('modal-jumlah').textContent = jumlah;
-        // Reset upload
         document.getElementById('previewWrap').style.display = 'none';
         document.getElementById('fileInput').value = '';
         document.getElementById('uploadZone').classList.remove('has-file');
         document.getElementById('uploadIcon').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i>';
         document.getElementById('uploadText').innerHTML = '<div style="font-size:13.5px;font-weight:700;color:var(--primary);">Klik untuk pilih foto</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">JPG, PNG — Maks. 2MB</div>';
         document.getElementById('modal-bayar').classList.add('show');
-    }
-
-    function openModalBukti() {
-        document.getElementById('modal-bukti').classList.add('show');
     }
 
     function closeModal(id) {
