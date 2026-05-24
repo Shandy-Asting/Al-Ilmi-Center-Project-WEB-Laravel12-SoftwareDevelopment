@@ -188,7 +188,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             'topik'          => 'nullable|string|max:255',
             'catatan'        => 'nullable|string',
             'jadwal'         => 'required|date|after:now',
-            'durasi_menit'   => 'required|in:60,90,120',
+            'durasi_menit'   => 'required|in:60,75,90,120',
             'mode'           => 'required|in:online,tatap_muka',
             'lokasi'         => 'nullable|string',
         ]);
@@ -206,6 +206,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         $harga = match ((int) $request->durasi_menit) {
             60      => 50000,
+            75      => 60000,
             90      => 75000,
             120     => 100000,
             default => 75000,
@@ -611,7 +612,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ->whereIn('pembayaran_status', ['belum', 'menunggu'])
             ->with(['tutor', 'pembayaranTerakhir'])
             ->orderBy('jadwal', 'asc')
-            ->get();
+            ->paginate(4);
 
         // Riwayat pembayaran
         $riwayat = Pembayaran::where('siswa_id', $user->id)
@@ -623,10 +624,21 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $rekening = RekeningBank::where('aktif', true)->get();
 
         // Statistik
-        $totalTagihan       = $tagihan->sum('harga');
-        $totalBelumBayar    = $tagihan->where('pembayaran_status', 'belum')->count();
-        $totalTransaksi     = $riwayat->count();
-        $jatuhTempoTerdekat = $tagihan->first()?->jadwal?->format('d M Y');
+        $totalTagihan = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->sum('harga');
+
+        $totalBelumBayar = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->where('pembayaran_status', 'belum')
+            ->count();
+
+        $jatuhTempoTerdekat = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->orderBy('jadwal', 'asc')
+            ->first()?->jadwal?->format('d M Y');
 
         return view('siswa.pembayaran', compact(
             'tagihan',
@@ -640,7 +652,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     });
 
     // ── Pembayaran ─────────────────────────────────────────────────────────
-
     Route::get('/pembayaran', function () {
         $user = auth()->user();
 
@@ -649,7 +660,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ->whereIn('pembayaran_status', ['belum', 'menunggu'])
             ->with(['tutor', 'pembayaranTerakhir'])
             ->orderBy('jadwal', 'asc')
-            ->get();
+            ->paginate(4);
 
         $riwayat = Pembayaran::where('siswa_id', $user->id)
             ->with(['lesPrivat.tutor'])
@@ -658,13 +669,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         $rekening = RekeningBank::where('aktif', true)->get();
 
-        $totalTagihan       = $tagihan->sum('harga');
-        $totalBelumBayar    = $tagihan->where('pembayaran_status', 'belum')->count();
-        $totalTransaksi     = $riwayat->count();
-        $jatuhTempoTerdekat = $tagihan->first()?->jadwal?->format('d M Y');
+        $totalTagihan = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->sum('harga');
 
-        $totalTerbayar  = $riwayat->where('status', 'dikonfirmasi')->sum('jumlah');
-        $totalDitolak   = $riwayat->where('status', 'ditolak')->count();
+        $totalBelumBayar = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->where('pembayaran_status', 'belum')
+            ->count();
+
+        $totalTransaksi     = $riwayat->count();
+        $jatuhTempoTerdekat = LesPrivat::where('user_id', $user->id)
+            ->where('status', 'dikonfirmasi')
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->orderBy('jadwal', 'asc')
+            ->first()?->jadwal?->format('d M Y');
+
+        $totalTerbayar = $riwayat->where('status', 'dikonfirmasi')->sum('jumlah');
+        $totalDitolak  = $riwayat->where('status', 'ditolak')->count();
 
         return view('siswa.pembayaran', compact(
             'tagihan',

@@ -6,45 +6,214 @@
 @section('page-sub', 'Admin / Rekening Bank')
 
 @section('sidebar-menu')
-    <div class="menu-label">Utama</div>
-    <a href="/admin/dashboard" class="nav-item-custom"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <div class="menu-label">Pengelolaan</div>
-    <a href="/admin/pengguna" class="nav-item-custom"><i class="bi bi-people-fill"></i> Pengelolaan Pengguna</a>
-    <a href="/admin/paket" class="nav-item-custom"><i class="bi bi-box-seam"></i> Pengelolaan Paket</a>
-    <a href="/admin/transaksi" class="nav-item-custom"><i class="bi bi-credit-card-fill"></i> Transaksi</a>
-    <a href="/admin/pembayaran" class="nav-item-custom"><i class="bi bi-cash-coin"></i> Pembayaran & Gaji</a>
-    <a href="/admin/rekening" class="nav-item-custom active"><i class="bi bi-bank"></i> Rekening Bank</a>
-    <a href="/admin/laporan" class="nav-item-custom"><i class="bi bi-bar-chart-line-fill"></i> Laporan</a>
+<div class="menu-label">Utama</div>
+<a href="/admin/dashboard" class="nav-item-custom"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<div class="menu-label">Pengelolaan</div>
+<a href="/admin/pengguna" class="nav-item-custom"><i class="bi bi-people-fill"></i> Pengelolaan Pengguna</a>
+<a href="/admin/paket" class="nav-item-custom"><i class="bi bi-box-seam"></i> Pengelolaan Paket</a>
+<a href="/admin/transaksi" class="nav-item-custom"><i class="bi bi-credit-card-fill"></i> Transaksi</a>
+<a href="/admin/pembayaran" class="nav-item-custom"><i class="bi bi-cash-coin"></i> Pembayaran & Gaji</a>
+<a href="/admin/rekening" class="nav-item-custom active"><i class="bi bi-bank"></i> Rekening Bank</a>
+<a href="/admin/laporan" class="nav-item-custom"><i class="bi bi-bar-chart-line-fill"></i> Laporan</a>
 @endsection
 
 @push('styles')
 <style>
-    .rek-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;padding:20px;transition:all .2s;}
-    .rek-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.07);}
-    .rek-card.aktif{border-color:var(--success);}
-    .rek-card.nonaktif{opacity:.7;}
-    .rek-logo{width:56px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
-    .rek-bank{font-size:15px;font-weight:700;color:var(--text);}
-    .rek-norek{font-size:14px;font-weight:600;color:var(--primary);font-family:monospace;letter-spacing:1px;}
-    .rek-atas-nama{font-size:12px;color:var(--muted);}
-    .card-box{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-    .card-box-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-    .tbl{width:100%;border-collapse:collapse;}
-    .tbl thead th{background:#f8fafc;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
-    .tbl tbody td{padding:12px 14px;font-size:13px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
-    .tbl tbody tr:last-child td{border-bottom:none;}
-    .tbl tbody tr:hover td{background:#fafcff;}
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;}
-    .modal-overlay.show{display:flex;}
-    .modal-box{background:#fff;border-radius:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:fadeUp .25s ease;}
-    @keyframes fadeUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;}
-    .modal-head h5{font-size:15px;font-weight:800;}
-    .modal-close-btn{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);}
-    .form-label-c{font-size:13px;font-weight:600;margin-bottom:6px;display:block;}
-    .form-input-c{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;outline:none;background:#fff;transition:border .2s;}
-    .form-input-c:focus{border-color:var(--primary);}
-    @media(max-width:767px){.row .col-md-4{margin-bottom:14px;}}
+    .rek-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        transition: all .2s;
+    }
+
+    .rek-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
+    }
+
+    .rek-card.aktif {
+        border-color: var(--success);
+    }
+
+    .rek-card.nonaktif {
+        opacity: .7;
+    }
+
+    .rek-logo {
+        width: 56px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .rek-bank {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .rek-norek {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--primary);
+        font-family: monospace;
+        letter-spacing: 1px;
+    }
+
+    .rek-atas-nama {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .card-box {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .card-box-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tbl {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tbl thead th {
+        background: #f8fafc;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .tbl tbody td {
+        padding: 12px 14px;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .tbl tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .tbl tbody tr:hover td {
+        background: #fafcff;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .55);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 92vh;
+        overflow-y: auto;
+        animation: fadeUp .25s ease;
+    }
+
+    @keyframes fadeUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1
+        }
+    }
+
+    .modal-head {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 1;
+    }
+
+    .modal-head h5 {
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .modal-close-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: none;
+        background: var(--bg);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        color: var(--muted);
+    }
+
+    .form-label-c {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-input-c {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-size: 13.5px;
+        outline: none;
+        background: #fff;
+        transition: border .2s;
+    }
+
+    .form-input-c:focus {
+        border-color: var(--primary);
+    }
+
+    @media(max-width:767px) {
+        .row .col-md-4 {
+            margin-bottom: 14px;
+        }
+    }
 </style>
 @endpush
 
@@ -130,9 +299,9 @@
     {{-- Dummy jika belum ada data --}}
     @php
     $dummyRek = [
-        ['Bank BCA','1234567890','Al Ilmi Center','#003087','BCA',true],
-        ['Bank BRI','0987654321','Al Ilmi Center','#004ea8','BRI',true],
-        ['Bank Mandiri','1122334455','Al Ilmi Center','#005e97','MDR',false],
+    ['Bank BCA','1234567890','Al Ilmi Center','#003087','BCA',true],
+    ['Bank BRI','0987654321','Al Ilmi Center','#004ea8','BRI',true],
+    ['Bank Mandiri','1122334455','Al Ilmi Center','#005e97','MDR',false],
     ];
     @endphp
     @foreach($dummyRek as $dr)
@@ -174,52 +343,63 @@
     </div>
     <div style="overflow-x:auto;">
         <table class="tbl">
-            <thead><tr><th>Bank</th><th>Nomor Rekening</th><th>Atas Nama</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Bank</th>
+                    <th>Nomor Rekening</th>
+                    <th>Atas Nama</th>
+                    <th>Status</th>
+                    <th>Dibuat</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
             <tbody>
-            @forelse(\App\Models\RekeningBank::all() as $rek)
-            <tr>
-                <td>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <div style="width:32px;height:22px;border-radius:5px;background:{{ $rek->nama_bank==='Bank BCA'?'#003087':($rek->nama_bank==='Bank BRI'?'#004ea8':'#005e97') }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">
-                            {{ strtoupper(str_replace(['Bank ','bank '],'',$rek->nama_bank)) }}
+                @forelse($rekening as $rek)
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="width:32px;height:22px;border-radius:5px;background:{{ $rek->nama_bank==='Bank BCA'?'#003087':($rek->nama_bank==='Bank BRI'?'#004ea8':'#005e97') }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">
+                                {{ strtoupper(str_replace(['Bank ','bank '],'',$rek->nama_bank)) }}
+                            </div>
+                            <span style="font-weight:600;">{{ $rek->nama_bank }}</span>
                         </div>
-                        <span style="font-weight:600;">{{ $rek->nama_bank }}</span>
-                    </div>
-                </td>
-                <td style="font-family:monospace;font-weight:600;letter-spacing:1px;color:var(--primary);">{{ $rek->nomor_rekening }}</td>
-                <td>{{ $rek->atas_nama }}</td>
-                <td>
-                    @if($rek->aktif)
-                    <span style="background:var(--success-soft);color:var(--success);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:3px;"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Aktif</span>
-                    @else
-                    <span style="background:var(--bg);color:var(--muted);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Nonaktif</span>
-                    @endif
-                </td>
-                <td style="font-size:12px;color:var(--muted);">{{ $rek->created_at->format('d M Y') }}</td>
-                <td>
-                    <div style="display:flex;gap:5px;">
-                        <button onclick="openEditRek('{{ $rek->id }}','{{ $rek->nama_bank }}','{{ $rek->nomor_rekening }}','{{ $rek->atas_nama }}')"
-                            style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--warning);">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <form method="POST" action="/admin/rekening/{{ $rek->id }}/toggle">
-                            @csrf
-                            <button type="submit" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:{{ $rek->aktif?'var(--warning)':'var(--success)' }};">
-                                <i class="bi bi-toggle-{{ $rek->aktif?'on':'off' }}"></i>
+                    </td>
+                    <td style="font-family:monospace;font-weight:600;letter-spacing:1px;color:var(--primary);">{{ $rek->nomor_rekening }}</td>
+                    <td>{{ $rek->atas_nama }}</td>
+                    <td>
+                        @if($rek->aktif)
+                        <span style="background:var(--success-soft);color:var(--success);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:3px;"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Aktif</span>
+                        @else
+                        <span style="background:var(--bg);color:var(--muted);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Nonaktif</span>
+                        @endif
+                    </td>
+                    <td style="font-size:12px;color:var(--muted);">{{ $rek->created_at->format('d M Y') }}</td>
+                    <td>
+                        <div style="display:flex;gap:5px;">
+                            <button onclick="openEditRek('{{ $rek->id }}','{{ $rek->nama_bank }}','{{ $rek->nomor_rekening }}','{{ $rek->atas_nama }}')"
+                                style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--warning);">
+                                <i class="bi bi-pencil"></i>
                             </button>
-                        </form>
-                        <form method="POST" action="/admin/rekening/{{ $rek->id }}" onsubmit="return confirm('Hapus?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--danger);">
-                                <i class="bi bi-trash3"></i>
-                            </button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Belum ada rekening. Tambahkan dengan tombol di atas atau jalankan Tinker.</td></tr>
-            @endforelse
+                            <form method="POST" action="/admin/rekening/{{ $rek->id }}/toggle">
+                                @csrf 
+                                <button type="submit" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:{{ $rek->aktif?'var(--warning)':'var(--success)' }};">
+                                    <i class="bi bi-toggle-{{ $rek->aktif?'on':'off' }}"></i>
+                                </button>
+                            </form>
+                            <form method="POST" action="/admin/rekening/{{ $rek->id }}" onsubmit="return confirm('Hapus?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--danger);">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Belum ada rekening. Tambahkan dengan tombol di atas atau jalankan Tinker.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -246,11 +426,11 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label-c">Nomor Rekening <span style="color:var(--danger);">*</span></label>
-                    <input type="text" name="nomor_rekening" class="form-input-c" placeholder="Contoh: 1234567890" required/>
+                    <input type="text" name="nomor_rekening" class="form-input-c" placeholder="Contoh: 1234567890" required />
                 </div>
                 <div class="col-12">
                     <label class="form-label-c">Atas Nama (Sesuai Buku Tabungan) <span style="color:var(--danger);">*</span></label>
-                    <input type="text" name="atas_nama" class="form-input-c" placeholder="Contoh: Al Ilmi Center" required/>
+                    <input type="text" name="atas_nama" class="form-input-c" placeholder="Contoh: Al Ilmi Center" required />
                 </div>
                 <div class="col-12">
                     <div style="background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:12.5px;color:#92400e;">
@@ -279,7 +459,7 @@
             <button class="modal-close-btn" onclick="document.getElementById('modal-edit-rek').classList.remove('show')"><i class="bi bi-x-lg"></i></button>
         </div>
         <form id="form-edit-rek" action="" method="POST">
-            @csrf @method('PUT')
+            @csrf 
             <div style="padding:20px 22px;" class="row g-3">
                 <div class="col-12">
                     <label class="form-label-c">Nama Bank</label>
@@ -291,11 +471,11 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label-c">Nomor Rekening</label>
-                    <input type="text" name="nomor_rekening" id="edit-norek" class="form-input-c"/>
+                    <input type="text" name="nomor_rekening" id="edit-norek" class="form-input-c" />
                 </div>
                 <div class="col-12">
                     <label class="form-label-c">Atas Nama</label>
-                    <input type="text" name="atas_nama" id="edit-atas-nama" class="form-input-c"/>
+                    <input type="text" name="atas_nama" id="edit-atas-nama" class="form-input-c" />
                 </div>
                 <div class="col-12 d-flex gap-2 justify-content-end">
                     <button type="button" onclick="document.getElementById('modal-edit-rek').classList.remove('show')"
@@ -314,12 +494,12 @@
 
 @push('scripts')
 <script>
-function openEditRek(id, namaBank, norek, atasNama) {
-    document.getElementById('form-edit-rek').action = '/admin/rekening/' + id;
-    document.getElementById('edit-nama-bank').value = namaBank;
-    document.getElementById('edit-norek').value = norek;
-    document.getElementById('edit-atas-nama').value = atasNama;
-    document.getElementById('modal-edit-rek').classList.add('show');
-}
+    function openEditRek(id, namaBank, norek, atasNama) {
+        document.getElementById('form-edit-rek').action = '/admin/rekening/' + id + '/update';
+        document.getElementById('edit-nama-bank').value = namaBank;
+        document.getElementById('edit-norek').value = norek;
+        document.getElementById('edit-atas-nama').value = atasNama;
+        document.getElementById('modal-edit-rek').classList.add('show');
+    }
 </script>
 @endpush
