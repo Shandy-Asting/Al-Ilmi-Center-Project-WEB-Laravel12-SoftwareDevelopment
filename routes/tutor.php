@@ -184,6 +184,16 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         return redirect('/tutor/soal')->with('sukses', 'Soal berhasil ditambahkan!');
     });
 
+    Route::get('/soal/template-import', function () {
+        $filePath = public_path('templates/template-import-soal.xlsx');
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File template tidak ditemukan.');
+        }
+
+        return response()->download($filePath, 'template-import-soal.xlsx');
+    });
+
     Route::put('/soal/{id}', function (Request $request, $id) {
         $request->validate([
             'pertanyaan'        => 'required|string',
