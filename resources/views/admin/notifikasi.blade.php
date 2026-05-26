@@ -7,16 +7,26 @@
 
 @section('sidebar-menu')
     <div class="menu-label">Utama</div>
-    <a href="/admin/dashboard" class="nav-item-custom"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/admin/dashboard" class="nav-item-custom {{ request()->is('admin/dashboard') ? 'active' : '' }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
     <div class="menu-label">Pengelolaan</div>
-    <a href="/admin/pengguna" class="nav-item-custom"><i class="bi bi-people-fill"></i> Pengelolaan Pengguna</a>
-    <a href="/admin/paket" class="nav-item-custom"><i class="bi bi-box-seam"></i> Pengelolaan Paket</a>
-    <a href="/admin/transaksi" class="nav-item-custom"><i class="bi bi-credit-card-fill"></i> Transaksi</a>
-    <a href="/admin/pembayaran" class="nav-item-custom"><i class="bi bi-cash-coin"></i> Pembayaran & Gaji</a>
-    <a href="/admin/rekening" class="nav-item-custom"><i class="bi bi-bank"></i> Rekening Bank</a>
-    <a href="/admin/laporan" class="nav-item-custom"><i class="bi bi-bar-chart-line-fill"></i> Laporan</a>
-    <div class="menu-label">Akun</div>
-    <a href="/admin/notifikasi" class="nav-item-custom active"><i class="bi bi-bell-fill"></i> Notifikasi <span class="nav-badge">6</span></a>
+    <a href="/admin/pengguna" class="nav-item-custom {{ request()->is('admin/pengguna') ? 'active' : '' }}">
+        <i class="bi bi-people-fill"></i> Pengelolaan Pengguna
+        <span class="nav-badge">12</span>
+    </a>
+    <a href="/admin/paket" class="nav-item-custom {{ request()->is('admin/paket') ? 'active' : '' }}">
+        <i class="bi bi-box-seam"></i> Pengelolaan Paket
+    </a>
+    <a href="/admin/pembayaran" class="nav-item-custom {{ request()->is('admin/pembayaran') ? 'active' : '' }}">
+        <i class="bi bi-cash-coin"></i> Pembayaran & Gaji
+    </a>
+    <a href="/admin/rekening" class="nav-item-custom {{ request()->is('admin/rekening') ? 'active' : '' }}">
+        <i class="bi bi-bank"></i> Rekening Bank
+    </a>
+    <a href="/admin/laporan" class="nav-item-custom {{ request()->is('admin/laporan') ? 'active' : '' }}">
+        <i class="bi bi-bar-chart-line-fill"></i> Laporan
+    </a>
 @endsection
 
 @push('styles')

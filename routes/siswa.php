@@ -602,61 +602,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     });
 
     // ── Pembayaran ─────────────────────────────────────────────────────────
-
-    Route::get('/pembayaran', function () {
-        $user = auth()->user();
-
-        // Tagihan = les yang sudah dikonfirmasi tutor tapi belum lunas
-        $tagihan = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
-            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
-            ->with(['tutor', 'pembayaranTerakhir'])
-            ->orderBy('jadwal', 'asc')
-            ->paginate(4);
-
-        // Riwayat pembayaran
-        $riwayat = Pembayaran::where('siswa_id', $user->id)
-            ->with(['lesPrivat.tutor'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Rekening bank aktif
-        $rekening = RekeningBank::where('aktif', true)->get();
-
-        // Statistik
-        $totalTagihan = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
-            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
-            ->sum('harga');
-
-        $totalBelumBayar = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
-            ->where('pembayaran_status', 'belum')
-            ->count();
-
-        $jatuhTempoTerdekat = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
-            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
-            ->orderBy('jadwal', 'asc')
-            ->first()?->jadwal?->format('d M Y');
-
-        return view('siswa.pembayaran', compact(
-            'tagihan',
-            'riwayat',
-            'rekening',
-            'totalTagihan',
-            'totalBelumBayar',
-            'totalTransaksi',
-            'jatuhTempoTerdekat'
-        ));
-    });
-
-    // ── Pembayaran ─────────────────────────────────────────────────────────
     Route::get('/pembayaran', function () {
         $user = auth()->user();
 
         $tagihan = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['menunggu', 'dikonfirmasi']) // ← tambah 'menunggu'
             ->whereIn('pembayaran_status', ['belum', 'menunggu'])
             ->with(['tutor', 'pembayaranTerakhir'])
             ->orderBy('jadwal', 'asc')
@@ -670,18 +620,19 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $rekening = RekeningBank::where('aktif', true)->get();
 
         $totalTagihan = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['menunggu', 'dikonfirmasi']) // ← tambah 'menunggu'
             ->whereIn('pembayaran_status', ['belum', 'menunggu'])
             ->sum('harga');
 
         $totalBelumBayar = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['menunggu', 'dikonfirmasi']) // ← tambah 'menunggu'
             ->where('pembayaran_status', 'belum')
             ->count();
 
-        $totalTransaksi     = $riwayat->count();
+        $totalTransaksi = $riwayat->count();
+
         $jatuhTempoTerdekat = LesPrivat::where('user_id', $user->id)
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['menunggu', 'dikonfirmasi']) // ← tambah 'menunggu'
             ->whereIn('pembayaran_status', ['belum', 'menunggu'])
             ->orderBy('jadwal', 'asc')
             ->first()?->jadwal?->format('d M Y');
@@ -711,7 +662,39 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         $les = LesPrivat::where('id', $les_id)
             ->where('user_id', auth()->id())
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['menunggu', 'dikonfirmasi']) // ← tambah 'menunggu'
+            ->whereIn('pembayaran_status', ['belum', 'menunggu'])
+            ->firstOrFail();
+
+        $path = $request->file('bukti_transfer')->store('bukti-pembayaran', 'public');
+
+        Pembayaran::create([
+            'les_privat_id'         => $les->id,
+            'siswa_id'              => auth()->id(),
+            'tutor_id'              => $les->tutor_id,
+            'nomor_invoice'         => Pembayaran::generateInvoice(),
+            'jumlah'                => $les->harga,
+            'bank_tujuan'           => $request->bank_tujuan,
+            'nomor_rekening_tujuan' => $request->nomor_rekening,
+            'bukti_transfer'        => $path,
+            'status'                => 'menunggu',
+        ]);
+
+        $les->update(['pembayaran_status' => 'menunggu']);
+
+        return back()->with('sukses', 'Bukti transfer berhasil dikirim! Menunggu konfirmasi tutor.');
+    });
+
+    Route::post('/pembayaran/{les_id}/upload-bukti', function (Request $request, $les_id) {
+        $request->validate([
+            'bukti_transfer' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'bank_tujuan'    => 'required|string',
+            'nomor_rekening' => 'required|string',
+        ]);
+
+        $les = LesPrivat::where('id', $les_id)
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['menunggu', 'dikonfirmasi'])
             ->whereIn('pembayaran_status', ['belum', 'menunggu'])
             ->firstOrFail();
 
