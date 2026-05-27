@@ -594,11 +594,6 @@
                 Dashboard / <span style="color:var(--primary);font-weight:600;">Jadwal Mengajar</span>
             </div>
         </div>
-        <button class="btn btn-sm fw-bold px-3 py-2"
-            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;"
-            onclick="openModalTambah()">
-            <i class="bi bi-plus-lg me-1"></i> Tambah Jadwal
-        </button>
     </div>
 
     {{-- STAT CARDS --}}

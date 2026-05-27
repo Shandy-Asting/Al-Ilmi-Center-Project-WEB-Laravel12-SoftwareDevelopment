@@ -813,18 +813,6 @@
                 </div>
                 <div class="jadwal-avatar" style="background:var(--warning);">RH</div>
             </div>
-            <div class="jadwal-card" style="border:1.5px dashed var(--primary-light);background:#f8faff;">
-                <div class="jadwal-time">
-                    <div class="time-val" style="color:var(--muted);">+</div>
-                    <div class="time-day">Tambah</div>
-                </div>
-                <div class="jadwal-info">
-                    <div class="j-subj" style="color:var(--primary);">Pesan Jadwal Les Baru</div>
-                    <div class="j-tutor">Pilih tutor & tentukan waktumu</div>
-                </div>
-                <a href="/siswa/pesan-jadwal" class="btn btn-sm"
-                    style="background:#eff6ff;color:var(--primary);font-weight:700;font-size:12px;border-radius:8px;text-decoration:none;">Pesan</a>
-            </div>
         </div>
     </div>
 
@@ -923,67 +911,5 @@
         </div>
     </div>
 
-    {{-- ── HARGA ── --}}
-    <div class="section-title">
-        <span>💳 Informasi Paket Harga</span>
-        <a href="#">Bandingkan Paket →</a>
-    </div>
-    <div class="row g-3 mb-2">
-        <div class="col-md-4">
-            <div class="harga-card">
-                <div class="harga-plan">SD</div>
-                <div class="harga-price">Rp 25K</div>
-                <div class="harga-period">/ bulan</div>
-                <ul class="harga-features">
-                    <li><i class="bi bi-check-circle-fill"></i> Akses Belajar TKA</li>
-                    <li><i class="bi bi-check-circle-fill"></i> 30 Soal Latihan/Bulan</li>
-                    <li><i class="bi bi-check-circle-fill"></i> 2x Les Privat Online</li>
-                    <li><i class="bi bi-x-circle-fill" style="color:var(--border);"></i> Feedback Tutor</li>
-                </ul>
-                <form method="POST" action="/siswa/pilih-paket/sd">
-                    @csrf
-                    <button type="submit" class="btn-harga" style="background:var(--bg);color:var(--primary);">Pilih
-                        Paket</button>
-                </form>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="harga-card featured">
-                <span class="harga-badge">Populer</span>
-                <div class="harga-plan">SMP</div>
-                <div class="harga-price">Rp 45K</div>
-                <div class="harga-period">/ bulan</div>
-                <ul class="harga-features">
-                    <li><i class="bi bi-check-circle-fill"></i> Akses Belajar TKA Penuh</li>
-                    <li><i class="bi bi-check-circle-fill"></i> 50 Soal Latihan/Bulan</li>
-                    <li><i class="bi bi-check-circle-fill"></i> 3x Les Privat Online</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Feedback Tutor Langsung</li>
-                </ul>
-                <form method="POST" action="/siswa/pilih-paket/smp">
-                    @csrf
-                    <button type="submit" class="btn-harga" style="background:var(--accent);color:var(--primary);">Pilih
-                        Paket</button>
-                </form>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="harga-card">
-                <div class="harga-plan">SMA</div>
-                <div class="harga-price">Rp 60K - 80K</div>
-                <div class="harga-period">/ bulan</div>
-                <ul class="harga-features">
-                    <li><i class="bi bi-check-circle-fill"></i> Akses Belajar TKA Penuh</li>
-                    <li><i class="bi bi-check-circle-fill"></i> 100 Soal Latihan/Bulan</li>
-                    <li><i class="bi bi-check-circle-fill"></i> 4x Les Privat Online/Offline</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Feedback Tutor Langsung</li>
-                </ul>
-                <form method="POST" action="/siswa/pilih-paket/sma">
-                    @csrf
-                    <button type="submit" class="btn-harga" style="background:var(--primary);color:#fff;">Pilih
-                        Paket</button>
-                </form>
-            </div>
-        </div>
-    </div>
 
 @endsection

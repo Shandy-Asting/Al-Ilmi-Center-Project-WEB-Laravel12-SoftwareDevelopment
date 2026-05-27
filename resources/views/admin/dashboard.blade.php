@@ -18,10 +18,6 @@
     <a href="/admin/paket" class="nav-item-custom {{ request()->is('admin/paket') ? 'active' : '' }}">
         <i class="bi bi-box-seam"></i> Pengelolaan Paket
     </a>
-    <a href="/admin/transaksi" class="nav-item-custom {{ request()->is('admin/transaksi') ? 'active' : '' }}">
-        <i class="bi bi-credit-card-fill"></i> Transaksi
-        <span class="nav-badge">5</span>
-    </a>
     <a href="/admin/pembayaran" class="nav-item-custom {{ request()->is('admin/pembayaran') ? 'active' : '' }}">
         <i class="bi bi-cash-coin"></i> Pembayaran & Gaji
     </a>
