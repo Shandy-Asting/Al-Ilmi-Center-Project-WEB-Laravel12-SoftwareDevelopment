@@ -447,7 +447,12 @@
             </div>
             <div style="margin-top:8px;">
                 <span style="background:rgba(255,255,255,.15);color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;">
-                    <i class="bi bi-star-fill me-1" style="color:var(--accent);"></i> Paket Pro
+                    <i class="bi bi-star-fill me-1" style="color:var(--accent);"></i>
+                    @if($paketLesPrivat->count() > 0)
+                    {{ $paketLesPrivat->first()->nama }}
+                    @else
+                    Belum Ada Paket
+                    @endif
                 </span>
                 <span style="background:rgba(255,255,255,.15);color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;margin-left:6px;">
                     <i class="bi bi-fire me-1"></i> {{ $aktivitasMinggu }} Hari Streak
@@ -638,13 +643,13 @@
         <div class="form-section-title"><i class="bi bi-bell-fill"></i> Pengaturan Notifikasi</div>
         <div class="d-flex flex-column gap-3">
             @php
-                $notifSettings = [
-                    ['Notifikasi Tagihan & Pembayaran', 'Dapatkan pengingat jatuh tempo tagihan', true],
-                    ['Notifikasi Jadwal Les', 'Pengingat sesi les privat yang akan datang', true],
-                    ['Notifikasi Nilai & Progres', 'Update nilai kuis dan perkembangan belajar', true],
-                    ['Notifikasi Materi Baru', 'Pemberitahuan saat tutor mengunggah materi baru', false],
-                    ['Email Marketing', 'Promo dan penawaran spesial dari Al Ilmi Center', false],
-                ];
+            $notifSettings = [
+            ['Notifikasi Tagihan & Pembayaran', 'Dapatkan pengingat jatuh tempo tagihan', true],
+            ['Notifikasi Jadwal Les', 'Pengingat sesi les privat yang akan datang', true],
+            ['Notifikasi Nilai & Progres', 'Update nilai kuis dan perkembangan belajar', true],
+            ['Notifikasi Materi Baru', 'Pemberitahuan saat tutor mengunggah materi baru', false],
+            ['Email Marketing', 'Promo dan penawaran spesial dari Al Ilmi Center', false],
+            ];
             @endphp
             @foreach($notifSettings as $ns)
             <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
@@ -684,46 +689,82 @@
 {{-- ══ SECTION: PAKET ══ --}}
 <div id="section-paket" style="display:none;">
     <div class="paket-aktif">
-        <div class="pa-label">Paket Aktif</div>
-        <div class="pa-name">Paket Pro ⭐</div>
-        <div class="pa-period">Periode: 1 – 30 April 2026 · Perpanjang Otomatis</div>
-        <div class="pa-features">
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Akses Materi TKA Penuh</div>
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Soal Latihan Tak Terbatas</div>
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> 4x Les Privat Online</div>
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Feedback Tutor Langsung</div>
+        @php $paketAktif = $paketLesPrivat->first(); @endphp
+        @if($paketAktif)
+        <div class="pa-label">Paket Les Privat Tersedia</div>
+        <div class="pa-name">{{ $paketAktif->nama }} ⭐</div>
+        <div class="pa-period">
+            Rp {{ number_format($paketAktif->harga_min, 0, ',', '.') }} / sesi
+            @if($paketAktif->harga_max)
+            — maks Rp {{ number_format($paketAktif->harga_max, 0, ',', '.') }}
+            @endif
         </div>
+        <div class="pa-features">
+            @if($paketAktif->jumlah_les)
+            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> {{ $paketAktif->jumlah_les }} Sesi Les Privat</div>
+            @endif
+            @if($paketAktif->jumlah_soal)
+            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> {{ $paketAktif->jumlah_soal }} Soal Latihan</div>
+            @endif
+            @if($paketAktif->feedback_tutor)
+            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Feedback Tutor Langsung</div>
+            @endif
+            @if($paketAktif->akses_penuh)
+            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Akses Penuh Materi</div>
+            @endif
+        </div>
+        @else
+        <div class="pa-label">Paket Les Privat</div>
+        <div class="pa-name">Belum Ada Paket ⭐</div>
+        <div class="pa-period">Hubungi admin untuk informasi paket</div>
+        @endif
     </div>
 
     <div class="row g-3 mb-3">
-        @php
-        $pakets = [
-            ['Starter','Rp 99K','/ bulan',false,['Akses Materi TKA','50 Soal/Hari','1x Les Privat Online'],'var(--bg)','var(--primary)','Pilih Paket'],
-            ['Pro','Rp 199K','/ bulan',true,['Akses Materi Penuh','Soal Tak Terbatas','4x Les Privat Online','Feedback Tutor'],'var(--primary)','#fff','Paket Aktif'],
-            ['Premium','Rp 349K','/ bulan',false,['Semua Fitur Pro','8x Les Online/Offline','Konsultasi Karir','Laporan Mingguan'],'var(--bg)','var(--primary)','Upgrade'],
-        ];
-        @endphp
-        @foreach($pakets as $p)
+        @foreach($paketLesPrivat as $loop_paket)
         <div class="col-md-4">
-            <div class="card-box text-center" style="{{ $p[3] ? 'border-color:var(--primary);border-width:2px;' : '' }}">
-                @if($p[3])
-                <div style="background:var(--accent);color:var(--primary);font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Paket Aktif</div>
+            <div class="card-box text-center" style="{{ $loop->first ? 'border-color:var(--primary);border-width:2px;' : '' }}">
+                @if($loop->first)
+                <div style="background:var(--accent);color:var(--primary);font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Paket Unggulan</div>
                 @endif
-                <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">{{ $p[0] }}</div>
-                <div style="font-size:26px;font-weight:800;color:{{ $p[3] ? 'var(--primary)' : 'var(--text)' }};margin:8px 0 2px;">{{ $p[1] }}</div>
-                <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">{{ $p[2] }}</div>
+                <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">
+                    {{ strtoupper($loop_paket->tipe) }}
+                </div>
+                <div style="font-size:26px;font-weight:800;color:{{ $loop->first ? 'var(--primary)' : 'var(--text)' }};margin:8px 0 2px;">
+                    Rp {{ number_format($loop_paket->harga_min, 0, ',', '.') }}
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">/ sesi</div>
                 <ul style="list-style:none;padding:0;text-align:left;margin-bottom:16px;">
-                    @foreach($p[4] as $f)
+                    @if($loop_paket->jumlah_les)
                     <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
-                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i> {{ $f }}
+                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                        {{ $loop_paket->jumlah_les }} Sesi Les Privat
                     </li>
-                    @endforeach
+                    @endif
+                    @if($loop_paket->jumlah_soal)
+                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                        {{ $loop_paket->jumlah_soal }} Soal Latihan
+                    </li>
+                    @endif
+                    @if($loop_paket->feedback_tutor)
+                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                        Feedback Tutor
+                    </li>
+                    @endif
+                    @if($loop_paket->akses_penuh)
+                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                        Akses Penuh Materi
+                    </li>
+                    @endif
                 </ul>
-                <button class="btn fw-bold w-100"
-                    style="background:{{ $p[5] }};color:{{ $p[6] }};border-radius:10px;border:{{ $p[3] ? 'none' : '1.5px solid var(--border)' }};font-size:13px;"
-                    {{ $p[3] ? 'disabled' : '' }}>
-                    {{ $p[7] }}
-                </button>
+                <a href="/siswa/les-privat"
+                    class="btn fw-bold w-100"
+                    style="background:{{ $loop->first ? 'var(--primary)' : 'var(--bg)' }};color:{{ $loop->first ? '#fff' : 'var(--primary)' }};border-radius:10px;border:{{ $loop->first ? 'none' : '1.5px solid var(--border)' }};font-size:13px;text-decoration:none;">
+                    Pilih Paket
+                </a>
             </div>
         </div>
         @endforeach
@@ -731,25 +772,39 @@
 
     <div class="card-box">
         <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Riwayat Langganan</div>
-        @php
-        $langganan = [
-            ['Paket Pro','April 2026','Rp 199.000','var(--success-soft)','var(--success)','Aktif'],
-            ['Paket Pro','Maret 2026','Rp 199.000','var(--success-soft)','var(--success)','Lunas'],
-            ['Paket Starter','Februari 2026','Rp 99.000','var(--success-soft)','var(--success)','Lunas'],
-        ];
-        @endphp
-        @foreach($langganan as $l)
+        @forelse($riwayatLes as $les)
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
             <div>
-                <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $l[0] }}</div>
-                <div style="font-size:12px;color:var(--muted);">Periode: {{ $l[1] }}</div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">
+                    {{ $les->mata_pelajaran }}
+                    @if($les->tutor) — {{ $les->tutor->name }} @endif
+                </div>
+                <div style="font-size:12px;color:var(--muted);">
+                    {{ $les->jadwal ? $les->jadwal->translatedFormat('d M Y') : '-' }}
+                </div>
             </div>
             <div class="text-end">
-                <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $l[2] }}</div>
-                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:{{ $l[3] }};color:{{ $l[4] }};">{{ $l[5] }}</span>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">
+                    Rp {{ number_format($les->harga, 0, ',', '.') }}
+                </div>
+                @if($les->status === 'selesai')
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--success-soft);color:var(--success);">Selesai</span>
+                @elseif($les->status === 'dikonfirmasi')
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--info-soft);color:var(--info);">Dikonfirmasi</span>
+                @elseif($les->status === 'menunggu')
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--warning);">Menunggu</span>
+                @else
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--danger-soft);color:var(--danger);">Dibatalkan</span>
+                @endif
             </div>
         </div>
-        @endforeach
+        @empty
+        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">
+            <i class="bi bi-calendar-x" style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:.4;"></i>
+            Belum ada riwayat les privat.
+            <a href="/siswa/les-privat" style="color:var(--primary);font-weight:600;display:block;margin-top:6px;">Pesan Les Sekarang →</a>
+        </div>
+        @endforelse
     </div>
 </div>
 

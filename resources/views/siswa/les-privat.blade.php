@@ -6,180 +6,810 @@
 @section('page-sub', 'Dashboard / Les Privat')
 
 @section('sidebar-menu')
-    <div class="menu-label">Menu Utama</div>
-    <a href="/siswa/dashboard" class="nav-item-custom {{ request()->is('siswa/dashboard') ? 'active' : '' }}">
-        <i class="bi bi-grid-fill"></i> Dashboard
-    </a>
-    <a href="/siswa/belajar-tka" class="nav-item-custom {{ request()->is('siswa/belajar-tka') ? 'active' : '' }}">
-        <i class="bi bi-book-fill"></i> Belajar TKA
-    </a>
-    <a href="/siswa/les-privat" class="nav-item-custom {{ request()->is('siswa/les-privat') ? 'active' : '' }}">
-        <i class="bi bi-person-video3"></i> Les Privat
-    </a>
-    <a href="/siswa/hasil-progres" class="nav-item-custom {{ request()->is('siswa/hasil-progres') ? 'active' : '' }}">
-        <i class="bi bi-bar-chart-line-fill"></i> Hasil & Progres
-    </a>
-    <div class="menu-label">Akun</div>
-    <a href="/siswa/pembayaran" class="nav-item-custom {{ request()->is('siswa/pembayaran') ? 'active' : '' }}">
-        <i class="bi bi-credit-card-fill"></i> Pembayaran
-    </a>
-    <a href="/siswa/notifikasi" class="nav-item-custom {{ request()->is('siswa/notifikasi') ? 'active' : '' }}">
-        <i class="bi bi-bell-fill"></i> Notifikasi
-        <span class="nav-badge">3</span>
-    </a>
-    <a href="/siswa/profil" class="nav-item-custom {{ request()->is('siswa/profil') ? 'active' : '' }}">
-        <i class="bi bi-person-circle"></i> Profil Saya
-    </a>
+<div class="menu-label">Menu Utama</div>
+<a href="/siswa/dashboard" class="nav-item-custom {{ request()->is('siswa/dashboard') ? 'active' : '' }}">
+    <i class="bi bi-grid-fill"></i> Dashboard
+</a>
+<a href="/siswa/belajar-tka" class="nav-item-custom {{ request()->is('siswa/belajar-tka') ? 'active' : '' }}">
+    <i class="bi bi-book-fill"></i> Belajar TKA
+</a>
+<a href="/siswa/les-privat" class="nav-item-custom {{ request()->is('siswa/les-privat') ? 'active' : '' }}">
+    <i class="bi bi-person-video3"></i> Les Privat
+</a>
+<a href="/siswa/hasil-progres" class="nav-item-custom {{ request()->is('siswa/hasil-progres') ? 'active' : '' }}">
+    <i class="bi bi-bar-chart-line-fill"></i> Hasil & Progres
+</a>
+<div class="menu-label">Akun</div>
+<a href="/siswa/pembayaran" class="nav-item-custom {{ request()->is('siswa/pembayaran') ? 'active' : '' }}">
+    <i class="bi bi-credit-card-fill"></i> Pembayaran
+</a>
+<a href="/siswa/notifikasi" class="nav-item-custom {{ request()->is('siswa/notifikasi') ? 'active' : '' }}">
+    <i class="bi bi-bell-fill"></i> Notifikasi
+    <span class="nav-badge">3</span>
+</a>
+<a href="/siswa/profil" class="nav-item-custom {{ request()->is('siswa/profil') ? 'active' : '' }}">
+    <i class="bi bi-person-circle"></i> Profil Saya
+</a>
 @endsection
 
 @push('styles')
 <style>
-/* ── MAIN TABS ── */
-.main-tabs{display:flex;gap:6px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:5px;margin-bottom:24px;}
-.main-tab{flex:1;text-align:center;padding:9px 8px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:transparent;}
-.main-tab.active{background:var(--primary);color:#fff;}
-.main-tab:hover:not(.active){background:var(--bg);color:var(--primary);}
+    /* ── MAIN TABS ── */
+    .main-tabs {
+        display: flex;
+        gap: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 5px;
+        margin-bottom: 24px;
+    }
 
-/* ── STEP BAR ── */
-.step-bar{display:flex;align-items:center;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:14px 24px;margin-bottom:28px;overflow-x:auto;gap:0;}
-.step-item{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.step-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all .3s;}
-.step-circle.done{background:var(--success);color:#fff;}
-.step-circle.active{background:var(--primary);color:#fff;box-shadow:0 0 0 4px rgba(30,58,95,.15);}
-.step-circle.pending{background:var(--bg);color:var(--muted);border:2px solid var(--border);}
-.step-label{font-size:12.5px;font-weight:600;}
-.step-label.active{color:var(--primary);}
-.step-label.done{color:var(--success);}
-.step-label.pending{color:var(--muted);}
-.step-divider{flex:1;height:2px;background:var(--border);margin:0 12px;min-width:20px;transition:background .3s;}
-.step-divider.done{background:var(--success);}
+    .main-tab {
+        flex: 1;
+        text-align: center;
+        padding: 9px 8px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s;
+        color: var(--muted);
+        border: none;
+        background: transparent;
+    }
 
-/* ── JENJANG SELECTOR ── */
-.jenjang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
-.jenjang-card{background:var(--card-bg);border:2px solid var(--border);border-radius:16px;padding:22px 16px;text-align:center;cursor:pointer;transition:all .25s;}
-.jenjang-card:hover{border-color:var(--primary-light);transform:translateY(-3px);box-shadow:0 8px 24px rgba(30,58,95,.1);}
-.jenjang-card.selected{border-color:var(--primary);background:#eff6ff;box-shadow:0 6px 22px rgba(30,58,95,.18);}
-.jenjang-icon{font-size:40px;margin-bottom:10px;}
-.jenjang-name{font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;}
-.jenjang-sub{font-size:12px;color:var(--muted);}
-.jenjang-harga{font-size:16px;font-weight:800;margin-top:8px;}
+    .main-tab.active {
+        background: var(--primary);
+        color: #fff;
+    }
 
-/* ── PAKET DETAIL CARD ── */
-.paket-detail{background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;padding:22px;margin-bottom:20px;display:none;}
-.paket-detail.show{display:block;}
-.paket-fitur li{font-size:13px;padding:6px 0;display:flex;align-items:flex-start;gap:8px;color:var(--text);border-bottom:1px solid #f1f5f9;}
-.paket-fitur li:last-child{border-bottom:none;}
+    .main-tab:hover:not(.active) {
+        background: var(--bg);
+        color: var(--primary);
+    }
 
-/* ── TUTOR CARD ── */
-.tutor-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:all .2s;margin-bottom:10px;}
-.tutor-card:hover{border-color:var(--primary-light);box-shadow:0 4px 14px rgba(30,58,95,.1);}
-.tutor-card.selected{border-color:var(--primary);background:#eff6ff;}
-.tutor-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;flex-shrink:0;}
-.tutor-name{font-size:14px;font-weight:800;color:var(--text);}
-.tutor-mapel{font-size:12px;color:var(--muted);margin-bottom:4px;}
-.tutor-stars{color:var(--accent);font-size:12px;}
-.tutor-price{margin-left:auto;text-align:right;flex-shrink:0;}
-.tp-val{font-size:14px;font-weight:800;color:var(--primary);}
-.tp-label{font-size:10px;color:var(--muted);}
-.tp-avail{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:4px;display:inline-block;}
+    /* ── STEP BAR ── */
+    .step-bar {
+        display: flex;
+        align-items: center;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 24px;
+        margin-bottom: 28px;
+        overflow-x: auto;
+        gap: 0;
+    }
 
-/* ── FORM ── */
-.form-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;}
-.form-label-custom{font-size:13px;font-weight:700;margin-bottom:6px;display:block;color:var(--text);}
-.form-control-custom{border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13.5px;width:100%;outline:none;transition:border-color .2s;color:var(--text);background:#fff;}
-.form-control-custom:focus{border-color:var(--primary);}
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
 
-/* ── SUMMARY ── */
-.summary-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:22px;position:sticky;top:80px;}
-.summary-title{font-size:15px;font-weight:800;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-.summary-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;font-size:13px;}
-.sr-label{color:var(--muted);}
-.sr-val{font-weight:600;text-align:right;max-width:55%;}
-.summary-total{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border);margin-top:6px;border-bottom:1px solid var(--border);}
-.st-label{font-size:14px;font-weight:700;}
-.st-val{font-size:18px;font-weight:800;color:var(--primary);}
+    .step-circle {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+        transition: all .3s;
+    }
 
-/* ── LOKASI ── */
-.lokasi-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;margin-bottom:10px;}
-.lokasi-option:hover{border-color:var(--primary-light);background:#f8faff;}
-.lokasi-option.selected{border-color:var(--primary);background:#eff6ff;}
+    .step-circle.done {
+        background: var(--success);
+        color: #fff;
+    }
 
-/* ── SLOT ── */
-.slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.slot-btn{padding:10px 4px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center;color:var(--muted);}
-.slot-btn:hover{border-color:var(--primary-light);color:var(--primary);}
-.slot-btn.selected{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(30,58,95,.25);}
-.slot-btn.booked{background:#f8fafc;border-color:var(--border);color:#cbd5e1;cursor:not-allowed;text-decoration:line-through;}
+    .step-circle.active {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 0 0 4px rgba(30, 58, 95, .15);
+    }
 
-/* ── ORDER CARD ── */
-.order-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:box-shadow .2s;}
-.order-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.07);}
-.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.order-id{font-size:11.5px;font-weight:700;color:var(--muted);}
-.order-body{display:flex;align-items:center;gap:14px;}
-.order-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
-.oi-subj{font-size:14px;font-weight:700;color:var(--text);}
-.oi-tutor,.oi-sched{font-size:12px;color:var(--muted);margin-top:2px;}
-.order-action{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
-.btn-action{border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+    .step-circle.pending {
+        background: var(--bg);
+        color: var(--muted);
+        border: 2px solid var(--border);
+    }
 
-/* ── TIMELINE ── */
-.status-timeline{position:relative;padding-left:28px;}
-.status-timeline::before{content:'';position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--border);}
-.timeline-item{position:relative;margin-bottom:20px;}
-.timeline-item:last-child{margin-bottom:0;}
-.tl-dot{position:absolute;left:-28px;top:3px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;z-index:1;}
-.tl-dot.done{background:var(--success);color:#fff;}
-.tl-dot.active{background:var(--primary);color:#fff;box-shadow:0 0 0 3px rgba(30,58,95,.2);}
-.tl-dot.pending{background:#fff;border:2px solid var(--border);color:var(--muted);}
-.tl-title{font-size:13px;font-weight:700;color:var(--text);}
-.tl-desc{font-size:12px;color:var(--muted);margin-top:2px;}
-.tl-time{font-size:11px;color:var(--muted);margin-top:2px;}
+    .step-label {
+        font-size: 12.5px;
+        font-weight: 600;
+    }
 
-/* ── PILL ── */
-.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600;}
-.p-success{background:var(--success-soft);color:var(--success);}
-.p-warning{background:var(--warning-soft);color:var(--warning);}
-.p-danger{background:var(--danger-soft);color:var(--danger);}
-.p-info{background:var(--info-soft);color:var(--info);}
+    .step-label.active {
+        color: var(--primary);
+    }
 
-/* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;}
-.modal-overlay.show{display:flex;}
-.modal-box{background:#fff;border-radius:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:fadeUp .25s ease;}
-@keyframes fadeUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;}
-.modal-head h5{font-size:15px;font-weight:800;color:var(--text);}
-.modal-close-btn{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);}
+    .step-label.done {
+        color: var(--success);
+    }
 
-/* ── RESPONSIVE ── */
-@media(max-width:991px){
-    .jenjang-grid{grid-template-columns:repeat(3,1fr);gap:10px;}
-    .summary-card{position:static;}
-}
-@media(max-width:767px){
-    .main-tabs{overflow-x:auto;flex-wrap:nowrap;}
-    .main-tab{min-width:90px;flex:none;font-size:12px;}
-    .step-bar{padding:12px 14px;}
-    .step-label{font-size:10px;}
-    .jenjang-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
-    .jenjang-card{padding:14px 8px;}
-    .jenjang-icon{font-size:28px;}
-    .jenjang-name{font-size:14px;}
-    .jenjang-sub{font-size:10px;}
-    .slot-grid{grid-template-columns:repeat(3,1fr) !important;}
-    .tutor-card{flex-wrap:wrap;}
-    .tutor-price{margin-left:0!important;text-align:left!important;width:100%;}
-    .order-body{flex-wrap:wrap;}
-    .order-action{width:100%;flex-wrap:wrap;}
-    .form-card{padding:16px!important;}
-    .summary-card{padding:16px!important;}
-}
-@media(max-width:480px){
-    .step-label{display:none;}
-    .slot-grid{grid-template-columns:repeat(2,1fr) !important;}
-    .jenjang-harga{font-size:13px;}
-}
+    .step-label.pending {
+        color: var(--muted);
+    }
+
+    .step-divider {
+        flex: 1;
+        height: 2px;
+        background: var(--border);
+        margin: 0 12px;
+        min-width: 20px;
+        transition: background .3s;
+    }
+
+    .step-divider.done {
+        background: var(--success);
+    }
+
+    /* ── JENJANG SELECTOR ── */
+    .jenjang-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .jenjang-card {
+        background: var(--card-bg);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all .25s;
+    }
+
+    .jenjang-card:hover {
+        border-color: var(--primary-light);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(30, 58, 95, .1);
+    }
+
+    .jenjang-card.selected {
+        border-color: var(--primary);
+        background: #eff6ff;
+        box-shadow: 0 6px 22px rgba(30, 58, 95, .18);
+    }
+
+    .jenjang-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .jenjang-name {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 4px;
+    }
+
+    .jenjang-sub {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .jenjang-harga {
+        font-size: 16px;
+        font-weight: 800;
+        margin-top: 8px;
+    }
+
+    /* ── PAKET DETAIL CARD ── */
+    .paket-detail {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        margin-bottom: 20px;
+        display: none;
+    }
+
+    .paket-detail.show {
+        display: block;
+    }
+
+    .paket-fitur li {
+        font-size: 13px;
+        padding: 6px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        color: var(--text);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .paket-fitur li:last-child {
+        border-bottom: none;
+    }
+
+    /* ── TUTOR CARD ── */
+    .tutor-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        cursor: pointer;
+        transition: all .2s;
+        margin-bottom: 10px;
+    }
+
+    .tutor-card:hover {
+        border-color: var(--primary-light);
+        box-shadow: 0 4px 14px rgba(30, 58, 95, .1);
+    }
+
+    .tutor-card.selected {
+        border-color: var(--primary);
+        background: #eff6ff;
+    }
+
+    .tutor-av {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .tutor-name {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .tutor-mapel {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .tutor-stars {
+        color: var(--accent);
+        font-size: 12px;
+    }
+
+    .tutor-price {
+        margin-left: auto;
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .tp-val {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .tp-label {
+        font-size: 10px;
+        color: var(--muted);
+    }
+
+    .tp-avail {
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-top: 4px;
+        display: inline-block;
+    }
+
+    /* ── FORM ── */
+    .form-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+    }
+
+    .form-label-custom {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        display: block;
+        color: var(--text);
+    }
+
+    .form-control-custom {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13.5px;
+        width: 100%;
+        outline: none;
+        transition: border-color .2s;
+        color: var(--text);
+        background: #fff;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--primary);
+    }
+
+    /* ── SUMMARY ── */
+    .summary-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        position: sticky;
+        top: 80px;
+    }
+
+    .summary-title {
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+
+    .sr-label {
+        color: var(--muted);
+    }
+
+    .sr-val {
+        font-weight: 600;
+        text-align: right;
+        max-width: 55%;
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 6px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .st-label {
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .st-val {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    /* ── LOKASI ── */
+    .lokasi-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all .2s;
+        margin-bottom: 10px;
+    }
+
+    .lokasi-option:hover {
+        border-color: var(--primary-light);
+        background: #f8faff;
+    }
+
+    .lokasi-option.selected {
+        border-color: var(--primary);
+        background: #eff6ff;
+    }
+
+    /* ── SLOT ── */
+    .slot-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    .slot-btn {
+        padding: 10px 4px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border);
+        background: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .slot-btn:hover {
+        border-color: var(--primary-light);
+        color: var(--primary);
+    }
+
+    .slot-btn.selected {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        box-shadow: 0 3px 10px rgba(30, 58, 95, .25);
+    }
+
+    .slot-btn.booked {
+        background: #f8fafc;
+        border-color: var(--border);
+        color: #cbd5e1;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+
+    /* ── ORDER CARD ── */
+    .order-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        transition: box-shadow .2s;
+    }
+
+    .order-card:hover {
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .07);
+    }
+
+    .order-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .order-id {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .order-body {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .order-av {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .oi-subj {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .oi-tutor,
+    .oi-sched {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .order-action {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .btn-action {
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    /* ── TIMELINE ── */
+    .status-timeline {
+        position: relative;
+        padding-left: 28px;
+    }
+
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        left: 11px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: var(--border);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .tl-dot {
+        position: absolute;
+        left: -28px;
+        top: 3px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+        z-index: 1;
+    }
+
+    .tl-dot.done {
+        background: var(--success);
+        color: #fff;
+    }
+
+    .tl-dot.active {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 0 0 3px rgba(30, 58, 95, .2);
+    }
+
+    .tl-dot.pending {
+        background: #fff;
+        border: 2px solid var(--border);
+        color: var(--muted);
+    }
+
+    .tl-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .tl-desc {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .tl-time {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    /* ── PILL ── */
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 600;
+    }
+
+    .p-success {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .p-warning {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .p-danger {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .p-info {
+        background: var(--info-soft);
+        color: var(--info);
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .55);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 92vh;
+        overflow-y: auto;
+        animation: fadeUp .25s ease;
+    }
+
+    @keyframes fadeUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1
+        }
+    }
+
+    .modal-head {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 1;
+    }
+
+    .modal-head h5 {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .modal-close-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: none;
+        background: var(--bg);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        color: var(--muted);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:991px) {
+        .jenjang-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .summary-card {
+            position: static;
+        }
+    }
+
+    @media(max-width:767px) {
+        .main-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+        }
+
+        .main-tab {
+            min-width: 90px;
+            flex: none;
+            font-size: 12px;
+        }
+
+        .step-bar {
+            padding: 12px 14px;
+        }
+
+        .step-label {
+            font-size: 10px;
+        }
+
+        .jenjang-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .jenjang-card {
+            padding: 14px 8px;
+        }
+
+        .jenjang-icon {
+            font-size: 28px;
+        }
+
+        .jenjang-name {
+            font-size: 14px;
+        }
+
+        .jenjang-sub {
+            font-size: 10px;
+        }
+
+        .slot-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+
+        .tutor-card {
+            flex-wrap: wrap;
+        }
+
+        .tutor-price {
+            margin-left: 0 !important;
+            text-align: left !important;
+            width: 100%;
+        }
+
+        .order-body {
+            flex-wrap: wrap;
+        }
+
+        .order-action {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .form-card {
+            padding: 16px !important;
+        }
+
+        .summary-card {
+            padding: 16px !important;
+        }
+    }
+
+    @media(max-width:480px) {
+        .step-label {
+            display: none;
+        }
+
+        .slot-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .jenjang-harga {
+            font-size: 13px;
+        }
+    }
 </style>
 @endpush
 
@@ -261,11 +891,20 @@
         {{-- JENJANG CARDS --}}
         <div class="jenjang-grid">
             @php
-            $jenjangList = [
-                'sd'  => ['emoji'=>'📚','name'=>'SD','sub'=>'Kelas 1–6','harga'=>'Rp 50.000','durasi'=>'60 mnt/sesi','warna'=>'var(--success)'],
-                'smp' => ['emoji'=>'🎒','name'=>'SMP','sub'=>'Kelas 7–9','harga'=>'Rp 60.000','durasi'=>'75 mnt/sesi','warna'=>'var(--primary)'],
-                'sma' => ['emoji'=>'🏆','name'=>'SMA','sub'=>'Kelas 10–12','harga'=>'Rp 75.000','durasi'=>'90 mnt/sesi','warna'=>'#8B5CF6'],
+            $meta = [
+            'sd' => ['emoji'=>'📚','name'=>'SD', 'sub'=>'Kelas 1–6', 'durasi'=>'60 mnt/sesi','warna'=>'var(--success)'],
+            'smp' => ['emoji'=>'🎒','name'=>'SMP','sub'=>'Kelas 7–9', 'durasi'=>'75 mnt/sesi','warna'=>'var(--primary)'],
+            'sma' => ['emoji'=>'🏆','name'=>'SMA','sub'=>'Kelas 10–12', 'durasi'=>'90 mnt/sesi','warna'=>'#8B5CF6'],
             ];
+            $jenjangList = [];
+            foreach ($meta as $key => $m) {
+            $p = $pakets->get($key); // ambil dari $pakets yang dikirim route
+            $jenjangList[$key] = array_merge($m, [
+            'harga' => $p ? 'Rp '.number_format($p->harga_min, 0, ',', '.') : 'Hubungi Admin',
+            'harga_raw' => $p ? $p->harga_min : 0,
+            'paket_id' => $p ? $p->id : null,
+            ]);
+            }
             @endphp
             @foreach($jenjangList as $key => $j)
             <div class="jenjang-card" onclick="selectJenjang('{{ $key }}')" id="jcard-{{ $key }}">
@@ -314,7 +953,7 @@
                         @endforeach
                     </div>
                     <button
-                        onclick="pilihPaket('{{ $key }}','{{ $j['name'] }}','{{ $j['harga'] }}')"
+                        onclick="pilihPaket('{{ $key }}','{{ $j['name'] }}','{{ $j['harga'] }}','{{ $j['paket_id'] }}')"
                         style="width:100%;margin-top:14px;padding:13px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;border:none;background:{{ $j['warna'] }};color:#fff;box-shadow:0 5px 16px rgba(0,0,0,.2);transition:all .2s;"
                         onmouseover="this.style.opacity='.88';this.style.transform='translateY(-2px)'"
                         onmouseout="this.style.opacity='1';this.style.transform=''">
@@ -376,7 +1015,7 @@
                 </div>
                 @endforelse
 
-                <input type="hidden" id="input-tutor-id" name="tutor_id"/>
+                <input type="hidden" id="input-tutor-id" name="tutor_id" />
 
                 <div class="d-flex justify-content-between mt-4">
                     <button class="btn fw-bold px-4 py-2"
@@ -426,7 +1065,7 @@
                     {{-- Topik --}}
                     <div class="mb-3">
                         <label class="form-label-custom">Topik / Materi yang Ingin Dipelajari</label>
-                        <input type="text" id="inp-topik" class="form-control-custom" placeholder="Contoh: Integral, Trigonometri, Grammar…"/>
+                        <input type="text" id="inp-topik" class="form-control-custom" placeholder="Contoh: Integral, Trigonometri, Grammar…" />
                     </div>
 
                     {{-- Tanggal & Waktu --}}
@@ -434,7 +1073,7 @@
                         <label class="form-label-custom">Tanggal & Waktu <span class="text-danger">*</span></label>
                         <input type="datetime-local" id="input-jadwal" class="form-control-custom"
                             min="{{ now()->addDay()->format('Y-m-d\TH:i') }}"
-                            onchange="updateSummary()"/>
+                            onchange="updateSummary()" />
                         <div style="font-size:12px;color:var(--muted);margin-top:4px;">
                             <i class="bi bi-info-circle me-1"></i>Minimal pemesanan H-1 dari jadwal sesi
                         </div>
@@ -446,7 +1085,7 @@
                         <div class="row g-2">
                             <div class="col-6">
                                 <div class="lokasi-option selected" id="mode-online" onclick="selectMode('online')">
-                                    <input type="radio" name="mode_radio" checked style="accent-color:var(--primary);width:16px;height:16px;"/>
+                                    <input type="radio" name="mode_radio" checked style="accent-color:var(--primary);width:16px;height:16px;" />
                                     <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
                                         <i class="bi bi-camera-video-fill"></i>
                                     </div>
@@ -458,7 +1097,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="lokasi-option" id="mode-offline" onclick="selectMode('tatap_muka')">
-                                    <input type="radio" name="mode_radio" style="accent-color:var(--primary);width:16px;height:16px;"/>
+                                    <input type="radio" name="mode_radio" style="accent-color:var(--primary);width:16px;height:16px;" />
                                     <div style="width:36px;height:36px;border-radius:10px;background:var(--info-soft);color:var(--info);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
                                         <i class="bi bi-geo-alt-fill"></i>
                                     </div>
@@ -474,7 +1113,7 @@
                     {{-- Lokasi (tatap muka) --}}
                     <div id="lokasi-wrap" class="mb-3" style="display:none;">
                         <label class="form-label-custom">Alamat Lokasi <span class="text-danger">*</span></label>
-                        <input type="text" id="inp-lokasi" class="form-control-custom" placeholder="Jl. Merdeka No.1, Kediri, Jawa Timur"/>
+                        <input type="text" id="inp-lokasi" class="form-control-custom" placeholder="Jl. Merdeka No.1, Kediri, Jawa Timur" />
                     </div>
 
                     {{-- Catatan --}}
@@ -538,11 +1177,11 @@
                             </div>
                         </div>
                         @foreach([
-                            ['bi-mortarboard-fill','Paket','konfirm-paket'],
-                            ['bi-book-fill','Mata Pelajaran','konfirm-mapel'],
-                            ['bi-calendar3','Jadwal','konfirm-jadwal'],
-                            ['bi-clock-fill','Durasi','konfirm-durasi'],
-                            ['bi-camera-video-fill','Mode','konfirm-mode'],
+                        ['bi-mortarboard-fill','Paket','konfirm-paket'],
+                        ['bi-book-fill','Mata Pelajaran','konfirm-mapel'],
+                        ['bi-calendar3','Jadwal','konfirm-jadwal'],
+                        ['bi-clock-fill','Durasi','konfirm-durasi'],
+                        ['bi-camera-video-fill','Mode','konfirm-mode'],
                         ] as $row)
                         <div style="display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid var(--border);">
                             <span style="color:var(--muted);display:flex;align-items:center;gap:6px;">
@@ -556,15 +1195,16 @@
                     {{-- Form hidden fields for POST --}}
                     <form id="form-pesan-les" action="/siswa/les-privat/pesan" method="POST">
                         @csrf
-                        <input type="hidden" name="tutor_id"       id="f-tutor-id"/>
-                        <input type="hidden" name="mata_pelajaran"  id="f-mapel"/>
-                        <input type="hidden" name="topik"           id="f-topik"/>
-                        <input type="hidden" name="jadwal"          id="f-jadwal"/>
-                        <input type="hidden" name="durasi_menit"    id="f-durasi" value="90"/>
-                        <input type="hidden" name="mode"            id="f-mode"   value="online"/>
-                        <input type="hidden" name="lokasi"          id="f-lokasi"/>
-                        <input type="hidden" name="catatan"         id="f-catatan"/>
-                        <input type="hidden" name="harga"           id="f-harga"/>
+                        <input type="hidden" name="tutor_id" id="f-tutor-id" />
+                        <input type="hidden" name="paket_id" id="f-paket-id" />
+                        <input type="hidden" name="mata_pelajaran" id="f-mapel" />
+                        <input type="hidden" name="topik" id="f-topik" />
+                        <input type="hidden" name="jadwal" id="f-jadwal" />
+                        <input type="hidden" name="durasi_menit" id="f-durasi" value="90" />
+                        <input type="hidden" name="mode" id="f-mode" value="online" />
+                        <input type="hidden" name="lokasi" id="f-lokasi" />
+                        <input type="hidden" name="catatan" id="f-catatan" />
+                        <input type="hidden" name="harga" id="f-harga" />
                     </form>
 
                     {{-- Persetujuan --}}
@@ -732,7 +1372,21 @@
             <div class="order-action" style="flex-direction:column;align-items:flex-end;">
                 <div style="font-size:14px;font-weight:800;color:var(--muted);">Rp {{ number_format($r->harga,0,',','.') }}</div>
                 @if($r->status==='selesai')
-                <button onclick="showMainTab('pesan')" class="btn-action" style="background:#eff6ff;color:var(--primary);margin-top:6px;">Pesan Ulang</button>
+                <button onclick="showMainTab('pesan')" class="btn-action"
+                    style="background:#eff6ff;color:var(--primary);margin-top:6px;">
+                    Pesan Ulang
+                </button>
+                @if(!$r->ulasan)
+                <button onclick="bukaModalUlasan('{{ $r->id }}','{{ addslashes($r->mata_pelajaran) }}','{{ addslashes($r->tutor->name ?? '') }}')"
+                    class="btn-action"
+                    style="background:var(--accent-soft);color:var(--warning);margin-top:6px;">
+                    ⭐ Beri Ulasan
+                </button>
+                @else
+                <span style="font-size:10.5px;color:var(--success);margin-top:4px;display:block;">
+                    ✅ Sudah Diulas
+                </span>
+                @endif
                 @endif
             </div>
         </div>
@@ -748,7 +1402,7 @@
             <div style="font-size:60px;margin-bottom:14px;">🎉</div>
             <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px;">Pesanan Terkirim!</div>
             <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
-                Pesanan les privat berhasil dikirim!<br/>
+                Pesanan les privat berhasil dikirim!<br />
                 Menunggu konfirmasi tutor dalam <strong>1×24 jam</strong>.
             </div>
             <div style="background:var(--success-soft);border-radius:12px;padding:14px;margin-bottom:20px;text-align:left;">
@@ -773,190 +1427,311 @@
     </div>
 </div>
 
+{{-- MODAL ULASAN --}}
+<div class="modal-overlay" id="modal-ulasan">
+    <div class="modal-box" style="max-width:440px;">
+        <div class="modal-head">
+            <h5><i class="bi bi-star-fill me-2" style="color:var(--accent);"></i>Beri Ulasan</h5>
+            <button class="modal-close-btn"
+                onclick="document.getElementById('modal-ulasan').classList.remove('show')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form method="POST" action="/siswa/ulasan">
+            @csrf
+            <input type="hidden" name="les_privat_id" id="ulasan-les-id" />
+            <div style="padding:20px 22px;">
+                <div style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:13.5px;font-weight:700;color:var(--text);" id="ulasan-mapel"></div>
+                    <div style="font-size:12px;color:var(--muted);" id="ulasan-tutor"></div>
+                </div>
+
+                <div style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">Rating</div>
+                    <div style="display:flex;justify-content:center;gap:8px;" id="star-container">
+                        @for($i=1;$i<=5;$i++)
+                            <i class="bi bi-star" data-val="{{ $i }}"
+                            onclick="setBintang({{ $i }})"
+                            style="font-size:28px;cursor:pointer;color:var(--border);transition:color .15s;"></i>
+                            @endfor
+                    </div>
+                    <input type="hidden" name="bintang" id="input-bintang" value="0" />
+                </div>
+
+                <div class="mb-3">
+                    <label style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;display:block;">
+                        Komentar (opsional)
+                    </label>
+                    <textarea name="komentar" rows="3"
+                        style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;outline:none;resize:vertical;"
+                        placeholder="Ceritakan pengalaman belajarmu..."></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button"
+                        onclick="document.getElementById('modal-ulasan').classList.remove('show')"
+                        style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);">
+                        Batal
+                    </button>
+                    <button type="submit" id="btn-kirim-ulasan" disabled
+                        style="flex:2;padding:10px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer;opacity:.6;">
+                        <i class="bi bi-send-fill me-1"></i> Kirim Ulasan
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
-// ── STATE ──
-let state = {
-    jenjang: '',
-    jenjangName: '',
-    harga: 0,
-    tutorId: '',
-    tutorName: '',
-    mapel: '',
-    jadwal: '',
-    mode: 'online',
-    durasi: 90
-};
+    // ── STATE ──
+    let state = {
+        jenjang: '',
+        jenjangName: '',
+        paketId: '',
+        harga: 0,
+        tutorId: '',
+        tutorName: '',
+        mapel: '',
+        jadwal: '',
+        mode: 'online',
+        durasi: 90
+    };
 
-// ── MAIN TAB ──
-function showMainTab(tab) {
-    const isPesan = tab === 'pesan';
-    document.getElementById('panel-pesan').style.display  = isPesan ? '' : 'none';
-    document.getElementById('panel-status').style.display = isPesan ? 'none' : '';
-    document.getElementById('step-bar').style.display     = isPesan ? '' : 'none';
+    // ── MAIN TAB ──
+    function showMainTab(tab) {
+        const isPesan = tab === 'pesan';
+        document.getElementById('panel-pesan').style.display = isPesan ? '' : 'none';
+        document.getElementById('panel-status').style.display = isPesan ? 'none' : '';
+        document.getElementById('step-bar').style.display = isPesan ? '' : 'none';
 
-    document.getElementById('tab-pesan').classList.toggle('active', isPesan);
-    document.getElementById('tab-status').classList.toggle('active', !isPesan);
-}
+        document.getElementById('tab-pesan').classList.toggle('active', isPesan);
+        document.getElementById('tab-status').classList.toggle('active', !isPesan);
+    }
 
-// ── STEP NAVIGATION ──
-function goStep(n) {
-    [1,2,3,4].forEach(i => {
-        const el = document.getElementById('form-step' + i);
-        if(el) el.style.display = 'none';
-    });
-    const target = document.getElementById('form-step' + n);
-    if(target) target.style.display = '';
+    // ── STEP NAVIGATION ──
+    function goStep(n) {
+        [1, 2, 3, 4].forEach(i => {
+            const el = document.getElementById('form-step' + i);
+            if (el) el.style.display = 'none';
+        });
+        const target = document.getElementById('form-step' + n);
+        if (target) target.style.display = '';
 
-    [1,2,3,4].forEach(i => {
-        const sc = document.getElementById('sc' + i);
-        const sl = document.getElementById('sl' + i);
-        const sd = document.getElementById('sd' + i);
-        if(!sc) return;
-        if(i < n) {
-            sc.className = 'step-circle done';
-            sc.innerHTML = '<i class="bi bi-check-lg"></i>';
-            sl.className = 'step-label done';
-        } else if(i === n) {
-            sc.className = 'step-circle active';
-            sc.innerHTML = i;
-            sl.className = 'step-label active';
-        } else {
-            sc.className = 'step-circle pending';
-            sc.innerHTML = i;
-            sl.className = 'step-label pending';
+        [1, 2, 3, 4].forEach(i => {
+            const sc = document.getElementById('sc' + i);
+            const sl = document.getElementById('sl' + i);
+            const sd = document.getElementById('sd' + i);
+            if (!sc) return;
+            if (i < n) {
+                sc.className = 'step-circle done';
+                sc.innerHTML = '<i class="bi bi-check-lg"></i>';
+                sl.className = 'step-label done';
+            } else if (i === n) {
+                sc.className = 'step-circle active';
+                sc.innerHTML = i;
+                sl.className = 'step-label active';
+            } else {
+                sc.className = 'step-circle pending';
+                sc.innerHTML = i;
+                sl.className = 'step-label pending';
+            }
+            if (sd) sd.className = 'step-divider ' + (i < n ? 'done' : '');
+        });
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // ── STEP 1: SELECT JENJANG ──
+    function selectJenjang(key) {
+        // Clear all
+        document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('.paket-detail').forEach(d => d.classList.remove('show'));
+
+        // Select
+        document.getElementById('jcard-' + key).classList.add('selected');
+        document.getElementById('paket-detail-' + key).classList.add('show');
+
+        // Scroll to detail
+        setTimeout(() => {
+            document.getElementById('paket-detail-' + key).scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 100);
+    }
+
+    function pilihPaket(key, name, harga, paketId) {
+        state.jenjang = key;
+        state.jenjangName = name;
+        state.paketId = paketId;
+        state.harga = parseInt(harga.replace(/[^0-9]/g, ''));
+        state.durasi = key === 'sd' ? 60 : key === 'smp' ? 75 : 90;
+
+        // Update summary step 2
+        document.getElementById('sum-paket').textContent = 'Les Privat ' + name;
+        document.getElementById('sum-jenjang').textContent = name;
+        document.getElementById('sum-harga').textContent = harga + ' / sesi';
+        document.getElementById('info-paket-step2').textContent = 'Les Privat ' + name + ' · ' + harga;
+
+        // Update harga per tutor card
+        document.querySelectorAll('[id^="tp-val-"]').forEach(el => {
+            el.textContent = harga;
+        });
+
+        goStep(2);
+    }
+
+    // ── STEP 2: SELECT TUTOR ──
+    function selectTutor(el) {
+        document.querySelectorAll('.tutor-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        state.tutorId = el.dataset.id;
+        state.tutorName = el.dataset.name;
+        document.getElementById('sum-tutor').textContent = el.dataset.name;
+    }
+
+    function nextFromTutor() {
+        if (!state.tutorId) {
+            alert('Pilih tutor terlebih dahulu!');
+            return;
         }
-        if(sd) sd.className = 'step-divider ' + (i < n ? 'done' : '');
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ── STEP 1: SELECT JENJANG ──
-function selectJenjang(key) {
-    // Clear all
-    document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('selected'));
-    document.querySelectorAll('.paket-detail').forEach(d => d.classList.remove('show'));
-
-    // Select
-    document.getElementById('jcard-' + key).classList.add('selected');
-    document.getElementById('paket-detail-' + key).classList.add('show');
-
-    // Scroll to detail
-    setTimeout(() => {
-        document.getElementById('paket-detail-' + key).scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-}
-
-function pilihPaket(key, name, harga) {
-    state.jenjang     = key;
-    state.jenjangName = name;
-    // Extract numeric harga
-    state.harga = parseInt(harga.replace(/[^0-9]/g,''));
-    // Set durasi berdasarkan jenjang
-    state.durasi = key === 'sd' ? 60 : key === 'smp' ? 75 : 90;
-
-    // Update summary step 2
-    document.getElementById('sum-paket').textContent   = 'Les Privat ' + name;
-    document.getElementById('sum-jenjang').textContent = name;
-    document.getElementById('sum-harga').textContent   = harga + ' / sesi';
-    document.getElementById('info-paket-step2').textContent = 'Les Privat ' + name + ' · ' + harga;
-
-    // Update harga per tutor card
-    document.querySelectorAll('[id^="tp-val-"]').forEach(el => {
-        el.textContent = harga;
-    });
-
-    goStep(2);
-}
-
-// ── STEP 2: SELECT TUTOR ──
-function selectTutor(el) {
-    document.querySelectorAll('.tutor-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    state.tutorId   = el.dataset.id;
-    state.tutorName = el.dataset.name;
-    document.getElementById('sum-tutor').textContent = el.dataset.name;
-}
-
-function nextFromTutor() {
-    if(!state.tutorId) { alert('Pilih tutor terlebih dahulu!'); return; }
-    // Update summary step 3
-    document.getElementById('sum3-paket').textContent  = 'Les Privat ' + state.jenjangName;
-    document.getElementById('sum3-tutor').textContent  = state.tutorName;
-    document.getElementById('sum3-harga').textContent  = 'Rp ' + state.harga.toLocaleString('id-ID');
-    goStep(3);
-}
-
-// ── STEP 3: MODE & SUMMARY ──
-function selectMode(mode) {
-    state.mode = mode;
-    document.getElementById('mode-online').classList.toggle('selected', mode === 'online');
-    document.getElementById('mode-offline').classList.toggle('selected', mode === 'tatap_muka');
-    document.getElementById('mode-online').querySelector('input').checked  = mode === 'online';
-    document.getElementById('mode-offline').querySelector('input').checked = mode === 'tatap_muka';
-    document.getElementById('lokasi-wrap').style.display = mode === 'tatap_muka' ? '' : 'none';
-    document.getElementById('sum3-mode').textContent = mode === 'online' ? 'Online (Zoom/Meet)' : 'Tatap Muka';
-}
-
-function updateSummary() {
-    const mapel  = document.getElementById('sel-mapel').value;
-    const jadwal = document.getElementById('input-jadwal').value;
-    if(mapel)  { document.getElementById('sum3-mapel').textContent  = mapel; state.mapel = mapel; }
-    if(jadwal) {
-        const d = new Date(jadwal);
-        const fmt = d.toLocaleString('id-ID', {weekday:'long',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-        document.getElementById('sum3-jadwal').textContent = fmt + ' WIB';
-        state.jadwal = jadwal;
-    }
-}
-
-function nextFromJadwal() {
-    if(!document.getElementById('sel-mapel').value) { alert('Pilih mata pelajaran!'); return; }
-    if(!document.getElementById('input-jadwal').value) { alert('Isi tanggal & waktu sesi!'); return; }
-
-    state.mapel   = document.getElementById('sel-mapel').value;
-    state.jadwal  = document.getElementById('input-jadwal').value;
-    state.topik   = document.getElementById('inp-topik').value;
-    state.lokasi  = document.getElementById('inp-lokasi').value;
-    state.catatan = document.getElementById('inp-catatan').value;
-
-    if(state.mode === 'tatap_muka' && !state.lokasi) {
-        alert('Isi alamat lokasi tatap muka!'); return;
+        // Update summary step 3
+        document.getElementById('sum3-paket').textContent = 'Les Privat ' + state.jenjangName;
+        document.getElementById('sum3-tutor').textContent = state.tutorName;
+        document.getElementById('sum3-harga').textContent = 'Rp ' + state.harga.toLocaleString('id-ID');
+        goStep(3);
     }
 
-    // Update konfirmasi step 4
-    document.getElementById('konfirm-av').textContent         = state.tutorName.substring(0,2).toUpperCase();
-    document.getElementById('konfirm-nama-tutor').textContent = state.tutorName;
-    document.getElementById('konfirm-paket').textContent      = 'Les Privat ' + state.jenjangName;
-    document.getElementById('konfirm-mapel').textContent      = state.mapel + (state.topik ? ' – '+state.topik : '');
-    document.getElementById('konfirm-durasi').textContent     = state.durasi + ' Menit';
-    document.getElementById('konfirm-mode').textContent       = state.mode === 'online' ? 'Online (Zoom/Meet)' : 'Tatap Muka';
-    const d = new Date(state.jadwal);
-    document.getElementById('konfirm-jadwal').textContent = d.toLocaleString('id-ID', {weekday:'long',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) + ' WIB';
+    // ── STEP 3: MODE & SUMMARY ──
+    function selectMode(mode) {
+        state.mode = mode;
+        document.getElementById('mode-online').classList.toggle('selected', mode === 'online');
+        document.getElementById('mode-offline').classList.toggle('selected', mode === 'tatap_muka');
+        document.getElementById('mode-online').querySelector('input').checked = mode === 'online';
+        document.getElementById('mode-offline').querySelector('input').checked = mode === 'tatap_muka';
+        document.getElementById('lokasi-wrap').style.display = mode === 'tatap_muka' ? '' : 'none';
+        document.getElementById('sum3-mode').textContent = mode === 'online' ? 'Online (Zoom/Meet)' : 'Tatap Muka';
+    }
 
-    document.getElementById('sum4-biaya').textContent = 'Rp ' + state.harga.toLocaleString('id-ID');
-    document.getElementById('sum4-total').textContent = 'Rp ' + state.harga.toLocaleString('id-ID');
+    function updateSummary() {
+        const mapel = document.getElementById('sel-mapel').value;
+        const jadwal = document.getElementById('input-jadwal').value;
+        if (mapel) {
+            document.getElementById('sum3-mapel').textContent = mapel;
+            state.mapel = mapel;
+        }
+        if (jadwal) {
+            const d = new Date(jadwal);
+            const fmt = d.toLocaleString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('sum3-jadwal').textContent = fmt + ' WIB';
+            state.jadwal = jadwal;
+        }
+    }
 
-    goStep(4);
-}
+    function nextFromJadwal() {
+        if (!document.getElementById('sel-mapel').value) {
+            alert('Pilih mata pelajaran!');
+            return;
+        }
+        if (!document.getElementById('input-jadwal').value) {
+            alert('Isi tanggal & waktu sesi!');
+            return;
+        }
 
-// ── SUBMIT ──
-function submitPesanan() {
-    // Isi hidden fields
-    document.getElementById('f-tutor-id').value = state.tutorId;
-    document.getElementById('f-mapel').value    = state.mapel;
-    document.getElementById('f-topik').value    = state.topik || '';
-    document.getElementById('f-jadwal').value   = state.jadwal;
-    document.getElementById('f-durasi').value   = state.durasi;
-    document.getElementById('f-mode').value     = state.mode;
-    document.getElementById('f-lokasi').value   = state.lokasi || '';
-    document.getElementById('f-catatan').value  = state.catatan || '';
-    document.getElementById('f-harga').value    = state.harga;
+        state.mapel = document.getElementById('sel-mapel').value;
+        state.jadwal = document.getElementById('input-jadwal').value;
+        state.topik = document.getElementById('inp-topik').value;
+        state.lokasi = document.getElementById('inp-lokasi').value;
+        state.catatan = document.getElementById('inp-catatan').value;
 
-    // Submit form
-    document.getElementById('form-pesan-les').submit();
-}
+        if (state.mode === 'tatap_muka' && !state.lokasi) {
+            alert('Isi alamat lokasi tatap muka!');
+            return;
+        }
+
+        // Update konfirmasi step 4
+        document.getElementById('konfirm-av').textContent = state.tutorName.substring(0, 2).toUpperCase();
+        document.getElementById('konfirm-nama-tutor').textContent = state.tutorName;
+        document.getElementById('konfirm-paket').textContent = 'Les Privat ' + state.jenjangName;
+        document.getElementById('konfirm-mapel').textContent = state.mapel + (state.topik ? ' – ' + state.topik : '');
+        document.getElementById('konfirm-durasi').textContent = state.durasi + ' Menit';
+        document.getElementById('konfirm-mode').textContent = state.mode === 'online' ? 'Online (Zoom/Meet)' : 'Tatap Muka';
+        const d = new Date(state.jadwal);
+        document.getElementById('konfirm-jadwal').textContent = d.toLocaleString('id-ID', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) + ' WIB';
+
+        document.getElementById('sum4-biaya').textContent = 'Rp ' + state.harga.toLocaleString('id-ID');
+        document.getElementById('sum4-total').textContent = 'Rp ' + state.harga.toLocaleString('id-ID');
+
+        goStep(4);
+    }
+
+    // ── SUBMIT ──
+    function submitPesanan() {
+        // Isi hidden fields
+        document.getElementById('f-tutor-id').value = state.tutorId;
+        document.getElementById('f-paket-id').value = state.paketId || '';
+        document.getElementById('f-mapel').value = state.mapel;
+        document.getElementById('f-topik').value = state.topik || '';
+        document.getElementById('f-jadwal').value = state.jadwal;
+        document.getElementById('f-durasi').value = state.durasi;
+        document.getElementById('f-mode').value = state.mode;
+        document.getElementById('f-lokasi').value = state.lokasi || '';
+        document.getElementById('f-catatan').value = state.catatan || '';
+        document.getElementById('f-harga').value = state.harga;
+
+        // Submit form
+        document.getElementById('form-pesan-les').submit();
+    }
+
+    function bukaModalUlasan(lesId, mapel, tutor) {
+        document.getElementById('ulasan-les-id').value = lesId;
+        document.getElementById('ulasan-mapel').textContent = mapel;
+        document.getElementById('ulasan-tutor').textContent = 'Tutor: ' + tutor;
+        document.getElementById('input-bintang').value = 0;
+
+        const btnKirim = document.getElementById('btn-kirim-ulasan');
+        btnKirim.disabled = true;
+        btnKirim.style.opacity = '.6';
+
+        document.querySelectorAll('#star-container i').forEach(s => {
+            s.className = 'bi bi-star';
+            s.style.color = 'var(--border)';
+        });
+
+        document.getElementById('modal-ulasan').classList.add('show');
+    }
+
+    function setBintang(val) {
+        document.getElementById('input-bintang').value = val;
+
+        const btnKirim = document.getElementById('btn-kirim-ulasan');
+        btnKirim.disabled = false;
+        btnKirim.style.opacity = '1';
+
+        document.querySelectorAll('#star-container i').forEach((s, i) => {
+            s.className = i < val ? 'bi bi-star-fill' : 'bi bi-star';
+            s.style.color = i < val ? 'var(--accent)' : 'var(--border)';
+        });
+    }
 </script>
 @endpush

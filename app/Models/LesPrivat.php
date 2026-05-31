@@ -82,4 +82,8 @@ class LesPrivat extends Model
     {
         return $this->hasOne(Pembayaran::class, 'les_privat_id')->latestOfMany();
     }
+    public function ulasan()
+    {
+        return $this->hasOne(\App\Models\Ulasan::class, 'les_privat_id');
+    }
 }
