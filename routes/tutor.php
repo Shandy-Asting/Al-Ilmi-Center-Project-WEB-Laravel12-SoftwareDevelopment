@@ -10,6 +10,8 @@ use App\Models\Materi;
 use App\Models\Soal;
 use App\Models\Pembayaran;
 use App\Models\Notifikasi;
+use App\Models\Ulasan;
+
 
 Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
 
@@ -18,31 +20,94 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         $user  = auth()->user();
         $today = now()->toDateString();
 
-        $totalSiswa    = LesPrivat::where('tutor_id', $user->id)->distinct('user_id')->count();
+        // Stat cards
         $sesiMingguIni = LesPrivat::where('tutor_id', $user->id)
             ->whereBetween('jadwal', [now()->startOfWeek(), now()->endOfWeek()])
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
             ->count();
-        $totalMateri   = Materi::where('tutor_id', $user->id)->count();
-        $totalSoal     = Soal::where('tutor_id', $user->id)->count();
+
+        $sesiMingguLalu = LesPrivat::where('tutor_id', $user->id)
+            ->whereBetween('jadwal', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()])
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->count();
+
+        $totalSiswa = LesPrivat::where('tutor_id', $user->id)
+            ->distinct('user_id')->count();
+
+        $siswaBulanLalu = LesPrivat::where('tutor_id', $user->id)
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->distinct('user_id')->count();
+
+        $jamBulanIni = round(
+            LesPrivat::where('tutor_id', $user->id)
+                ->whereIn('status', ['dikonfirmasi', 'selesai'])
+                ->whereMonth('jadwal', now()->month)
+                ->sum('durasi_menit') / 60,
+            1
+        );
+
+        $jamBulanLalu = round(
+            LesPrivat::where('tutor_id', $user->id)
+                ->whereIn('status', ['dikonfirmasi', 'selesai'])
+                ->whereMonth('jadwal', now()->subMonth()->month)
+                ->sum('durasi_menit') / 60,
+            1
+        );
+
+        // Rating dari ulasan DB
+        $ulasanList  = \App\Models\Ulasan::where('tutor_id', $user->id)->get();
+        $ratingRata  = $ulasanList->count() > 0 ? round($ulasanList->avg('bintang'), 1) : 0;
+        $totalUlasan = $ulasanList->count();
+
+        // Jadwal hari ini dari DB
         $jadwalHariIni = LesPrivat::where('tutor_id', $user->id)
             ->whereDate('jadwal', $today)
-            ->where('status', 'dikonfirmasi')
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
             ->with('siswa')
             ->orderBy('jadwal', 'asc')
             ->get();
 
-        return view('tutor.dashboard', [
-            'namaUser'       => $user->name,
-            'totalSiswa'     => $totalSiswa,
-            'sesiMingguIni'  => $sesiMingguIni,
-            'totalMateri'    => $totalMateri,
-            'totalSoal'      => $totalSoal,
-            'jadwalHariIni'  => $jadwalHariIni,
-            'tanggalHariIni' => now()->translatedFormat('d M Y'),
-        ]);
-    });
+        // Progres siswa — rata-rata nilai HasilKuis per siswa
+        $progresMapel = LesPrivat::where('tutor_id', $user->id)
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->with('siswa')
+            ->get()
+            ->unique('user_id')
+            ->take(5)
+            ->map(function ($les) {
+                $rata = \App\Models\HasilKuis::where('user_id', $les->user_id)->avg('nilai') ?? 0;
+                return [
+                    'nama'  => $les->siswa->name ?? '-',
+                    'mapel' => $les->mata_pelajaran,
+                    'pct'   => min(round($rata), 100),
+                ];
+            })->values();
 
+        // Kalender — hari yang ada sesi bulan ini
+        $hariAdaSesi = LesPrivat::where('tutor_id', $user->id)
+            ->whereMonth('jadwal', now()->month)
+            ->whereYear('jadwal', now()->year)
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->get()
+            ->map(fn($l) => $l->jadwal->day)
+            ->unique()->values()->toArray();
+
+        return view('tutor.dashboard', compact(
+            'user',
+            'sesiMingguIni',
+            'sesiMingguLalu',
+            'totalSiswa',
+            'siswaBulanLalu',
+            'jamBulanIni',
+            'jamBulanLalu',
+            'ratingRata',
+            'totalUlasan',
+            'jadwalHariIni',
+            'progresMapel',
+            'hariAdaSesi',
+        ));
+    });
+    
     // ── Materi ─────────────────────────────────────────────────────────────
     Route::get('/materi', function () {
         $tutorId = auth()->id();
@@ -287,7 +352,220 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
     });
 
     // ── Lainnya ────────────────────────────────────────────────────────────
-    Route::get('/jadwal', fn() => view('tutor.jadwal'));
+    Route::get('/jadwal/kalender', function (Request $request) {
+        $tgl   = (int) $request->query('tgl', now()->day);
+        $bulan = (int) $request->query('bulan', now()->month);
+        $tahun = (int) $request->query('tahun', now()->year);
+
+        $tanggal = \Carbon\Carbon::create($tahun, $bulan, $tgl);
+
+        $jadwal = LesPrivat::where('tutor_id', auth()->id())
+            ->whereDate('jadwal', $tanggal->toDateString())
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->with('siswa')
+            ->orderBy('jadwal', 'asc')
+            ->get()
+            ->map(fn($l) => [
+                'waktu' => $l->jadwal->format('H.i'),
+                'mapel' => $l->mata_pelajaran,
+                'siswa' => $l->siswa->name ?? '-',
+                'mode'  => $l->mode,
+            ]);
+
+        return response()->json([
+            'label'  => $tanggal->translatedFormat('l, d M Y'),
+            'total'  => $jadwal->count(),
+            'jadwal' => $jadwal->values(),
+        ]);
+    });
+
+    Route::get('/jadwal', function () {
+        $tutorId = auth()->id();
+        $today   = now()->toDateString();
+
+        // ── Tab Hari Ini ────────────────────────────────────────────────────
+        $jadwalHariIni = LesPrivat::where('tutor_id', $tutorId)
+            ->whereDate('jadwal', $today)
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->with('siswa')
+            ->orderBy('jadwal', 'asc')
+            ->get()
+            ->map(function ($les) {
+                $sekarang  = now();
+                $mulai     = $les->jadwal;
+                $selesai   = $les->jadwal->copy()->addMinutes($les->durasi_menit);
+
+                // Tentukan status tampilan
+                if ($les->status === 'selesai') {
+                    $statusTampil = 'selesai';
+                } elseif ($sekarang->between($mulai, $selesai)) {
+                    $statusTampil = 'sedang';
+                } elseif ($sekarang->lt($mulai)) {
+                    $statusTampil = 'akan-datang';
+                } else {
+                    $statusTampil = 'selesai';
+                }
+
+                return array_merge($les->toArray(), [
+                    'status_tampil' => $statusTampil,
+                    'waktu_mulai'   => $mulai->format('H.i'),
+                    'siswa_nama'    => $les->siswa->name ?? '-',
+                    'lokasi_tampil' => $les->mode === 'online'
+                        ? ($les->link_meeting ?? 'Via Meeting Online')
+                        : ($les->lokasi ?? 'Tatap Muka'),
+                ]);
+            });
+
+        // Ringkasan hari ini
+        $selesaiHariIni   = $jadwalHariIni->where('status_tampil', 'selesai')->count();
+        $sedangHariIni    = $jadwalHariIni->where('status_tampil', 'sedang')->count();
+        $akanDatangHariIni = $jadwalHariIni->where('status_tampil', 'akan-datang')->count();
+        $totalDurasi      = $jadwalHariIni->sum('durasi_menit');
+        $penghasilanHariIni = $jadwalHariIni
+            ->where('status_tampil', 'selesai')
+            ->sum('harga');
+
+        // Sesi berikutnya
+        $sesiBerikutnya = $jadwalHariIni
+            ->where('status_tampil', 'akan-datang')
+            ->sortBy('jadwal')
+            ->first();
+
+        // ── Tab Permintaan ──────────────────────────────────────────────────
+        $permintaan = LesPrivat::where('tutor_id', $tutorId)
+            ->where('status', 'menunggu')
+            ->with('siswa')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Statistik permintaan bulan ini
+        $statPermintaan = [
+            'masuk'    => LesPrivat::where('tutor_id', $tutorId)->whereMonth('created_at', now()->month)->count(),
+            'diterima' => LesPrivat::where('tutor_id', $tutorId)->whereMonth('created_at', now()->month)->where('status', 'dikonfirmasi')->count(),
+            'ditolak'  => LesPrivat::where('tutor_id', $tutorId)->whereMonth('created_at', now()->month)->where('status', 'dibatalkan')->count(),
+            'menunggu' => $permintaan->count(),
+        ];
+
+        // ── Tab Semua Jadwal ────────────────────────────────────────────────
+        $semuaJadwal = LesPrivat::where('tutor_id', $tutorId)
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->with('siswa')
+            ->orderBy('jadwal', 'desc')
+            ->get();
+
+        // ── Stat Cards ──────────────────────────────────────────────────────
+        $statCards = [
+            'sesi_hari_ini'  => $jadwalHariIni->count(),
+            'sesi_minggu_ini' => LesPrivat::where('tutor_id', $tutorId)
+                ->whereBetween('jadwal', [now()->startOfWeek(), now()->endOfWeek()])
+                ->whereIn('status', ['dikonfirmasi', 'selesai'])
+                ->count(),
+            'siswa_aktif'    => LesPrivat::where('tutor_id', $tutorId)
+                ->where('status', 'dikonfirmasi')
+                ->distinct('user_id')
+                ->count(),
+            'permintaan_baru' => $permintaan->count(),
+        ];
+
+        // ── Data Kalender (hari yang ada sesi bulan ini) ─────────────────────
+        $hariAdaSesi = LesPrivat::where('tutor_id', $tutorId)
+            ->whereMonth('jadwal', now()->month)
+            ->whereYear('jadwal', now()->year)
+            ->whereIn('status', ['dikonfirmasi', 'selesai'])
+            ->get()
+            ->map(fn($l) => $l->jadwal->day)
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return view('tutor.jadwal', compact(
+            'jadwalHariIni',
+            'selesaiHariIni',
+            'sedangHariIni',
+            'akanDatangHariIni',
+            'totalDurasi',
+            'penghasilanHariIni',
+            'sesiBerikutnya',
+            'permintaan',
+            'statPermintaan',
+            'semuaJadwal',
+            'statCards',
+            'hariAdaSesi',
+        ));
+    });
+    Route::post('/jadwal/{id}/terima', function ($id) {
+        $les = LesPrivat::where('id', $id)
+            ->where('tutor_id', auth()->id())
+            ->where('status', 'menunggu')
+            ->firstOrFail();
+
+        $les->update([
+            'status'       => 'dikonfirmasi',
+            'link_meeting' => $les->mode === 'online'
+                ? 'https://meet.google.com/alilmi-' . strtolower(substr(str_replace(' ', '', auth()->user()->name), 0, 6))
+                : null,
+        ]);
+
+        // Kirim notifikasi ke siswa
+        \App\Models\Notifikasi::create([
+            'user_id'  => $les->user_id,
+            'judul'    => '✅ Les Privat Dikonfirmasi',
+            'pesan'    => 'Tutor <strong>' . auth()->user()->name . '</strong> mengkonfirmasi sesi <strong>' . $les->mata_pelajaran . '</strong> pada ' . $les->jadwal->translatedFormat('d M Y · H:i') . ' WIB.',
+            'tipe'     => 'les_privat',
+            'ikon'     => 'bi bi-calendar-check-fill',
+            'warna'    => 'var(--success-soft)',
+            'url_aksi' => '/siswa/les-privat',
+            'label_aksi' => 'Lihat',
+        ]);
+
+        return redirect('/tutor/jadwal')->with('sukses', 'Pesanan berhasil dikonfirmasi!');
+    });
+
+    Route::post('/jadwal/{id}/tolak', function ($id) {
+        $les = LesPrivat::where('id', $id)
+            ->where('tutor_id', auth()->id())
+            ->where('status', 'menunggu')
+            ->firstOrFail();
+
+        $les->update(['status' => 'dibatalkan']);
+
+        // Kirim notifikasi ke siswa
+        \App\Models\Notifikasi::create([
+            'user_id'  => $les->user_id,
+            'judul'    => '❌ Les Privat Ditolak',
+            'pesan'    => 'Maaf, tutor tidak dapat menerima sesi <strong>' . $les->mata_pelajaran . '</strong> pada ' . $les->jadwal->translatedFormat('d M Y · H:i') . ' WIB. Silakan pesan ulang dengan jadwal lain.',
+            'tipe'     => 'les_privat',
+            'ikon'     => 'bi bi-calendar-x-fill',
+            'warna'    => 'var(--danger-soft)',
+            'url_aksi' => '/siswa/les-privat',
+            'label_aksi' => 'Pesan Ulang',
+        ]);
+
+        return redirect('/tutor/jadwal')->with('sukses', 'Pesanan berhasil ditolak.');
+    });
+
+    Route::post('/jadwal/{id}/selesai', function ($id) {
+        $les = LesPrivat::where('id', $id)
+            ->where('tutor_id', auth()->id())
+            ->where('status', 'dikonfirmasi')
+            ->firstOrFail();
+
+        $les->update(['status' => 'selesai']);
+
+        // Kirim notifikasi ke siswa
+        \App\Models\Notifikasi::create([
+            'user_id'  => $les->user_id,
+            'judul'    => '🎓 Sesi Les Selesai',
+            'pesan'    => 'Sesi <strong>' . $les->mata_pelajaran . '</strong> bersama tutor <strong>' . auth()->user()->name . '</strong> telah selesai.',
+            'tipe'     => 'les_privat',
+            'ikon'     => 'bi bi-check-circle-fill',
+            'warna'    => 'var(--success-soft)',
+            'url_aksi' => '/siswa/les-privat',
+            'label_aksi' => 'Lihat Riwayat',
+        ]);
+
+        return redirect('/tutor/jadwal')->with('sukses', 'Sesi berhasil ditandai selesai!');
+    });
 
     Route::get('/daftar-siswa', function () {
         $siswaList = LesPrivat::where('tutor_id', auth()->id())
@@ -301,10 +579,8 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         return view('tutor.daftar-siswa', compact('siswaList'));
     });
 
+
     // ── Pembayaran Tutor ───────────────────────────────────────────────────
-
-
-
     Route::get('/pembayaran', function () {
         $user = auth()->user();
 
@@ -416,7 +692,135 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         return redirect($notif->url_aksi ?? '/tutor/notifikasi');
     });
 
-    Route::get('/profil', fn() => view('tutor.profil'));
+    Route::get('/profil', function () {
+        $user = auth()->user();
 
-    Route::get('/profil',     fn() => view('tutor.profil'));
+        $totalSiswa = LesPrivat::where('tutor_id', $user->id)->distinct('user_id')->count();
+        $totalSesi  = LesPrivat::where('tutor_id', $user->id)->whereIn('status', ['dikonfirmasi', 'selesai'])->count();
+        $pengalaman = $user->tahun_mengajar ? (now()->year - $user->tahun_mengajar) : 0;
+
+        // Data ulasan dari DB
+        $ulasanList = \App\Models\Ulasan::where('tutor_id', $user->id)
+            ->with('siswa')
+            ->latest()
+            ->get();
+
+        $totalUlasan  = $ulasanList->count();
+        $ratingRata   = $totalUlasan > 0 ? round($ulasanList->avg('bintang'), 1) : 0;
+
+        // Distribusi bintang (persentase)
+        $distribusi = [];
+        for ($b = 5; $b >= 1; $b--) {
+            $jumlah = $ulasanList->where('bintang', $b)->count();
+            $distribusi[$b] = $totalUlasan > 0 ? round($jumlah / $totalUlasan * 100) : 0;
+        }
+
+        return view('tutor.profil', compact(
+            'user',
+            'totalSiswa',
+            'totalSesi',
+            'pengalaman',
+            'ulasanList',
+            'totalUlasan',
+            'ratingRata',
+            'distribusi'
+        ));
+    });
+    Route::get('/profil', function () {
+        $user = auth()->user();
+
+        $totalSiswa = LesPrivat::where('tutor_id', $user->id)->distinct('user_id')->count();
+        $totalSesi  = LesPrivat::where('tutor_id', $user->id)->whereIn('status', ['dikonfirmasi', 'selesai'])->count();
+        $pengalaman = $user->tahun_mengajar ? (now()->year - $user->tahun_mengajar) : 0;
+
+        // Data ulasan dari DB
+        $ulasanList  = \App\Models\Ulasan::where('tutor_id', $user->id)->with('siswa')->latest()->get();
+        $totalUlasan = $ulasanList->count();
+        $ratingRata  = $totalUlasan > 0 ? round($ulasanList->avg('bintang'), 1) : 0;
+
+        // Distribusi bintang
+        $distribusi = [];
+        for ($b = 5; $b >= 1; $b--) {
+            $jumlah       = $ulasanList->where('bintang', $b)->count();
+            $distribusi[$b] = $totalUlasan > 0 ? round($jumlah / $totalUlasan * 100) : 0;
+        }
+
+        return view('tutor.profil', compact(
+            'user',
+            'totalSiswa',
+            'totalSesi',
+            'pengalaman',
+            'ulasanList',
+            'totalUlasan',
+            'ratingRata',
+            'distribusi'
+        ));
+    });
+
+    Route::post('/profil/update-info', function (Request $request) {
+        $user = auth()->user();
+
+        $request->validate([
+            'name'           => 'required|string|max:100',
+            'no_hp'          => 'nullable|string|max:20',
+            'kota'           => 'nullable|string|max:100',
+            'pendidikan'     => 'nullable|string|max:50',
+            'jurusan'        => 'nullable|string|max:100',
+            'tahun_mengajar' => 'nullable|integer|min:1990|max:' . now()->year,
+            'mode_mengajar'  => 'nullable|string|max:50',
+            'bio'            => 'nullable|string|max:500',
+        ]);
+
+        $user->update($request->only([
+            'name',
+            'no_hp',
+            'kota',
+            'pendidikan',
+            'jurusan',
+            'tahun_mengajar',
+            'mode_mengajar',
+            'bio',
+        ]));
+
+        return redirect('/tutor/profil')->with('sukses_info', 'Informasi pribadi berhasil diperbarui!');
+    });
+
+    Route::post('/profil/ganti-password', function (Request $request) {
+        $user = auth()->user();
+
+        $request->validate([
+            'password_lama'              => 'required',
+            'password_baru'              => 'required|min:8|confirmed',
+            'password_baru_confirmation' => 'required',
+        ], [
+            'password_baru.confirmed' => 'Konfirmasi password tidak cocok.',
+            'password_baru.min'       => 'Password baru minimal 8 karakter.',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->password_lama, $user->password)) {
+            return back()->withErrors(['password_lama' => 'Password saat ini tidak sesuai.'])
+                ->with('tab', 'keamanan');
+        }
+
+        $user->update(['password' => \Illuminate\Support\Facades\Hash::make($request->password_baru)]);
+
+        return redirect('/tutor/profil')->with('sukses_password', 'Password berhasil diubah!');
+    });
+
+    Route::post('/profil/upload-avatar', function (Request $request) {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        if ($user->avatar) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->update(['avatar' => $path]);
+
+        return redirect('/tutor/profil')->with('sukses_info', 'Foto profil berhasil diperbarui!');
+    });
 });

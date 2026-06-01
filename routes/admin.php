@@ -12,12 +12,132 @@ use App\Models\LesPrivat;
 use App\Models\HasilKuis;
 use App\Models\AktivitasBelajar;
 use App\Models\Materi;
+use App\Models\Notifikasi;
 use Barryvdh\DomPDF\Facade\Pdf;
+
+// ── Helper: Buat notifikasi untuk admin ────────────────────────────────
+if (!function_exists('notifAdmin')) {
+    function notifAdmin(string $judul, string $pesan, string $tipe, array $opsi = []): void
+    {
+        $admin = \App\Models\User::where('role', 'admin')->first();
+        if (!$admin) return;
+
+        \App\Models\Notifikasi::create([
+            'user_id'        => $admin->id,
+            'judul'          => $judul,
+            'pesan'          => $pesan,
+            'tipe'           => $tipe,
+            'ikon'           => $opsi['ikon']      ?? 'bi bi-bell-fill',
+            'warna'          => $opsi['warna']     ?? 'var(--info-soft)',
+            'url_aksi'       => $opsi['url']       ?? null,
+            'label_aksi'     => $opsi['label']     ?? null,
+            'referensi_id'   => $opsi['ref_id']    ?? null,
+            'referensi_tipe' => $opsi['ref_tipe']  ?? null,
+        ]);
+    }
+}
+
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
     // ── Halaman Statis ─────────────────────────────────────────────────────
-    Route::get('/dashboard',  fn() => view('admin.dashboard'));
+    Route::get('/dashboard', function () {
+        $now = now();
+
+        // Stat cards
+        $totalPengguna  = User::count();
+        $totalSiswa     = User::where('role', 'siswa')->count();
+        $totalTutor     = User::where('role', 'tutor')->count();
+        $totalLes       = LesPrivat::count();
+        $pendapatanLes  = LesPrivat::where('status', 'selesai')->sum('harga');
+        $sesiSelesai    = LesPrivat::where('status', 'selesai')->count();
+
+        // Pembayaran pending & pesanan baru
+        $pembayaranPending = Pembayaran::where('status', 'menunggu')->count();
+        $pesananBaru       = LesPrivat::where('status', 'menunggu')->count();
+
+        // Aktivitas terbaru
+        $aktivitasTerbaru = collect();
+
+        User::where('role', 'siswa')->latest()->take(2)->get()->each(function ($u) use (&$aktivitasTerbaru) {
+            $aktivitasTerbaru->push([
+                'bg'    => '#eff6ff',
+                'color' => 'var(--primary)',
+                'icon'  => 'bi-person-plus-fill',
+                'title' => 'Siswa baru mendaftar',
+                'desc'  => $u->name . ' bergabung sebagai siswa ' . strtoupper($u->jenjang ?? 'SMA'),
+                'time'  => $u->created_at->diffForHumans(),
+                'sort'  => $u->created_at,
+            ]);
+        });
+
+        Pembayaran::with('siswa')->where('status', 'dikonfirmasi')->latest()->take(2)->get()->each(function ($p) use (&$aktivitasTerbaru) {
+            $aktivitasTerbaru->push([
+                'bg'    => 'var(--success-soft)',
+                'color' => 'var(--success)',
+                'icon'  => 'bi-credit-card-fill',
+                'title' => 'Pembayaran dikonfirmasi',
+                'desc'  => ($p->siswa->name ?? '-') . ' — Rp ' . number_format($p->jumlah, 0, ',', '.'),
+                'time'  => $p->dikonfirmasi_at?->diffForHumans() ?? $p->updated_at->diffForHumans(),
+                'sort'  => $p->dikonfirmasi_at ?? $p->updated_at,
+            ]);
+        });
+
+        User::where('role', 'tutor')->latest()->take(1)->get()->each(function ($u) use (&$aktivitasTerbaru) {
+            $aktivitasTerbaru->push([
+                'bg'    => 'var(--accent-soft)',
+                'color' => 'var(--warning)',
+                'icon'  => 'bi-person-badge-fill',
+                'title' => 'Tutor baru terdaftar',
+                'desc'  => $u->name . ' mendaftar sebagai tutor',
+                'time'  => $u->created_at->diffForHumans(),
+                'sort'  => $u->created_at,
+            ]);
+        });
+
+        LesPrivat::where('status', 'dibatalkan')->latest()->take(1)->get()->each(function ($l) use (&$aktivitasTerbaru) {
+            $aktivitasTerbaru->push([
+                'bg'    => 'var(--danger-soft)',
+                'color' => 'var(--danger)',
+                'icon'  => 'bi-x-circle-fill',
+                'title' => 'Pesanan les dibatalkan',
+                'desc'  => ($l->siswa->name ?? '-') . ' membatalkan sesi ' . $l->mata_pelajaran,
+                'time'  => $l->updated_at->diffForHumans(),
+                'sort'  => $l->updated_at,
+            ]);
+        });
+
+        Materi::with('tutor')->latest()->take(1)->get()->each(function ($m) use (&$aktivitasTerbaru) {
+            $aktivitasTerbaru->push([
+                'bg'    => 'var(--info-soft)',
+                'color' => 'var(--info)',
+                'icon'  => 'bi-upload',
+                'title' => 'Materi baru diunggah',
+                'desc'  => ($m->tutor->name ?? '-') . ' — ' . $m->mata_pelajaran . ' ' . strtoupper($m->jenjang ?? ''),
+                'time'  => $m->created_at->diffForHumans(),
+                'sort'  => $m->created_at,
+            ]);
+        });
+
+        $aktivitasTerbaru = $aktivitasTerbaru->sortByDesc('sort')->take(6)->values();
+
+        // Pengguna terbaru
+        $penggunaTerbaru = User::latest()->take(5)->get();
+
+        return view('admin.dashboard', compact(
+            'totalPengguna',
+            'totalSiswa',
+            'totalTutor',
+            'totalLes',
+            'pendapatanLes',
+            'sesiSelesai',
+            'pembayaranPending',
+            'pesananBaru',
+            'aktivitasTerbaru',
+            'penggunaTerbaru',
+        ));
+    });
+    
     Route::get('/pengguna',   fn() => view('admin.pengguna'));
     Route::get('/transaksi',  fn() => view('admin.transaksi'));
 
@@ -363,32 +483,164 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         return $pdf->download('laporan-' . $periode . '.pdf');
     });
 
+    // ── Notifikasi Admin ───────────────────────────────────────────────────
+
+    // Muat notifikasi lebih lama (pagination) — harus di atas {id}
+    Route::get('/notifikasi/lebih-lama', function (Request $request) {
+        $page = $request->query('page', 1);
+
+        $notifikasi = \App\Models\Notifikasi::where('user_id', auth()->id())
+            ->where('created_at', '<', now()->subWeek())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10, ['*'], 'page', $page);
+
+        return response()->json($notifikasi);
+    });
+
+    // Tandai semua dibaca — harus di atas {id}
+    Route::post('/notifikasi/baca-semua', function () {
+        \App\Models\Notifikasi::where('user_id', auth()->id())
+            ->where('sudah_dibaca', false)
+            ->update(['sudah_dibaca' => true]);
+
+        return redirect('/admin/notifikasi')->with('sukses', 'Semua notifikasi telah ditandai dibaca.');
+    });
+
+    // Tandai satu notifikasi dibaca
+    Route::post('/notifikasi/{id}/baca', function ($id) {
+        $notif = \App\Models\Notifikasi::where('user_id', auth()->id())
+            ->findOrFail($id);
+        $notif->update(['sudah_dibaca' => true]);
+
+        return response()->json(['sukses' => true]);
+    });
+
+    // Tampilkan halaman notifikasi — paling bawah
     Route::get('/notifikasi', function () {
-        return view('admin.notifikasi');
+        $adminId = auth()->id();
+
+        $semuaNotifikasi = \App\Models\Notifikasi::where('user_id', $adminId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $hariIni   = $semuaNotifikasi->filter(fn($n) => $n->created_at->isToday());
+        $kemarin   = $semuaNotifikasi->filter(fn($n) => $n->created_at->isYesterday());
+        $mingguIni = $semuaNotifikasi->filter(
+            fn($n) =>
+            !$n->created_at->isToday() &&
+                !$n->created_at->isYesterday() &&
+                $n->created_at->isCurrentWeek()
+        );
+        $lebihLama = $semuaNotifikasi->filter(
+            fn($n) =>
+            !$n->created_at->isToday() &&
+                !$n->created_at->isYesterday() &&
+                !$n->created_at->isCurrentWeek()
+        );
+
+        $belumDibaca = [
+            'semua'      => $semuaNotifikasi->where('sudah_dibaca', false)->count(),
+            'pembayaran' => $semuaNotifikasi->where('sudah_dibaca', false)->where('tipe', 'pembayaran')->count(),
+            'les'        => $semuaNotifikasi->where('sudah_dibaca', false)->where('tipe', 'les_privat')->count(),
+            'pengguna'   => $semuaNotifikasi->where('sudah_dibaca', false)->where('tipe', 'sistem')->count(),
+            'sistem'     => $semuaNotifikasi->where('sudah_dibaca', false)->where('tipe', 'sistem')->count(),
+        ];
+
+        return view('admin.notifikasi', compact(
+            'hariIni',
+            'kemarin',
+            'mingguIni',
+            'lebihLama',
+            'belumDibaca',
+        ));
     });
 
     // ── Paket ──────────────────────────────────────────────────────────────
-    Route::get('/paket', fn() => view('admin.paket'));
 
+    // Tampilkan halaman pengelolaan paket dengan data dari DB
+    Route::get('/paket', function () {
+        $pakets = Paket::orderByRaw("FIELD(tipe,'sd','smp','sma')")
+            ->orderBy('harga_min')
+            ->get();
+        return view('admin.paket', compact('pakets'));
+    });
+
+    // Tambah paket baru
     Route::post('/paket', function (Request $request) {
         $request->validate([
-            'nama'     => 'required',
-            'tipe'     => 'required|in:sd,smp,sma',
-            'harga_min' => 'required|numeric',
+            'nama'           => 'required|string|max:100',
+            'tipe'           => 'required|in:sd,smp,sma',
+            'harga_min'      => 'required|numeric|min:0',
+            'harga_max'      => 'nullable|numeric|min:0',
+            'jumlah_soal'    => 'nullable|integer|min:0',
+            'jumlah_les'     => 'nullable|integer|min:0',
+            'feedback_tutor' => 'nullable|boolean',
+            'akses_penuh'    => 'nullable|boolean',
+        ], [
+            'nama.required'      => 'Nama paket wajib diisi.',
+            'tipe.required'      => 'Tipe jenjang wajib dipilih.',
+            'harga_min.required' => 'Harga minimum wajib diisi.',
+            'harga_min.numeric'  => 'Harga minimum harus berupa angka.',
         ]);
 
-        Paket::create($request->only([
+        $data = $request->only([
             'nama',
             'tipe',
             'harga_min',
             'harga_max',
             'jumlah_soal',
             'jumlah_les',
-            'feedback_tutor',
-            'akses_penuh',
-        ]));
+        ]);
+        $data['feedback_tutor'] = $request->boolean('feedback_tutor');
+        $data['akses_penuh']    = $request->boolean('akses_penuh');
+
+        Paket::create($data);
 
         return redirect('/admin/paket')->with('sukses', 'Paket berhasil ditambahkan!');
+    });
+
+    // Update paket — pakai POST /paket/{id}/update karena form HTML biasa
+    Route::post('/paket/{id}/update', function (Request $request, $id) {
+        $paket = Paket::findOrFail($id);
+
+        $request->validate([
+            'nama'           => 'required|string|max:100',
+            'tipe'           => 'required|in:sd,smp,sma',
+            'harga_min'      => 'required|numeric|min:0',
+            'harga_max'      => 'nullable|numeric|min:0',
+            'jumlah_soal'    => 'nullable|integer|min:0',
+            'jumlah_les'     => 'nullable|integer|min:0',
+            'feedback_tutor' => 'nullable|boolean',
+            'akses_penuh'    => 'nullable|boolean',
+        ], [
+            'nama.required'      => 'Nama paket wajib diisi.',
+            'tipe.required'      => 'Tipe jenjang wajib dipilih.',
+            'harga_min.required' => 'Harga minimum wajib diisi.',
+        ]);
+
+        $data = $request->only([
+            'nama',
+            'tipe',
+            'harga_min',
+            'harga_max',
+            'jumlah_soal',
+            'jumlah_les',
+        ]);
+        $data['feedback_tutor'] = $request->boolean('feedback_tutor');
+        $data['akses_penuh']    = $request->boolean('akses_penuh');
+
+        $paket->update($data);
+
+        return redirect('/admin/paket')->with('sukses', 'Paket berhasil diperbarui!');
+    });
+
+    // Hapus paket
+    Route::post('/paket/{id}/hapus', function ($id) {
+        $paket = Paket::findOrFail($id);
+        $nama  = $paket->nama;
+        $paket->delete();
+
+        return redirect('/admin/paket')->with('sukses', 'Paket "' . $nama . '" berhasil dihapus!');
     });
 
     // ── Rekening Bank ──────────────────────────────────────────────────────
