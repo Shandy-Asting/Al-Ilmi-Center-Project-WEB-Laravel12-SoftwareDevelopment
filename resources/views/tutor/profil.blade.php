@@ -490,31 +490,40 @@
     </form>
 </div>
 
-{{-- ══ TAB: KEAHLIAN & JADWAL ══ --}}
-<div id="section-keahlian" style="display:none;">
+<form method="POST" action="/tutor/profil/simpan-keahlian">
+    @csrf
     <div class="form-section">
         <div class="form-section-title"><i class="bi bi-mortarboard-fill"></i> Mata Pelajaran & Keahlian</div>
         <div class="row g-3">
             <div class="col-12">
                 <label class="form-label-custom">Mata Pelajaran yang Diajarkan</label>
                 <div class="d-flex gap-2 flex-wrap">
-                    @foreach (['Matematika','Fisika','Kalkulus','Aljabar','Trigonometri','Statistika','UTBK/TKA'] as $mapel)
-                    <span style="background:{{ in_array($mapel,['Matematika','Fisika','UTBK/TKA']) ? 'var(--primary)' : '#eff6ff' }};color:{{ in_array($mapel,['Matematika','Fisika','UTBK/TKA']) ? '#fff' : 'var(--primary)' }};font-size:12.5px;font-weight:700;padding:5px 14px;border-radius:20px;cursor:pointer;border:1.5px solid {{ in_array($mapel,['Matematika','Fisika','UTBK/TKA']) ? 'var(--primary)' : '#eff6ff' }};">
-                        {{ $mapel }}
-                    </span>
+                    @foreach(['Matematika','Fisika','Kalkulus','Aljabar','Trigonometri','Statistika','UTBK/TKA'] as $mapel)
+                    @php $aktif = in_array($mapel, $user->mata_pelajaran_tutor ?? []); @endphp
+                    <label style="cursor:pointer;margin:0;">
+                        <input type="checkbox" name="mata_pelajaran[]" value="{{ $mapel }}"
+                            {{ $aktif ? 'checked' : '' }} style="display:none;"
+                            onchange="toggleBadge(this)">
+                        <span style="background:{{ $aktif ? 'var(--primary)' : '#eff6ff' }};color:{{ $aktif ? '#fff' : 'var(--primary)' }};font-size:12.5px;font-weight:700;padding:5px 14px;border-radius:20px;border:1.5px solid {{ $aktif ? 'var(--primary)' : '#eff6ff' }};display:inline-block;">
+                            {{ $mapel }}
+                        </span>
+                    </label>
                     @endforeach
-                    <span style="background:var(--bg);color:var(--muted);font-size:12.5px;font-weight:700;padding:5px 14px;border-radius:20px;cursor:pointer;border:1.5px dashed var(--border);">
-                        <i class="bi bi-plus me-1"></i> Tambah
-                    </span>
                 </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label-custom">Jenjang yang Diajar</label>
                 <div class="d-flex gap-2 flex-wrap">
-                    @foreach (['SMP','SMA','Perguruan Tinggi'] as $j)
-                    <span style="background:{{ in_array($j,['SMP','SMA']) ? 'var(--success)' : 'var(--bg)' }};color:{{ in_array($j,['SMP','SMA']) ? '#fff' : 'var(--muted)' }};font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1.5px solid {{ in_array($j,['SMP','SMA']) ? 'var(--success)' : 'var(--border)' }};">
-                        {{ $j }}
-                    </span>
+                    @foreach(['smp' => 'SMP', 'sma' => 'SMA', 'perguruan_tinggi' => 'Perguruan Tinggi'] as $val => $label)
+                    @php $aktif = in_array($val, $user->jenjang_tutor ?? []); @endphp
+                    <label style="cursor:pointer;margin:0;">
+                        <input type="checkbox" name="jenjang[]" value="{{ $val }}"
+                            {{ $aktif ? 'checked' : '' }} style="display:none;"
+                            onchange="toggleBadge(this)">
+                        <span style="background:{{ $aktif ? 'var(--success)' : 'var(--bg)' }};color:{{ $aktif ? '#fff' : 'var(--muted)' }};font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;border:1.5px solid {{ $aktif ? 'var(--success)' : 'var(--border)' }};display:inline-block;">
+                            {{ $label }}
+                        </span>
+                    </label>
                     @endforeach
                 </div>
             </div>
@@ -522,50 +531,59 @@
                 <label class="form-label-custom">Tarif per Sesi (60 mnt)</label>
                 <div style="position:relative;">
                     <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--muted);">Rp</span>
-                    <input type="number" class="form-control-custom" value="75000" style="padding-left:40px;" />
+                    <input type="number" name="tarif_per_sesi" class="form-control-custom"
+                        value="{{ $user->tarif_per_sesi ?? 75000 }}" style="padding-left:40px;" />
                 </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label-custom">Maks. Siswa per Hari</label>
-                <input type="number" class="form-control-custom" value="5" />
+                <input type="number" name="maks_siswa_per_hari" class="form-control-custom"
+                    value="{{ $user->maks_siswa_per_hari ?? 5 }}" />
             </div>
         </div>
-    </div>
-
-    <div class="form-section">
-        <div class="form-section-title"><i class="bi bi-clock-fill"></i> Ketersediaan Waktu</div>
-        @php
-        $haris = [
-        ['Senin', ['07:00','08:00','09:00','13:00','14:00'], ['07:00','09:00','13:00']],
-        ['Selasa', ['07:00','08:00','10:00','13:00','15:00'], ['08:00','10:00','15:00']],
-        ['Rabu', ['07:00','08:00','09:00','13:00'], ['07:00','13:00']],
-        ['Kamis', ['07:00','09:00','13:00','15:00','17:00'], ['09:00','15:00']],
-        ['Jumat', ['07:00','08:00','13:00'], ['']],
-        ['Sabtu', ['07:00','09:00','11:00','13:00'], ['07:00','09:00','11:00']],
-        ['Minggu', [], ['']],
-        ];
-        @endphp
-        @foreach ($haris as $h)
-        <div class="hari-row">
-            <div class="hari-label">{{ $h[0] }}</div>
-            <div class="slot-available">
-                @if(count($h[1]) > 0)
-                @foreach ($h[1] as $slot)
-                <span class="slot-chip {{ in_array($slot, $h[2]) ? 'on' : 'off' }}" onclick="toggleSlot(this)">{{ $slot }}</span>
-                @endforeach
-                @else
-                <span style="font-size:12px;color:var(--muted);">Tidak tersedia</span>
-                @endif
-            </div>
-        </div>
-        @endforeach
         <div class="d-flex justify-content-end mt-3">
-            <button class="btn fw-bold px-4 py-2"
+            <button type="submit" class="btn fw-bold px-4 py-2"
                 style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                <i class="bi bi-check2 me-1"></i> Simpan Ketersediaan
+                <i class="bi bi-check2 me-1"></i> Simpan Keahlian
             </button>
         </div>
     </div>
+</form>
+
+<div class="form-section">
+    <div class="form-section-title"><i class="bi bi-clock-fill"></i> Ketersediaan Waktu</div>
+    @php
+    $haris = [
+    ['Senin', ['07:00','08:00','09:00','13:00','14:00'], ['07:00','09:00','13:00']],
+    ['Selasa', ['07:00','08:00','10:00','13:00','15:00'], ['08:00','10:00','15:00']],
+    ['Rabu', ['07:00','08:00','09:00','13:00'], ['07:00','13:00']],
+    ['Kamis', ['07:00','09:00','13:00','15:00','17:00'], ['09:00','15:00']],
+    ['Jumat', ['07:00','08:00','13:00'], ['']],
+    ['Sabtu', ['07:00','09:00','11:00','13:00'], ['07:00','09:00','11:00']],
+    ['Minggu', [], ['']],
+    ];
+    @endphp
+    @foreach ($haris as $h)
+    <div class="hari-row">
+        <div class="hari-label">{{ $h[0] }}</div>
+        <div class="slot-available">
+            @if(count($h[1]) > 0)
+            @foreach ($h[1] as $slot)
+            <span class="slot-chip {{ in_array($slot, $h[2]) ? 'on' : 'off' }}" onclick="toggleSlot(this)">{{ $slot }}</span>
+            @endforeach
+            @else
+            <span style="font-size:12px;color:var(--muted);">Tidak tersedia</span>
+            @endif
+        </div>
+    </div>
+    @endforeach
+    <div class="d-flex justify-content-end mt-3">
+        <button class="btn fw-bold px-4 py-2"
+            style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
+            <i class="bi bi-check2 me-1"></i> Simpan Ketersediaan
+        </button>
+    </div>
+</div>
 </div>
 
 {{-- ══ TAB: KEAMANAN ══ --}}
@@ -618,43 +636,49 @@
 
     <div class="form-section">
         <div class="form-section-title"><i class="bi bi-bell-fill"></i> Pengaturan Notifikasi</div>
-        @php
-        $notifs = [
-        ['Notifikasi Permintaan Jadwal Baru', 'Pemberitahuan saat siswa minta sesi baru', true],
-        ['Pengingat Sesi', 'Pengingat 1 jam sebelum sesi dimulai', true],
-        ['Notifikasi Pembayaran', 'Update status pembayaran sesi', true],
-        ['Ulasan Baru dari Siswa', 'Pemberitahuan ulasan masuk', true],
-        ['Email Newsletter', 'Informasi dan tips mengajar', false],
-        ];
-        @endphp
-        <div class="d-flex flex-column gap-3">
-            @foreach ($notifs as $n)
-            <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background:var(--bg);">
-                <div>
-                    <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $n[0] }}</div>
-                    <div style="font-size:11.5px;color:var(--muted);">{{ $n[1] }}</div>
+        <form method="POST" action="/tutor/profil/simpan-notifikasi">
+            @csrf
+            <div class="d-flex flex-column gap-3">
+                @php
+                $notifs = [
+                ['notif_permintaan_jadwal', 'Les Privat', 'Notifikasi permintaan jadwal dan konfirmasi sesi'],
+                ['notif_pengingat_sesi', 'Pengingat Sesi', 'Pengingat 1 jam sebelum sesi dimulai'],
+                ['notif_pembayaran', 'Pembayaran', 'Update status pembayaran sesi'],
+                ['notif_ulasan', 'Sistem', 'Notifikasi ulasan dan pemberitahuan sistem'],
+                ['notif_newsletter', 'Email Newsletter', 'Informasi dan tips mengajar'],
+                ];
+                @endphp
+                @foreach ($notifs as $n)
+                <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background:var(--bg);">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $n[1] }}</div>
+                        <div style="font-size:11.5px;color:var(--muted);">{{ $n[2] }}</div>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" name="{{ $n[0] }}"
+                            {{ $user->{$n[0]} ? 'checked' : '' }}
+                            style="width:40px;height:22px;cursor:pointer;"
+                            onchange="this.form.submit()" />
+                    </div>
                 </div>
-                <div class="form-check form-switch mb-0">
-                    <input class="form-check-input" type="checkbox" {{ $n[2] ? 'checked' : '' }}
-                        style="width:40px;height:22px;cursor:pointer;" />
-                </div>
+                @endforeach
             </div>
-            @endforeach
-        </div>
+        </form>
     </div>
+</div>
 
-    <div class="danger-zone">
-        <div style="font-size:14px;font-weight:700;color:var(--danger);margin-bottom:8px;">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya
-        </div>
-        <div style="font-size:12.5px;color:#7f1d1d;margin-bottom:14px;line-height:1.5;">
-            Menonaktifkan akun akan menghentikan semua jadwal aktif dan siswa tidak bisa memesan sesi baru dengan Anda.
-        </div>
-        <button class="btn fw-bold px-4 py-2"
-            style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
-            <i class="bi bi-x-circle-fill me-1"></i> Nonaktifkan Akun
-        </button>
+<div class="danger-zone">
+    <div style="font-size:14px;font-weight:700;color:var(--danger);margin-bottom:8px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya
     </div>
+    <div style="font-size:12.5px;color:#7f1d1d;margin-bottom:14px;line-height:1.5;">
+        Menonaktifkan akun akan menghentikan semua jadwal aktif dan siswa tidak bisa memesan sesi baru dengan Anda.
+    </div>
+    <button class="btn fw-bold px-4 py-2"
+        style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
+        <i class="bi bi-x-circle-fill me-1"></i> Nonaktifkan Akun
+    </button>
+</div>
 </div>
 
 {{-- ══ ULASAN SISWA ══ --}}
@@ -741,6 +765,20 @@
     function toggleSlot(el) {
         el.classList.toggle('on');
         el.classList.toggle('off');
+    }
+
+    function toggleBadge(checkbox) {
+        const span = checkbox.nextElementSibling;
+        const isMapel = checkbox.name === 'mata_pelajaran[]';
+        if (checkbox.checked) {
+            span.style.background = isMapel ? 'var(--primary)' : 'var(--success)';
+            span.style.color = '#fff';
+            span.style.borderColor = isMapel ? 'var(--primary)' : 'var(--success)';
+        } else {
+            span.style.background = isMapel ? '#eff6ff' : 'var(--bg)';
+            span.style.color = isMapel ? 'var(--primary)' : 'var(--muted)';
+            span.style.borderColor = isMapel ? '#eff6ff' : 'var(--border)';
+        }
     }
 
     function togglePass(inputId, iconId) {

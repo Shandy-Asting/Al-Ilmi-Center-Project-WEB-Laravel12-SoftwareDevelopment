@@ -896,71 +896,68 @@
             'smp' => ['emoji'=>'🎒','name'=>'SMP','sub'=>'Kelas 7–9', 'durasi'=>'75 mnt/sesi','warna'=>'var(--primary)'],
             'sma' => ['emoji'=>'🏆','name'=>'SMA','sub'=>'Kelas 10–12', 'durasi'=>'90 mnt/sesi','warna'=>'#8B5CF6'],
             ];
-            $jenjangList = [];
-            foreach ($meta as $key => $m) {
-            $p = $pakets->get($key); // ambil dari $pakets yang dikirim route
-            $jenjangList[$key] = array_merge($m, [
-            'harga' => $p ? 'Rp '.number_format($p->harga_min, 0, ',', '.') : 'Hubungi Admin',
-            'harga_raw' => $p ? $p->harga_min : 0,
-            'paket_id' => $p ? $p->id : null,
-            ]);
-            }
             @endphp
-            @foreach($jenjangList as $key => $j)
+            @foreach($meta as $key => $m)
+            @php $group = $pakets->get($key) ?? collect(); $p = $group->isNotEmpty() ? $group->first() : null; @endphp
             <div class="jenjang-card" onclick="selectJenjang('{{ $key }}')" id="jcard-{{ $key }}">
-                <div class="jenjang-icon">{{ $j['emoji'] }}</div>
-                <div class="jenjang-name">{{ $j['name'] }}</div>
-                <div class="jenjang-sub">{{ $j['sub'] }}</div>
-                <div class="jenjang-harga" style="color:{{ $j['warna'] }};">{{ $j['harga'] }}</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $j['durasi'] }}</div>
+                <div class="jenjang-icon">{{ $m['emoji'] }}</div>
+                <div class="jenjang-name">{{ $m['name'] }}</div>
+                <div class="jenjang-sub">{{ $m['sub'] }}</div>
+                <div class="jenjang-harga" style="color:{{ $m['warna'] }};">
+                    {{ $p ? 'Rp '.number_format($p->harga_min,0,',','.') : 'Hubungi Admin' }}
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $m['durasi'] }}</div>
+                @if($group && $group->count() > 1)
+                <div style="font-size:10.5px;font-weight:700;margin-top:4px;color:{{ $m['warna'] }};">{{ $group->count() }} pilihan paket</div>
+                @endif
             </div>
             @endforeach
         </div>
 
         {{-- PAKET DETAIL per jenjang --}}
-        @foreach($jenjangList as $key => $j)
+        @foreach($meta as $key => $m)
+        @php $group = $pakets->get($key) ?? collect(); @endphp
         <div class="paket-detail" id="paket-detail-{{ $key }}">
-            <div class="row g-3 align-items-start">
-                <div class="col-12 col-lg-7">
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                        <div style="font-size:32px;">{{ $j['emoji'] }}</div>
-                        <div>
-                            <div style="font-size:17px;font-weight:800;color:var(--text);">Paket Les Privat {{ $j['name'] }}</div>
-                            <div style="font-size:12.5px;color:var(--muted);">{{ $j['sub'] }} · {{ $j['durasi'] }} per sesi</div>
-                        </div>
-                        <div style="margin-left:auto;text-align:right;">
-                            <div style="font-size:26px;font-weight:800;color:{{ $j['warna'] }};">{{ $j['harga'] }}</div>
-                            <div style="font-size:11.5px;color:var(--muted);">/ sesi · bayar per sesi</div>
-                        </div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;">
+                {{ $m['emoji'] }} Pilih Paket {{ $m['name'] }}
+            </div>
+
+            {{-- Loop semua paket dalam tipe ini --}}
+            @foreach($group as $pidx => $p)
+            <div class="paket-option-card" id="pocard-{{ $key }}-{{ $pidx }}"
+                onclick="selectPaketOption('{{ $key }}','{{ $pidx }}','{{ $p->id }}','{{ addslashes($p->nama) }}','Rp {{ number_format($p->harga_min,0,',','.') }}',{{ $p->harga_min }},{{ $p->jumlah_les ?? 0 }},{{ $p->jumlah_soal ?? 0 }})"
+                style="border:2px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;" id="radio-{{ $key }}-{{ $pidx }}"></div>
+                <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:800;color:var(--text);">{{ $p->nama }}</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">{{ $m['sub'] }} · {{ $m['durasi'] }}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                        @if($p->jumlah_les)
+                        <span style="font-size:11.5px;background:var(--success-soft);color:var(--success);padding:2px 8px;border-radius:6px;font-weight:600;">✓ {{ $p->jumlah_les }} Sesi Les</span>
+                        @endif
+                        @if($p->jumlah_soal)
+                        <span style="font-size:11.5px;background:#eff6ff;color:var(--primary);padding:2px 8px;border-radius:6px;font-weight:600;">✓ {{ $p->jumlah_soal }} Soal</span>
+                        @endif
+                        @if($p->feedback_tutor)
+                        <span style="font-size:11.5px;background:var(--accent-soft);color:var(--warning);padding:2px 8px;border-radius:6px;font-weight:600;">✓ Feedback Tutor</span>
+                        @endif
+                        @if($p->akses_penuh)
+                        <span style="font-size:11.5px;background:var(--info-soft);color:var(--info);padding:2px 8px;border-radius:6px;font-weight:600;">✓ Akses Penuh Materi</span>
+                        @endif
                     </div>
-                    <ul class="paket-fitur list-unstyled mb-0">
-                        @foreach(['1 sesi per minggu (bisa tambah)','Pilih tutor berpengalaman sendiri','Semua mata pelajaran tersedia','Mode online maupun tatap muka','Jadwal fleksibel sesuai kesepakatan','Laporan belajar setelah tiap sesi'] as $f)
-                        <li>
-                            <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;flex-shrink:0;margin-top:2px;"></i>
-                            {{ $f }}
-                        </li>
-                        @endforeach
-                    </ul>
                 </div>
-                <div class="col-12 col-lg-5">
-                    <div style="background:var(--bg);border-radius:14px;padding:18px;">
-                        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Ringkasan Paket</div>
-                        @foreach([['Jenjang',strtoupper($key)],['Durasi Sesi',$j['durasi']],['Harga',$j['harga'].' / sesi'],['Pembayaran','Per sesi, tidak ada langganan'],['Mode','Online & Tatap Muka']] as $r)
-                        <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border);">
-                            <span style="color:var(--muted);">{{ $r[0] }}</span>
-                            <span style="font-weight:600;color:var(--text);">{{ $r[1] }}</span>
-                        </div>
-                        @endforeach
-                    </div>
-                    <button
-                        onclick="pilihPaket('{{ $key }}','{{ $j['name'] }}','{{ $j['harga'] }}','{{ $j['paket_id'] }}')"
-                        style="width:100%;margin-top:14px;padding:13px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;border:none;background:{{ $j['warna'] }};color:#fff;box-shadow:0 5px 16px rgba(0,0,0,.2);transition:all .2s;"
-                        onmouseover="this.style.opacity='.88';this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.opacity='1';this.style.transform=''">
-                        <i class="bi bi-arrow-right-circle-fill me-2"></i>Lanjut Pilih Tutor →
-                    </button>
+                <div style="text-align:right;flex-shrink:0;">
+                    <div style="font-size:20px;font-weight:800;color:{{ $m['warna'] }};">Rp {{ number_format($p->harga_min,0,',','.') }}</div>
+                    <div style="font-size:11px;color:var(--muted);">/ sesi</div>
                 </div>
             </div>
+            @endforeach
+
+            <button
+                onclick="lanjutDariPaket('{{ $key }}','{{ $m['name'] }}','{{ $m['warna'] }}')"
+                style="width:100%;margin-top:8px;padding:13px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;border:none;background:{{ $m['warna'] }};color:#fff;box-shadow:0 5px 16px rgba(0,0,0,.2);">
+                <i class="bi bi-arrow-right-circle-fill me-2"></i>Lanjut Pilih Tutor →
+            </button>
         </div>
         @endforeach
 
@@ -989,12 +986,14 @@
                         <div class="tutor-name">{{ $tutor->name }}</div>
                         <div class="tutor-mapel">
                             <i class="bi bi-mortarboard-fill me-1"></i>
-                            @php
-                            $mapelTutor = $tutor->materi()->distinct('mata_pelajaran')->pluck('mata_pelajaran')->take(3)->join(', ');
-                            @endphp
-                            {{ $mapelTutor ?: 'Semua Mata Pelajaran' }}
+                            {{ $tutor->mata_pelajaran_tutor ? implode(', ', array_slice($tutor->mata_pelajaran_tutor, 0, 3)) : 'Semua Mata Pelajaran' }}
                         </div>
                         <div class="tutor-stars">★★★★★ <span style="color:var(--muted);font-size:11px;">4.8 ({{ rand(20,80) }} ulasan)</span></div>
+                        @if($tutor->jenjang_tutor)
+                        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                            {{ implode(', ', array_map('strtoupper', $tutor->jenjang_tutor)) }}
+                        </div>
+                        @endif
                         <div class="tutor-tags mt-1">
                             @php $colors=['#eff6ff','#f0fdf4','#fef9c3']; $tc=['var(--primary)','var(--success)','var(--warning)']; @endphp
                             @foreach(($tutor->materi()->distinct('mata_pelajaran')->pluck('mata_pelajaran')->take(2)) as $ki => $m)
@@ -1003,7 +1002,9 @@
                         </div>
                     </div>
                     <div class="tutor-price">
-                        <div class="tp-val" id="tp-val-{{ $tutor->id }}">Rp 75.000</div>
+                        <div class="tp-val" id="tp-val-{{ $tutor->id }}">
+                            {{ $tutor->tarif_per_sesi ? 'Rp '.number_format($tutor->tarif_per_sesi,0,',','.') : 'Rp 75.000' }}
+                        </div>
                         <div class="tp-label">/ sesi</div>
                         <span class="tp-avail" style="background:var(--success-soft);color:var(--success);">● Tersedia</span>
                     </div>
@@ -1501,6 +1502,32 @@
         durasi: 90
     };
 
+    function lanjutDariPaket(key, jenjangName, warna) {
+        if (!selectedPaketOption[key]) {
+            alert('Pilih salah satu paket terlebih dahulu!');
+            return;
+        }
+        const opt = selectedPaketOption[key];
+        const durasi = key === 'sd' ? 60 : key === 'smp' ? 75 : 90;
+
+        state.jenjang = key;
+        state.jenjangName = jenjangName;
+        state.paketId = opt.paketId;
+        state.harga = opt.hargaRaw;
+        state.durasi = durasi;
+
+        document.getElementById('sum-paket').textContent = opt.nama;
+        document.getElementById('sum-jenjang').textContent = jenjangName;
+        document.getElementById('sum-harga').textContent = opt.harga + ' / sesi';
+        document.getElementById('info-paket-step2').textContent = opt.nama + ' · ' + opt.harga;
+
+        document.querySelectorAll('[id^="tp-val-"]').forEach(el => {
+            el.textContent = opt.harga;
+        });
+
+        goStep(2);
+    }
+
     // ── MAIN TAB ──
     function showMainTab(tab) {
         const isPesan = tab === 'pesan';
@@ -1732,6 +1759,61 @@
             s.className = i < val ? 'bi bi-star-fill' : 'bi bi-star';
             s.style.color = i < val ? 'var(--accent)' : 'var(--border)';
         });
+    }
+    // ── PILIH PAKET OPTION ──
+    let selectedPaketOption = {};
+
+    function selectPaketOption(key, pidx, paketId, nama, harga, hargaRaw, jumlahLes, jumlahSoal) {
+        // Reset semua radio di jenjang ini
+        document.querySelectorAll('[id^="radio-' + key + '-"]').forEach(r => {
+            r.style.background = '';
+            r.style.borderColor = 'var(--border)';
+        });
+        document.querySelectorAll('[id^="pocard-' + key + '-"]').forEach(c => {
+            c.style.borderColor = 'var(--border)';
+            c.style.background = '';
+        });
+
+        // Aktifkan yang dipilih
+        const radio = document.getElementById('radio-' + key + '-' + pidx);
+        const card = document.getElementById('pocard-' + key + '-' + pidx);
+        radio.style.background = 'var(--primary)';
+        radio.style.borderColor = 'var(--primary)';
+        card.style.borderColor = 'var(--primary)';
+        card.style.background = '#f0f7ff';
+
+        selectedPaketOption[key] = {
+            paketId,
+            nama,
+            harga,
+            hargaRaw
+        };
+    }
+
+    function lanjutDariPaket(key, jenjangName, warna) {
+        if (!selectedPaketOption[key]) {
+            alert('Pilih salah satu paket terlebih dahulu!');
+            return;
+        }
+        const opt = selectedPaketOption[key];
+        const durasi = key === 'sd' ? 60 : key === 'smp' ? 75 : 90;
+
+        state.jenjang = key;
+        state.jenjangName = jenjangName;
+        state.paketId = opt.paketId;
+        state.harga = opt.hargaRaw;
+        state.durasi = durasi;
+
+        document.getElementById('sum-paket').textContent = opt.nama;
+        document.getElementById('sum-jenjang').textContent = jenjangName;
+        document.getElementById('sum-harga').textContent = opt.harga + ' / sesi';
+        document.getElementById('info-paket-step2').textContent = opt.nama + ' · ' + opt.harga;
+
+        document.querySelectorAll('[id^="tp-val-"]').forEach(el => {
+            el.textContent = opt.harga;
+        });
+
+        goStep(2);
     }
 </script>
 @endpush

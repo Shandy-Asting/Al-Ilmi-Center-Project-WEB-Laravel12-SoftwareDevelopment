@@ -121,8 +121,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
         $aktivitasTerbaru = $aktivitasTerbaru->sortByDesc('sort')->take(6)->values();
 
-        // Pengguna terbaru
-        $penggunaTerbaru = User::latest()->take(5)->get();
+        $penggunaTerbaru = User::latest()->take(10)->get();
 
         return view('admin.dashboard', compact(
             'totalPengguna',
@@ -137,9 +136,178 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             'penggunaTerbaru',
         ));
     });
-    
-    Route::get('/pengguna',   fn() => view('admin.pengguna'));
-    Route::get('/transaksi',  fn() => view('admin.transaksi'));
+
+    Route::get('/pengguna', function () {
+        $pengguna = User::latest()->get();
+        return view('admin.pengguna', compact('pengguna'));
+    });
+
+    Route::get('/pengguna/export', function (Request $request) {
+        $role = $request->query('role', 'siswa');
+        $users = User::where('role', $role)->latest()->get();
+
+        $headers = ['Content-Type' => 'text/csv'];
+        $filename = 'data-' . $role . '-' . now()->format('Y-m-d') . '.csv';
+
+        $callback = function () use ($users, $role) {
+            $file = fopen('php://output', 'w');
+            if ($role === 'siswa') {
+                fputcsv($file, ['Nama', 'Email', 'No HP', 'Tanggal Daftar']);
+                foreach ($users as $u) {
+                    fputcsv($file, [$u->name, $u->email, $u->no_hp ?? '-', $u->created_at->format('d M Y')]);
+                }
+            } else {
+                fputcsv($file, ['Nama', 'Email', 'No HP', 'Bergabung']);
+                foreach ($users as $u) {
+                    fputcsv($file, [$u->name, $u->email, $u->no_hp ?? '-', $u->created_at->format('d M Y')]);
+                }
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, array_merge($headers, [
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]));
+    });
+
+    Route::get('/pengguna/{id}', function ($id) {
+        $user = User::findOrFail($id);
+        return view('admin.pengguna-detail', compact('user'));
+    });
+
+    Route::get('/transaksi/export', function (Request $request) {
+        $status = $request->query('status');
+        $metode = $request->query('metode');
+        $search = $request->query('search');
+
+        $query = Pembayaran::with(['siswa', 'lesPrivat'])->orderBy('created_at', 'desc');
+
+        if ($status && $status !== 'semua') {
+            $map = ['berhasil' => 'dikonfirmasi', 'pending' => 'menunggu', 'gagal' => 'ditolak'];
+            $query->where('status', $map[$status] ?? $status);
+        }
+
+        if ($metode && $metode !== 'semua') {
+            $query->where('bank_tujuan', 'like', "%$metode%");
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_invoice', 'like', "%$search%")
+                    ->orWhereHas('siswa', fn($q2) => $q2->where('name', 'like', "%$search%"));
+            });
+        }
+
+        $transaksi = $query->get();
+
+        $filename = 'transaksi-' . now()->format('Y-m-d') . '.csv';
+
+        $callback = function () use ($transaksi) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['ID Invoice', 'Nama Siswa', 'Email', 'Layanan', 'Metode', 'Jumlah', 'Status', 'Tanggal']);
+            foreach ($transaksi as $tx) {
+                $statusLabel = match ($tx->status) {
+                    'dikonfirmasi' => 'Berhasil',
+                    'menunggu'     => 'Pending',
+                    'ditolak'      => 'Gagal',
+                    default        => $tx->status,
+                };
+                fputcsv($file, [
+                    $tx->nomor_invoice,
+                    $tx->siswa->name ?? '-',
+                    $tx->siswa->email ?? '-',
+                    'Les Privat – ' . ($tx->lesPrivat->mata_pelajaran ?? '-'),
+                    $tx->bank_tujuan ?? '-',
+                    $tx->jumlah,
+                    $statusLabel,
+                    $tx->created_at->format('d M Y H:i'),
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    });
+
+    Route::get('/transaksi', function (Request $request) {
+        // Stat cards
+        $totalTransaksi    = Pembayaran::count();
+        $totalBerhasil     = Pembayaran::where('status', 'dikonfirmasi')->count();
+        $totalPending      = Pembayaran::where('status', 'menunggu')->count();
+        $totalPendapatan   = Pembayaran::where('status', 'dikonfirmasi')->sum('jumlah');
+
+        $bulanLalu         = Pembayaran::whereMonth('created_at', now()->subMonth()->month)->count();
+        $berhasilBulanLalu = Pembayaran::where('status', 'dikonfirmasi')->whereMonth('created_at', now()->subMonth()->month)->count();
+        $pendapatanBulanLalu = Pembayaran::where('status', 'dikonfirmasi')->whereMonth('dikonfirmasi_at', now()->subMonth()->month)->sum('jumlah');
+
+        // Filter
+        $status  = $request->query('status');
+        $metode  = $request->query('metode');
+        $search  = $request->query('search');
+
+        $query = Pembayaran::with(['siswa', 'lesPrivat'])
+            ->orderBy('created_at', 'desc');
+
+        if ($status && $status !== 'semua') {
+            $map = ['berhasil' => 'dikonfirmasi', 'pending' => 'menunggu', 'gagal' => 'ditolak'];
+            $query->where('status', $map[$status] ?? $status);
+        }
+
+        if ($metode && $metode !== 'semua') {
+            $query->where('bank_tujuan', 'like', "%$metode%");
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_invoice', 'like', "%$search%")
+                    ->orWhereHas('siswa', fn($q2) => $q2->where('name', 'like', "%$search%"));
+            });
+        }
+
+        $transaksi = $query->paginate(6)->withQueryString();
+
+        // Donut stats
+        $totalSemua  = Pembayaran::count() ?: 1;
+        $pctBerhasil = round($totalBerhasil / $totalSemua * 100);
+        $pctPending  = round($totalPending / $totalSemua * 100);
+        $totalGagal  = Pembayaran::where('status', 'ditolak')->count();
+        $pctGagal    = round($totalGagal / $totalSemua * 100);
+
+        // Pendapatan per layanan (mata pelajaran)
+        $pendapatanPerLayanan = Pembayaran::with('lesPrivat')
+            ->where('status', 'dikonfirmasi')
+            ->get()
+            ->groupBy(fn($p) => $p->lesPrivat->mata_pelajaran ?? 'Lainnya')
+            ->map(fn($list, $mapel) => [
+                'nama'   => 'Les Privat – ' . $mapel,
+                'jumlah' => $list->sum('jumlah'),
+            ])
+            ->sortByDesc('jumlah')
+            ->take(4)
+            ->values();
+
+        $maxLayanan = $pendapatanPerLayanan->max('jumlah') ?: 1;
+
+        return view('admin.transaksi', compact(
+            'totalTransaksi',
+            'totalBerhasil',
+            'totalPending',
+            'totalPendapatan',
+            'bulanLalu',
+            'berhasilBulanLalu',
+            'pendapatanBulanLalu',
+            'transaksi',
+            'pctBerhasil',
+            'pctPending',
+            'totalGagal',
+            'pctGagal',
+            'pendapatanPerLayanan',
+            'maxLayanan',
+        ));
+    });
 
     Route::get('/pembayaran', function () {
 

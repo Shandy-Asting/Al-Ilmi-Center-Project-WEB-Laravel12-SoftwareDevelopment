@@ -642,259 +642,313 @@
     <div class="form-section">
         <div class="form-section-title"><i class="bi bi-bell-fill"></i> Pengaturan Notifikasi</div>
         <div class="d-flex flex-column gap-3">
-            @php
-            $notifSettings = [
-            ['Notifikasi Tagihan & Pembayaran', 'Dapatkan pengingat jatuh tempo tagihan', true],
-            ['Notifikasi Jadwal Les', 'Pengingat sesi les privat yang akan datang', true],
-            ['Notifikasi Nilai & Progres', 'Update nilai kuis dan perkembangan belajar', true],
-            ['Notifikasi Materi Baru', 'Pemberitahuan saat tutor mengunggah materi baru', false],
-            ['Email Marketing', 'Promo dan penawaran spesial dari Al Ilmi Center', false],
-            ];
-            @endphp
-            @foreach($notifSettings as $ns)
-            <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
-                style="background:var(--bg);">
-                <div>
-                    <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $ns[0] }}</div>
-                    <div style="font-size:11.5px;color:var(--muted);">{{ $ns[1] }}</div>
+            <form method="POST" action="/siswa/profil/simpan-notifikasi">
+                @csrf
+                <div class="d-flex flex-column gap-3">
+                    @php
+                    $notifSettings = [
+                    [
+                    'key' => 'notif_pembayaran',
+                    'label' => 'Pembayaran',
+                    'desc' => 'Notifikasi terkait pembayaran dan tagihan les privat',
+                    'ikon' => 'bi-credit-card-fill',
+                    'warna' => 'var(--success)',
+                    'tipe' => 'pembayaran',
+                    ],
+                    [
+                    'key' => 'notif_pengingat_sesi',
+                    'label' => 'Les Privat',
+                    'desc' => 'Notifikasi jadwal, konfirmasi, dan pengingat sesi les privat',
+                    'ikon' => 'bi-person-video3',
+                    'warna' => 'var(--primary)',
+                    'tipe' => 'les_privat',
+                    ],
+                    [
+                    'key' => 'notif_ulasan',
+                    'label' => 'Belajar',
+                    'desc' => 'Notifikasi nilai kuis, latihan soal, dan progres belajar',
+                    'ikon' => 'bi-bar-chart-line-fill',
+                    'warna' => 'var(--info)',
+                    'tipe' => 'belajar',
+                    ],
+                    [
+                    'key' => 'notif_permintaan_jadwal',
+                    'label' => 'Sistem',
+                    'desc' => 'Notifikasi sistem, materi baru, dan pengumuman dari Al Ilmi Center',
+                    'ikon' => 'bi-bell-fill',
+                    'warna' => 'var(--warning)',
+                    'tipe' => 'sistem',
+                    ],
+                    [
+                    'key' => 'notif_newsletter',
+                    'label' => 'Email Marketing',
+                    'desc' => 'Promo dan penawaran spesial dari Al Ilmi Center',
+                    'ikon' => 'bi-envelope-fill',
+                    'warna' => 'var(--muted)',
+                    'tipe' => 'sistem',
+                    ],
+                    ];
+                    @endphp
+
+                    @foreach($notifSettings as $ns)
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
+                        style="background:var(--bg);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:36px;height:36px;border-radius:10px;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;color:{{ $ns['warna'] }};font-size:16px;flex-shrink:0;">
+                                <i class="bi {{ $ns['ikon'] }}"></i>
+                            </div>
+                            <div>
+                                <div>
+                                    <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $ns['label'] }}</div>
+                                    <div style="font-size:11.5px;color:var(--muted);">{{ $ns['desc'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-0 ms-3">
+                            <input class="form-check-input"
+                                type="checkbox"
+                                name="{{ $ns['key'] }}"
+                                value="1"
+                                {{ $user->{$ns['key']} ? 'checked' : '' }}
+                                style="width:40px;height:22px;cursor:pointer;" />
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
-                <div class="form-check form-switch mb-0">
-                    <input class="form-check-input" type="checkbox" {{ $ns[2] ? 'checked' : '' }}
-                        style="width:40px;height:22px;cursor:pointer;" />
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn fw-bold px-4 py-2"
+                        style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
+                        <i class="bi bi-check2 me-1"></i> Simpan Pengaturan
+                    </button>
                 </div>
-            </div>
-            @endforeach
+            </form>
         </div>
-        <div class="d-flex justify-content-end mt-3">
+
+        <div class="danger-zone">
+            <div class="dz-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya</div>
+            <div class="dz-desc">
+                Menghapus akun akan menghapus semua data termasuk riwayat belajar, nilai, dan transaksi secara permanen.
+                Tindakan ini tidak dapat dibatalkan.
+            </div>
             <button class="btn fw-bold px-4 py-2"
-                style="background:var(--primary);color:#fff;border-radius:10px;border:none;font-size:13px;">
-                <i class="bi bi-check2 me-1"></i> Simpan Pengaturan
+                style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
+                <i class="bi bi-trash3-fill me-1"></i> Hapus Akun Saya
             </button>
         </div>
     </div>
 
-    <div class="danger-zone">
-        <div class="dz-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya</div>
-        <div class="dz-desc">
-            Menghapus akun akan menghapus semua data termasuk riwayat belajar, nilai, dan transaksi secara permanen.
-            Tindakan ini tidak dapat dibatalkan.
-        </div>
-        <button class="btn fw-bold px-4 py-2"
-            style="background:var(--danger);color:#fff;border-radius:10px;border:none;font-size:13px;">
-            <i class="bi bi-trash3-fill me-1"></i> Hapus Akun Saya
-        </button>
-    </div>
-</div>
+</div> 
 
 {{-- ══ SECTION: PAKET ══ --}}
 <div id="section-paket" style="display:none;">
-    <div class="paket-aktif">
-        @php $paketAktif = $paketLesPrivat->first(); @endphp
-        @if($paketAktif)
-        <div class="pa-label">Paket Les Privat Tersedia</div>
-        <div class="pa-name">{{ $paketAktif->nama }} ⭐</div>
-        <div class="pa-period">
-            Rp {{ number_format($paketAktif->harga_min, 0, ',', '.') }} / sesi
-            @if($paketAktif->harga_max)
-            — maks Rp {{ number_format($paketAktif->harga_max, 0, ',', '.') }}
-            @endif
-        </div>
-        <div class="pa-features">
-            @if($paketAktif->jumlah_les)
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> {{ $paketAktif->jumlah_les }} Sesi Les Privat</div>
-            @endif
-            @if($paketAktif->jumlah_soal)
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> {{ $paketAktif->jumlah_soal }} Soal Latihan</div>
-            @endif
-            @if($paketAktif->feedback_tutor)
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Feedback Tutor Langsung</div>
-            @endif
-            @if($paketAktif->akses_penuh)
-            <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Akses Penuh Materi</div>
-            @endif
-        </div>
-        @else
-        <div class="pa-label">Paket Les Privat</div>
-        <div class="pa-name">Belum Ada Paket ⭐</div>
-        <div class="pa-period">Hubungi admin untuk informasi paket</div>
-        @endif
-    </div>
-
-    <div class="row g-3 mb-3">
-        @foreach($paketLesPrivat as $loop_paket)
-        <div class="col-md-4">
-            <div class="card-box text-center" style="{{ $loop->first ? 'border-color:var(--primary);border-width:2px;' : '' }}">
-                @if($loop->first)
-                <div style="background:var(--accent);color:var(--primary);font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Paket Unggulan</div>
-                @endif
-                <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">
-                    {{ strtoupper($loop_paket->tipe) }}
-                </div>
-                <div style="font-size:26px;font-weight:800;color:{{ $loop->first ? 'var(--primary)' : 'var(--text)' }};margin:8px 0 2px;">
-                    Rp {{ number_format($loop_paket->harga_min, 0, ',', '.') }}
-                </div>
-                <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">/ sesi</div>
-                <ul style="list-style:none;padding:0;text-align:left;margin-bottom:16px;">
-                    @if($loop_paket->jumlah_les)
-                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
-                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
-                        {{ $loop_paket->jumlah_les }} Sesi Les Privat
-                    </li>
-                    @endif
-                    @if($loop_paket->jumlah_soal)
-                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
-                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
-                        {{ $loop_paket->jumlah_soal }} Soal Latihan
-                    </li>
-                    @endif
-                    @if($loop_paket->feedback_tutor)
-                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
-                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
-                        Feedback Tutor
-                    </li>
-                    @endif
-                    @if($loop_paket->akses_penuh)
-                    <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
-                        <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
-                        Akses Penuh Materi
-                    </li>
-                    @endif
-                </ul>
-                <a href="/siswa/les-privat"
-                    class="btn fw-bold w-100"
-                    style="background:{{ $loop->first ? 'var(--primary)' : 'var(--bg)' }};color:{{ $loop->first ? '#fff' : 'var(--primary)' }};border-radius:10px;border:{{ $loop->first ? 'none' : '1.5px solid var(--border)' }};font-size:13px;text-decoration:none;">
-                    Pilih Paket
-                </a>
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-    <div class="card-box">
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Riwayat Langganan</div>
-        @forelse($riwayatLes as $les)
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
-            <div>
-                <div style="font-size:13px;font-weight:700;color:var(--text);">
-                    {{ $les->mata_pelajaran }}
-                    @if($les->tutor) — {{ $les->tutor->name }} @endif
-                </div>
-                <div style="font-size:12px;color:var(--muted);">
-                    {{ $les->jadwal ? $les->jadwal->translatedFormat('d M Y') : '-' }}
-                </div>
-            </div>
-            <div class="text-end">
-                <div style="font-size:13px;font-weight:700;color:var(--text);">
-                    Rp {{ number_format($les->harga, 0, ',', '.') }}
-                </div>
-                @if($les->status === 'selesai')
-                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--success-soft);color:var(--success);">Selesai</span>
-                @elseif($les->status === 'dikonfirmasi')
-                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--info-soft);color:var(--info);">Dikonfirmasi</span>
-                @elseif($les->status === 'menunggu')
-                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--warning);">Menunggu</span>
-                @else
-                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--danger-soft);color:var(--danger);">Dibatalkan</span>
+        <div class="paket-aktif">
+            @php $paketAktif = $paketLesPrivat->first(); @endphp
+            @if($paketAktif)
+            <div class="pa-label">Paket Les Privat Tersedia</div>
+            <div class="pa-name">{{ $paketAktif->nama }} ⭐</div>
+            <div class="pa-period">
+                Rp {{ number_format($paketAktif->harga_min, 0, ',', '.') }} / sesi
+                @if($paketAktif->harga_max)
+                — maks Rp {{ number_format($paketAktif->harga_max, 0, ',', '.') }}
                 @endif
             </div>
-        </div>
-        @empty
-        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">
-            <i class="bi bi-calendar-x" style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:.4;"></i>
-            Belum ada riwayat les privat.
-            <a href="/siswa/les-privat" style="color:var(--primary);font-weight:600;display:block;margin-top:6px;">Pesan Les Sekarang →</a>
-        </div>
-        @endforelse
-    </div>
-</div>
-
-{{-- ══ SECTION: PENCAPAIAN ══ --}}
-<div id="section-pencapaian" style="display:none;">
-    <div class="row g-3 mb-3">
-        <div class="col-md-3 col-6">
-            <div class="card-box text-center">
-                <div style="font-size:32px;font-weight:800;color:var(--primary);">{{ $badgeTerbuka }}</div>
-                <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="card-box text-center">
-                <div style="font-size:32px;font-weight:800;color:var(--muted);">{{ $badgeTerkunci }}</div>
-                <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="card-box text-center">
-                <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 {{ $aktivitasMinggu }}</div>
-                <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="card-box text-center">
-                <div style="font-size:32px;font-weight:800;color:var(--success);">{{ $rataRataNilai }}</div>
-                <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card-box">
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
-        <div class="achieve-grid">
-            @foreach($achievements as $a)
-            <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
-                <div class="achieve-icon">{{ $a[0] }}</div>
-                <div class="achieve-title">{{ $a[1] }}</div>
-                <div class="achieve-sub">{{ $a[2] }}</div>
-                @if($a[3])
-                <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka</div>
+            <div class="pa-features">
+                @if($paketAktif->jumlah_les)
+                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> {{ $paketAktif->jumlah_les }} Sesi Les Privat</div>
                 @endif
+                @if($paketAktif->jumlah_soal)
+                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> {{ $paketAktif->jumlah_soal }} Soal Latihan</div>
+                @endif
+                @if($paketAktif->feedback_tutor)
+                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Feedback Tutor Langsung</div>
+                @endif
+                @if($paketAktif->akses_penuh)
+                <div class="pa-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent);"></i> Akses Penuh Materi</div>
+                @endif
+            </div>
+            @else
+            <div class="pa-label">Paket Les Privat</div>
+            <div class="pa-name">Belum Ada Paket ⭐</div>
+            <div class="pa-period">Hubungi admin untuk informasi paket</div>
+            @endif
+        </div>
+
+        <div class="row g-3 mb-3">
+            @foreach($paketLesPrivat as $loop_paket)
+            <div class="col-md-4">
+                <div class="card-box text-center" style="{{ $loop->first ? 'border-color:var(--primary);border-width:2px;' : '' }}">
+                    @if($loop->first)
+                    <div style="background:var(--accent);color:var(--primary);font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Paket Unggulan</div>
+                    @endif
+                    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">
+                        {{ strtoupper($loop_paket->tipe) }}
+                    </div>
+                    <div style="font-size:26px;font-weight:800;color:{{ $loop->first ? 'var(--primary)' : 'var(--text)' }};margin:8px 0 2px;">
+                        Rp {{ number_format($loop_paket->harga_min, 0, ',', '.') }}
+                    </div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">/ sesi</div>
+                    <ul style="list-style:none;padding:0;text-align:left;margin-bottom:16px;">
+                        @if($loop_paket->jumlah_les)
+                        <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                            <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                            {{ $loop_paket->jumlah_les }} Sesi Les Privat
+                        </li>
+                        @endif
+                        @if($loop_paket->jumlah_soal)
+                        <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                            <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                            {{ $loop_paket->jumlah_soal }} Soal Latihan
+                        </li>
+                        @endif
+                        @if($loop_paket->feedback_tutor)
+                        <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                            <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                            Feedback Tutor
+                        </li>
+                        @endif
+                        @if($loop_paket->akses_penuh)
+                        <li style="font-size:12.5px;padding:4px 0;display:flex;align-items:center;gap:6px;color:var(--text);">
+                            <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:13px;"></i>
+                            Akses Penuh Materi
+                        </li>
+                        @endif
+                    </ul>
+                    <a href="/siswa/les-privat"
+                        class="btn fw-bold w-100"
+                        style="background:{{ $loop->first ? 'var(--primary)' : 'var(--bg)' }};color:{{ $loop->first ? '#fff' : 'var(--primary)' }};border-radius:10px;border:{{ $loop->first ? 'none' : '1.5px solid var(--border)' }};font-size:13px;text-decoration:none;">
+                        Pilih Paket
+                    </a>
+                </div>
             </div>
             @endforeach
         </div>
+
+        <div class="card-box">
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">📋 Riwayat Langganan</div>
+            @forelse($riwayatLes as $les)
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text);">
+                        {{ $les->mata_pelajaran }}
+                        @if($les->tutor) — {{ $les->tutor->name }} @endif
+                    </div>
+                    <div style="font-size:12px;color:var(--muted);">
+                        {{ $les->jadwal ? $les->jadwal->translatedFormat('d M Y') : '-' }}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div style="font-size:13px;font-weight:700;color:var(--text);">
+                        Rp {{ number_format($les->harga, 0, ',', '.') }}
+                    </div>
+                    @if($les->status === 'selesai')
+                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--success-soft);color:var(--success);">Selesai</span>
+                    @elseif($les->status === 'dikonfirmasi')
+                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--info-soft);color:var(--info);">Dikonfirmasi</span>
+                    @elseif($les->status === 'menunggu')
+                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--warning);">Menunggu</span>
+                    @else
+                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--danger-soft);color:var(--danger);">Dibatalkan</span>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">
+                <i class="bi bi-calendar-x" style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:.4;"></i>
+                Belum ada riwayat les privat.
+                <a href="/siswa/les-privat" style="color:var(--primary);font-weight:600;display:block;margin-top:6px;">Pesan Les Sekarang →</a>
+            </div>
+            @endforelse
+        </div>
     </div>
-</div>
 
-@endsection
+    {{-- ══ SECTION: PENCAPAIAN ══ --}}
+    <div id="section-pencapaian" style="display:none;">
+        <div class="row g-3 mb-3">
+            <div class="col-md-3 col-6">
+                <div class="card-box text-center">
+                    <div style="font-size:32px;font-weight:800;color:var(--primary);">{{ $badgeTerbuka }}</div>
+                    <div style="font-size:12px;color:var(--muted);">Badge Terbuka</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card-box text-center">
+                    <div style="font-size:32px;font-weight:800;color:var(--muted);">{{ $badgeTerkunci }}</div>
+                    <div style="font-size:12px;color:var(--muted);">Badge Terkunci</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card-box text-center">
+                    <div style="font-size:32px;font-weight:800;color:var(--accent);">🔥 {{ $aktivitasMinggu }}</div>
+                    <div style="font-size:12px;color:var(--muted);">Hari Streak</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card-box text-center">
+                    <div style="font-size:32px;font-weight:800;color:var(--success);">{{ $rataRataNilai }}</div>
+                    <div style="font-size:12px;color:var(--muted);">Rata-rata Nilai</div>
+                </div>
+            </div>
+        </div>
 
-@push('scripts')
-<script>
-    function switchSection(el, id) {
-        document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        ['info', 'keamanan', 'paket', 'pencapaian'].forEach(s => {
-            document.getElementById('section-' + s).style.display = s === id ? '' : 'none';
+        <div class="card-box">
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">🏆 Semua Pencapaian</div>
+            <div class="achieve-grid">
+                @foreach($achievements as $a)
+                <div class="achieve-card {{ $a[3] ? 'unlocked' : 'locked' }}">
+                    <div class="achieve-icon">{{ $a[0] }}</div>
+                    <div class="achieve-title">{{ $a[1] }}</div>
+                    <div class="achieve-sub">{{ $a[2] }}</div>
+                    @if($a[3])
+                    <div style="margin-top:6px;font-size:10px;color:var(--success);font-weight:700;">✅ Terbuka</div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    @endsection
+
+    @php
+    $bukaKeamanan = session('tab') === 'keamanan' || $errors->has('password_lama');
+    @endphp
+
+    @push('scripts')
+    <script>
+        function switchSection(el, id) {
+            document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            ['info', 'keamanan', 'paket', 'pencapaian'].forEach(s => {
+                document.getElementById('section-' + s).style.display = s === id ? '' : 'none';
+            });
+        }
+
+        function togglePass(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        setTimeout(() => {
+            const el = document.getElementById('flash-sukses');
+            if (el) {
+                el.style.transition = 'opacity .5s';
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            }
+        }, 3000);
+
+        @if($bukaKeamanan)
+        document.addEventListener('DOMContentLoaded', () => {
+            const tab = document.querySelector('[onclick*="keamanan"]');
+            if (tab) tab.click();
         });
-    }
-
-    // Toggle show/hide password
-    function togglePass(inputId, iconId) {
-        const input = document.getElementById(inputId);
-        const icon = document.getElementById(iconId);
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.className = 'bi bi-eye-slash';
-        } else {
-            input.type = 'password';
-            icon.className = 'bi bi-eye';
-        }
-    }
-
-    // Auto-hide flash message
-    setTimeout(() => {
-        const el = document.getElementById('flash-sukses');
-        if (el) {
-            el.style.transition = 'opacity .5s';
-            el.style.opacity = '0';
-            setTimeout(() => el.remove(), 500);
-        }
-    }, 3000);
-
-    // Buka tab keamanan jika ada error password
-    @if(session('tab') === 'keamanan' || $errors->has('password_lama'))
-    document.addEventListener('DOMContentLoaded', () => {
-        const tab = document.querySelector('[onclick*="keamanan"]');
-        if (tab) tab.click();
-    });
-    @endif
-</script>
-@endpush
+        @endif
+    </script>
+    @endpush

@@ -30,6 +30,15 @@ class User extends Authenticatable
         'jurusan',
         'tahun_mengajar',
         'mode_mengajar',
+        'notif_permintaan_jadwal',
+        'notif_pengingat_sesi',
+        'notif_pembayaran',
+        'notif_ulasan',
+        'notif_newsletter',
+        'mata_pelajaran_tutor',
+        'jenjang_tutor',
+        'tarif_per_sesi',
+        'maks_siswa_per_hari',
     ];
 
     protected $hidden = [
@@ -40,8 +49,15 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'       => 'datetime',
+            'password'                => 'hashed',
+            'notif_permintaan_jadwal' => 'boolean',
+            'notif_pengingat_sesi'    => 'boolean',
+            'notif_pembayaran'        => 'boolean',
+            'notif_ulasan'            => 'boolean',
+            'notif_newsletter'        => 'boolean',
+            'mata_pelajaran_tutor' => 'array',
+            'jenjang_tutor'        => 'array',
         ];
     }
 

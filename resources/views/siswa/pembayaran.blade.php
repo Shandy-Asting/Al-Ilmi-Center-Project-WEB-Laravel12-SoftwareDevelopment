@@ -1020,30 +1020,43 @@
             return;
         }
 
-        const formData = new FormData();
-        formData.append('_token', '{{ csrf_token() }}');
-        formData.append('bukti_transfer', file);
-        formData.append('bank_tujuan', selectedRek.dataset.bank);
-        formData.append('nomor_rekening', selectedRek.dataset.norek);
+        // Buat form dan submit langsung
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/siswa/pembayaran/' + currentLesId + '/upload-bukti';
+        form.enctype = 'multipart/form-data';
 
-        fetch('/siswa/pembayaran/' + currentLesId + '/upload-bukti', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(res => {
-                if (res.ok || res.redirected) {
-                    closeModal('modal-bayar');
-                    setTimeout(() => {
-                        document.getElementById('modal-sukses').classList.add('show');
-                    }, 300);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2500);
-                } else {
-                    alert('Gagal mengirim bukti. Coba lagi.');
-                }
-            })
-            .catch(() => alert('Terjadi kesalahan. Coba lagi.'));
+        const token = document.createElement('input');
+        token.type = 'hidden';
+        token.name = '_token';
+        token.value = '{{ csrf_token() }}';
+        form.appendChild(token);
+
+        const bank = document.createElement('input');
+        bank.type = 'hidden';
+        bank.name = 'bank_tujuan';
+        bank.value = selectedRek.dataset.bank;
+        form.appendChild(bank);
+
+        const norek = document.createElement('input');
+        norek.type = 'hidden';
+        norek.name = 'nomor_rekening';
+        norek.value = selectedRek.dataset.norek;
+        form.appendChild(norek);
+
+        // Clone file input ke form
+        const fileInput = document.getElementById('fileInput');
+        const fileClone = fileInput.cloneNode(true);
+        fileClone.style.display = 'none';
+        form.appendChild(fileClone);
+
+        // Transfer DataTransfer
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileClone.files = dt.files;
+
+        document.body.appendChild(form);
+        form.submit();
     }
 
     function openModalBuktiUrl(url) {
