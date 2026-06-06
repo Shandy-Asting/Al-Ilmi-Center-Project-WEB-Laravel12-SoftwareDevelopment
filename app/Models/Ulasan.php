@@ -33,4 +33,5 @@ class Ulasan extends Model
     {
         return $this->belongsTo(LesPrivat::class, 'les_privat_id');
     }
+    
 }

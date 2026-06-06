@@ -726,9 +726,9 @@
                     <td style="font-size:12.5px;color:var(--muted);">{{ $u->created_at->format('d M Y') }}</td>
                     <td><span class="pill p-success"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Aktif</span></td>
                     <td>
-                        <button style="border:1px solid var(--success);background:var(--success-soft);color:var(--success);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;">
+                        <a href="/admin/pengguna/{{ $u->id }}" style="border:1px solid var(--success);background:var(--success-soft);color:var(--success);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;">
                             Detail
-                        </button>
+                        </a>
                     </td>
                 </tr>
                 @empty

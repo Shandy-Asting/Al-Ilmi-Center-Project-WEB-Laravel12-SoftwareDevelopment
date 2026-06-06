@@ -107,7 +107,7 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
             'hariAdaSesi',
         ));
     });
-    
+
     // ── Materi ─────────────────────────────────────────────────────────────
     Route::get('/materi', function () {
         $tutorId = auth()->id();
@@ -641,7 +641,23 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
     Route::get('/notifikasi', function () {
         $user = auth()->user();
 
+        // Kumpulkan tipe yang dinonaktifkan user
+        $tipeDisabled = [];
+        if (!$user->notif_permintaan_jadwal) $tipeDisabled[] = 'les_privat';
+        if (!$user->notif_pembayaran)        $tipeDisabled[] = 'pembayaran';
+        if (!$user->notif_ulasan)            $tipeDisabled[] = 'ulasan';
+        // notif_pengingat_sesi & notif_newsletter = tipe 'sistem'
+        // hanya disable sistem jika keduanya off
+        if (!$user->notif_pengingat_sesi && !$user->notif_newsletter) $tipeDisabled[] = 'sistem';
+
+        // Kumpulkan tipe yang dinonaktifkan user
+        $tipeDisabled = [];
+        if (!$user->notif_permintaan_jadwal) $tipeDisabled[] = 'les_privat';
+        if (!$user->notif_pembayaran)        $tipeDisabled[] = 'pembayaran';
+        if (!$user->notif_ulasan) $tipeDisabled[] = 'sistem';
+
         $notifikasi = Notifikasi::where('user_id', $user->id)
+            ->when(count($tipeDisabled), fn($q) => $q->whereNotIn('tipe', $tipeDisabled))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -670,7 +686,8 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
             'kemarin',
             'mingguIni',
             'lebihLama',
-            'perTipe'
+            'perTipe',
+            'tipeDisabled'
         ));
     });
 
@@ -822,5 +839,36 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         $user->update(['avatar' => $path]);
 
         return redirect('/tutor/profil')->with('sukses_info', 'Foto profil berhasil diperbarui!');
+    });
+    Route::post('/profil/simpan-notifikasi', function (Request $request) {
+        auth()->user()->update([
+            'notif_permintaan_jadwal' => $request->boolean('notif_permintaan_jadwal'),
+            'notif_pengingat_sesi'    => $request->boolean('notif_pengingat_sesi'),
+            'notif_pembayaran'        => $request->boolean('notif_pembayaran'),
+            'notif_ulasan'            => $request->boolean('notif_ulasan'),
+            'notif_newsletter'        => $request->boolean('notif_newsletter'),
+        ]);
+
+        return back()->with('sukses_info', 'Pengaturan notifikasi berhasil disimpan!');
+    });
+    
+    Route::post('/profil/simpan-keahlian', function (Request $request) {
+        $request->validate([
+            'mata_pelajaran'      => 'required|array|min:1',
+            'mata_pelajaran.*'    => 'string|max:50',
+            'jenjang'             => 'required|array|min:1',
+            'jenjang.*'           => 'in:sd,smp,sma,perguruan_tinggi',
+            'tarif_per_sesi'      => 'required|integer|min:0',
+            'maks_siswa_per_hari' => 'required|integer|min:1|max:20',
+        ]);
+
+        auth()->user()->update([
+            'mata_pelajaran_tutor' => $request->mata_pelajaran,
+            'jenjang_tutor'        => $request->jenjang,
+            'tarif_per_sesi'       => $request->tarif_per_sesi,
+            'maks_siswa_per_hari'  => $request->maks_siswa_per_hari,
+        ]);
+
+        return redirect('/tutor/profil')->with('sukses_info', 'Keahlian & jadwal berhasil disimpan!');
     });
 });
