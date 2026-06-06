@@ -657,15 +657,23 @@ $menunggu = collect([]);
                             @endphp
                             <div
                                 class="cal-day
-                        {{ $cell['other'] ? 'other-month' : '' }}
-                        {{ $isToday ? 'today' : '' }}
-                        {{ $hasEvent ? 'has-event' : '' }}">
+    {{ $cell['other'] ? 'other-month' : '' }}
+    {{ $isToday ? 'today' : '' }}
+    {{ $hasEvent ? 'has-event' : '' }}"
+                                onclick="loadJadwalKalender({{ $cell['day'] }}, {{ $cell['date']->month }}, {{ $cell['date']->year }})">
                                 {{ $cell['day'] }}
                             </div>
                             @endforeach
                         </div>
             </div>
+
+            {{-- HASIL KLIK KALENDER --}}
+            <div id="jadwal-kalender-result" style="display:none;border-top:1px solid var(--border);padding:16px 20px;">
+                <div id="jadwal-kalender-title" style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:10px;"></div>
+                <div id="jadwal-kalender-list"></div>
+            </div>
         </div>
+
 
 
         {{-- RATING --}}
@@ -791,3 +799,40 @@ $menunggu = collect([]);
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    function loadJadwalKalender(tgl, bulan, tahun) {
+        fetch(`/tutor/jadwal/kalender?tgl=${tgl}&bulan=${bulan}&tahun=${tahun}`)
+            .then(r => r.json())
+            .then(data => {
+                const box = document.getElementById('jadwal-kalender-result');
+                const title = document.getElementById('jadwal-kalender-title');
+                const list = document.getElementById('jadwal-kalender-list');
+
+                title.textContent = data.label + ' (' + data.total + ' sesi)';
+
+                if (data.jadwal.length === 0) {
+                    list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">Tidak ada jadwal pada hari ini.</div>`;
+                } else {
+                    list.innerHTML = data.jadwal.map(j => `
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+                        <div style="min-width:56px;text-align:center;background:var(--bg);border-radius:8px;padding:6px 8px;">
+                            <div style="font-size:.85rem;font-weight:700;color:var(--primary);">${j.waktu}</div>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:.84rem;font-weight:600;color:var(--text);">${j.mapel}</div>
+                            <div style="font-size:.75rem;color:var(--muted);">${j.siswa} · ${j.mode === 'online' ? 'Online' : 'Offline'}</div>
+                        </div>
+                        <span style="font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:20px;background:${j.mode === 'online' ? 'var(--success-soft)' : '#f5f3ff'};color:${j.mode === 'online' ? 'var(--success)' : '#6d28d9'};">
+                            ${j.mode === 'online' ? 'Online' : 'Offline'}
+                        </span>
+                    </div>
+                `).join('');
+                }
+
+                box.style.display = 'block';
+            });
+    }
+</script>
+@endpush

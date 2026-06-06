@@ -86,6 +86,15 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ->take(3)
             ->get();
 
+        // Rekomendasi materi (ambil 3 materi aktif terbaru)
+        $rekomendasiMateri = Materi::where('status', 'aktif')
+            ->withCount('soal')
+            ->with('tutor')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        // Ulasan untuk testimoni (dari semua siswa, bukan hanya siswa ini)
         $testimoni = \App\Models\Ulasan::with('siswa')
             ->whereNotNull('komentar')
             ->where('bintang', '>=', 4)
@@ -109,6 +118,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             'maxAktivitas',
             'jadwalTerdekat',
             'testimoni',
+            'rekomendasiMateri'
         ));
     });
 
@@ -231,10 +241,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     // ── Les Privat ─────────────────────────────────────────────────────────
     Route::get('/les-privat', function () {
         $pakets = Paket::orderByRaw("FIELD(tipe,'sd','smp','sma')")
-            ->orderBy('created_at', 'desc')
+            ->orderBy('harga_min', 'asc')
             ->get()
-            ->unique('tipe')
-            ->keyBy('tipe');
+            ->groupBy('tipe');
 
         $tutors = User::where('role', 'tutor')->get();
 
@@ -276,17 +285,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
                 ->withInput();
         }
 
-        $harga = match ((int) $request->durasi_menit) {
-            60      => 50000,
-            75      => 60000,
-            90      => 75000,
-            120     => 100000,
-            default => 75000,
-        };
+        // Ambil harga dari paket jika ada, fallback ke durasi
+        $harga = 75000;
+        if ($request->filled('paket_id')) {
+            $paket = Paket::find($request->paket_id);
+            if ($paket) $harga = $paket->harga_min;
+        } else {
+            $harga = match ((int) $request->durasi_menit) {
+                60      => 50000,
+                75      => 60000,
+                90      => 75000,
+                120     => 100000,
+                default => 75000,
+            };
+        }
 
         LesPrivat::create([
             'user_id'        => auth()->id(),
             'tutor_id'       => $request->tutor_id,
+            'paket_id'       => $request->paket_id ?? null,
             'mata_pelajaran' => $request->mata_pelajaran,
             'topik'          => $request->topik,
             'catatan'        => $request->catatan,
@@ -549,10 +566,23 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     // ── Notifikasi ─────────────────────────────────────────────────────────
     Route::get('/notifikasi', function () {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())->orderBy('created_at', 'desc')->get();
+        $user = auth()->user();
+
+        $tipeAktif = [];
+        if ($user->notif_pembayaran)        $tipeAktif[] = 'pembayaran';
+        if ($user->notif_pengingat_sesi)    $tipeAktif[] = 'les_privat';
+        if ($user->notif_ulasan)            $tipeAktif[] = 'belajar';
+        if ($user->notif_permintaan_jadwal) $tipeAktif[] = 'sistem';
+        if ($user->notif_newsletter)        $tipeAktif[] = 'sistem';
+
+        $notifikasi = Notifikasi::where('user_id', $user->id)
+            ->whereIn('tipe', array_unique($tipeAktif))
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('siswa.notifikasi', [
             'jumlahBelumDibaca' => $notifikasi->where('sudah_dibaca', false)->count(),
+            'tipeAktif'         => array_unique($tipeAktif),
             'hariIni'           => $notifikasi->filter(fn($n) => $n->created_at->isToday()),
             'kemarin'           => $notifikasi->filter(fn($n) => $n->created_at->isYesterday()),
             'mingguIni'         => $notifikasi->filter(fn($n) => ! $n->created_at->isToday() && ! $n->created_at->isYesterday() && $n->created_at->diffInDays(now()) <= 7),
@@ -600,9 +630,10 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $badgeTerkunci = collect($achievements)->where(3, false)->count();
 
         $paketLesPrivat = \App\Models\Paket::orderByRaw("FIELD(tipe,'sd','smp','sma')")
-            ->orderBy('created_at', 'desc')
+            ->orderBy('harga_min', 'asc')
             ->get()
-            ->unique('tipe')
+            ->groupBy('tipe')
+            ->map(fn($group) => $group->first())
             ->values();
 
         $riwayatLes = \App\Models\LesPrivat::where('user_id', $user->id)
@@ -680,6 +711,20 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         return redirect('/siswa/profil')
             ->with('sukses_password', 'Password berhasil diubah!')
+            ->with('tab', 'keamanan');
+    });
+
+    Route::post('/profil/simpan-notifikasi', function (Request $request) {
+        auth()->user()->update([
+            'notif_pembayaran'        => $request->boolean('notif_pembayaran'),
+            'notif_pengingat_sesi'    => $request->boolean('notif_pengingat_sesi'),
+            'notif_ulasan'            => $request->boolean('notif_ulasan'),
+            'notif_permintaan_jadwal' => $request->boolean('notif_permintaan_jadwal'),
+            'notif_newsletter'        => $request->boolean('notif_newsletter'),
+        ]);
+
+        return redirect('/siswa/profil')
+            ->with('sukses_info', 'Pengaturan notifikasi berhasil disimpan!')
             ->with('tab', 'keamanan');
     });
 
@@ -768,7 +813,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ));
     });
 
-    // ✅ Return JSON agar kompatibel dengan fetch() di blade
+    // Return JSON agar kompatibel dengan fetch() di blade
     Route::post('/pembayaran/{les_id}/upload-bukti', function (Request $request, $les_id) {
         $request->validate([
             'bukti_transfer' => 'required|image|mimes:jpg,jpeg,png|max:2048',

@@ -207,7 +207,6 @@
 </div>
 @endif
 
-{{-- FILTER TABS --}}
 <div class="filter-tabs">
     <div class="filter-tab active" onclick="filterNotif(this,'semua')">
         Semua
@@ -216,19 +215,28 @@
         @endif
     </div>
     <div class="filter-tab" onclick="filterNotif(this,'belum')">Belum Dibaca</div>
+
+    @if(!in_array('les_privat', $tipeDisabled))
     <div class="filter-tab" onclick="filterNotif(this,'les_privat')">
         Les Privat
         @if($perTipe['les_privat'] > 0)
         <span style="background:var(--primary);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:4px;">{{ $perTipe['les_privat'] }}</span>
         @endif
     </div>
+    @endif
+
+    @if(!in_array('pembayaran', $tipeDisabled))
     <div class="filter-tab" onclick="filterNotif(this,'pembayaran')">
         Pembayaran
         @if($perTipe['pembayaran'] > 0)
         <span style="background:var(--success);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:4px;">{{ $perTipe['pembayaran'] }}</span>
         @endif
     </div>
+    @endif
+
+    @if(!in_array('sistem', $tipeDisabled))
     <div class="filter-tab" onclick="filterNotif(this,'sistem')">Sistem</div>
+    @endif
 </div>
 
 @php

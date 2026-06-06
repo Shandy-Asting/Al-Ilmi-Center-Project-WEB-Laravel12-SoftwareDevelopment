@@ -1064,7 +1064,6 @@
                     method: 'POST',
                     body: formData,
                 })
-                // ✅ SESUDAH — cek status 200-299 atau 302 redirect
                 .then(res => {
                     if (res.ok || res.status === 302 || res.redirected) {
                         closeModal('modal-bayar');

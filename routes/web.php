@@ -8,7 +8,35 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn () => view('landing.index'));
+Route::get('/', function () {
+    $totalSiswa  = \App\Models\User::where('role', 'siswa')->count();
+    $totalTutor  = \App\Models\User::where('role', 'tutor')->count();
+
+    // Tingkat kepuasan: rata-rata bintang ulasan, dikonversi ke persen
+    $ulasan      = \App\Models\Ulasan::all();
+    $kepuasan    = $ulasan->count() > 0
+        ? round(($ulasan->avg('bintang') / 5) * 100)
+        : 98;
+
+    // Paket harga dari DB, urutkan harga_min ascending
+    $pakets      = \App\Models\Paket::orderBy('harga_min', 'asc')->get();
+
+    // Testimoni dari DB: ulasan bintang >= 4, ambil 3
+    $testimoni   = \App\Models\Ulasan::with(['siswa', 'lesPrivat'])
+        ->whereNotNull('komentar')
+        ->where('bintang', '>=', 4)
+        ->latest()
+        ->take(3)
+        ->get();
+
+    return view('landing.index', compact(
+        'totalSiswa',
+        'totalTutor',
+        'kepuasan',
+        'pakets',
+        'testimoni',
+    ));
+});
 
 /*
 |--------------------------------------------------------------------------

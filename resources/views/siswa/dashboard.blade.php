@@ -616,7 +616,7 @@
     <span class="tag">🌟 Selamat Datang Kembali!</span>
     <h2>Halo, {{ $user->name }}!</h2>
     <p>Kamu sudah belajar <strong>{{ $streak }} hari berturut-turut</strong>. Teruskan semangatmu hari ini!</p>
-    <button class="btn-banner"><i class="bi bi-play-fill me-1"></i> Lanjutkan Belajar</button>
+    <a href="/siswa/belajar-tka" class="btn-banner"><i class="bi bi-play-fill me-1"></i> Lanjutkan Belajar</a>
     <div class="streak-badge">
         <div style="font-size:22px;">🔥</div>
         <div class="streak-num">{{ $streak }}</div>
@@ -772,42 +772,57 @@
     <a href="/siswa/belajar-tka">Lihat Semua →</a>
 </div>
 <div class="row g-3 mb-4">
+    @php
+    $ikonMap = [
+    'matematika' => ['bi-calculator-fill', '#eff6ff', 'var(--primary)'],
+    'fisika' => ['bi-lightning-charge-fill', '#dbeafe', '#2563eb'],
+    'kimia' => ['bi-flask-conical-fill', 'var(--success-soft)', 'var(--success)'],
+    'biologi' => ['bi-tree-fill', '#f0fdf4', '#15803d'],
+    'bahasa inggris' => ['bi-translate', 'var(--accent-soft)', 'var(--warning)'],
+    'bahasa indonesia'=> ['bi-book-fill', 'var(--danger-soft)', 'var(--danger)'],
+    'ipa' => ['bi-stars', '#f0fdf4', '#0d9488'],
+    'ips' => ['bi-globe2', '#fef3c7', '#d97706'],
+    ];
+    $def = ['bi-journal-text', '#f1f5f9', '#64748b'];
+    $btnStyle = [
+    0 => ['#eff6ff', 'var(--primary)'],
+    1 => ['var(--info-soft)', 'var(--info)'],
+    2 => ['var(--accent-soft)', 'var(--warning)'],
+    ];
+    @endphp
+
+    @forelse($rekomendasiMateri as $idx => $m)
+    @php
+    $ik = $ikonMap[strtolower($m->mata_pelajaran)] ?? $def;
+    $btn = $btnStyle[$idx % 3];
+    $label = $m->tipe === 'video' ? 'Tonton Sekarang' : ($m->soal_count > 0 ? 'Mulai Latihan' : 'Buka Materi');
+    @endphp
     <div class="col-md-4">
         <div class="rec-card">
-            <div class="rec-icon" style="background:#eff6ff;color:var(--primary);">
-                <i class="bi bi-calculator-fill"></i>
+            <div class="rec-icon" style="background:{{ $ik[1] }};color:{{ $ik[2] }};">
+                <i class="bi {{ $ik[0] }}"></i>
             </div>
             <div>
-                <div class="rec-title">Latihan Integral Trigonometri</div>
-                <div class="rec-sub">Matematika · SMA · 25 soal latihan</div>
-                <button class="btn-rec" style="background:#eff6ff;color:var(--primary);">Mulai Latihan</button>
+                <div class="rec-title">{{ $m->judul }}</div>
+                <div class="rec-sub">
+                    {{ $m->mata_pelajaran }} · {{ strtoupper($m->jenjang) }}
+                    @if($m->soal_count > 0) · {{ $m->soal_count }} soal @endif
+                    @if($m->tipe === 'video') · 📹 Video @endif
+                </div>
+                <a href="/siswa/belajar-tka" class="btn-rec"
+                    style="background:{{ $btn[0] }};color:{{ $btn[1] }};text-decoration:none;display:inline-block;">
+                    {{ $label }}
+                </a>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="rec-card">
-            <div class="rec-icon" style="background:var(--info-soft);color:var(--info);">
-                <i class="bi bi-lightning-fill"></i>
-            </div>
-            <div>
-                <div class="rec-title">Kuis Hukum Newton</div>
-                <div class="rec-sub">Fisika · SMA · 15 soal kuis cepat</div>
-                <button class="btn-rec" style="background:var(--info-soft);color:var(--info);">Mulai Kuis</button>
-            </div>
+    @empty
+    <div class="col-12">
+        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">
+            Belum ada materi tersedia.
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="rec-card">
-            <div class="rec-icon" style="background:var(--accent-soft);color:var(--warning);">
-                <i class="bi bi-star-fill"></i>
-            </div>
-            <div>
-                <div class="rec-title">Video: Reaksi Redoks Lengkap</div>
-                <div class="rec-sub">Kimia · SMA · 18 menit tontonan</div>
-                <button class="btn-rec" style="background:var(--accent-soft);color:var(--warning);">Tonton Sekarang</button>
-            </div>
-        </div>
-    </div>
+    @endforelse
 </div>
 
 {{-- TESTIMONI --}}
