@@ -51,9 +51,16 @@ class Pembayaran extends Model
 
     public static function generateInvoice(): string
     {
-        $tahun  = now()->format('Y');
-        $bulan  = now()->format('m');
-        $urutan = self::whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->count() + 1;
-        return 'INV-' . $tahun . '-' . str_pad($urutan, 4, '0', STR_PAD_LEFT);
+        $tahun = now()->format('Y');
+        $bulan = now()->format('m');
+
+        do {
+            $urutan  = self::whereYear('created_at', $tahun)
+                ->whereMonth('created_at', $bulan)
+                ->count() + mt_rand(1, 999);
+            $invoice = 'INV-' . $tahun . $bulan . '-' . str_pad($urutan, 4, '0', STR_PAD_LEFT);
+        } while (self::where('nomor_invoice', $invoice)->exists());
+
+        return $invoice;
     }
 }
