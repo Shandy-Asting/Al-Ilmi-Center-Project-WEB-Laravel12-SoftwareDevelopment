@@ -261,8 +261,6 @@
             border-color: var(--primary);
         }
 
-        .topbar-titles {}
-
         .topbar-title {
             font-size: 16px;
             font-weight: 700;
@@ -371,63 +369,38 @@
             font-weight: 600;
         }
 
-        .p-success {
-            background: var(--success-soft);
-            color: var(--success);
-        }
-
-        .p-warning {
-            background: var(--warning-soft);
-            color: var(--warning);
-        }
-
-        .p-danger {
-            background: var(--danger-soft);
-            color: var(--danger);
-        }
-
-        .p-info {
-            background: var(--info-soft);
-            color: var(--info);
-        }
-
-        .p-primary {
-            background: #eff6ff;
-            color: var(--primary);
-        }
+        .p-success { background: var(--success-soft); color: var(--success); }
+        .p-warning { background: var(--warning-soft); color: var(--warning); }
+        .p-danger  { background: var(--danger-soft);  color: var(--danger);  }
+        .p-info    { background: var(--info-soft);    color: var(--info);    }
+        .p-primary { background: #eff6ff;             color: var(--primary); }
 
         /* ══ RESPONSIVE ══ */
-        @media (max-width:991px) {
+        @media (max-width: 991px) {
             .sidebar {
                 transform: translateX(-100%);
             }
-
             .sidebar.open {
                 transform: translateX(0);
             }
-
             .main-wrap {
                 margin-left: 0;
             }
-
             .btn-menu {
                 display: flex;
             }
-
             .content {
                 padding: 16px;
             }
         }
 
-        @media (max-width:576px) {
+        @media (max-width: 576px) {
             .content {
                 padding: 12px;
             }
-
             .topbar {
                 padding: 0 14px;
             }
-
             .logout-btn span {
                 display: none;
             }
@@ -457,10 +430,13 @@
         </div>
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+                <div class="user-avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
                 <div style="flex:1;min-width:0;">
                     <div class="user-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                        {{ auth()->user()->name ?? 'Pengguna' }}</div>
+                        {{ auth()->user()->name ?? 'Pengguna' }}
+                    </div>
                     <div class="user-role">{{ ucfirst(auth()->user()->role ?? '') }}</div>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
@@ -476,6 +452,7 @@
 
     <!-- MAIN -->
     <div class="main-wrap" id="mainWrap">
+
         <!-- TOPBAR -->
         <div class="topbar">
             <div class="topbar-left">
@@ -488,34 +465,32 @@
                 </div>
             </div>
             <div class="topbar-right">
-                {{-- Notifikasi --}}
-                @if (auth()->check())
-                    @if (auth()->user()->role === 'siswa')
-                        <a href="/siswa/notifikasi" class="icon-btn" title="Notifikasi">
-                            <i class="bi bi-bell"></i>
+
+                {{-- NOTIFIKASI — dinamis per role --}}
+                @if(auth()->check())
+                    @php
+                        $notifUrl = match(auth()->user()->role) {
+                            'tutor' => '/tutor/notifikasi',
+                            'admin' => '/admin/notifikasi',
+                            default => '/siswa/notifikasi',
+                        };
+                    @endphp
+                    <a href="{{ $notifUrl }}" class="icon-btn" title="Notifikasi">
+                        <i class="bi bi-bell"></i>
+                        @if(($jumlahNotifBelumDibaca ?? 0) > 0)
                             <span class="badge-dot"></span>
-                        </a>
-                    @elseif(auth()->user()->role === 'tutor')
-                        <a href="/tutor/notifikasi" class="icon-btn" title="Notifikasi">
-                            <i class="bi bi-bell"></i>
-                            <span class="badge-dot"></span>
-                        </a>
-                    @elseif(auth()->user()->role === 'admin')
-                        <a href="/admin/notifikasi" class="icon-btn" title="Notifikasi">
-                            <i class="bi bi-bell"></i>
-                            <span class="badge-dot"></span>
-                        </a>
-                    @endif
+                        @endif
+                    </a>
                 @endif
 
-                {{-- Logout — hanya icon di mobile, icon+teks di desktop --}}
+                {{-- LOGOUT --}}
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="icon-btn logout-btn" title="Logout"
-                        style="background:var(--danger-soft);color:var(--danger);border-color:var(--danger-soft);">
+                    <button type="submit" class="icon-btn logout-btn" title="Logout">
                         <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
+
             </div>
         </div>
 
@@ -528,289 +503,113 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('sidebarOverlay');
-            sb.classList.toggle('open');
-            ov.classList.toggle('show');
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
         }
-
         function closeSidebar() {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sidebarOverlay').classList.remove('show');
         }
-        // Tutup sidebar kalau resize ke desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth > 991) closeSidebar();
         });
     </script>
     @stack('scripts')
 
-    {{-- ════════════════════════════════════
-     GLOBAL LOADING OVERLAY
-     Muncul saat: submit form, klik link,
-     navigasi, dan proses apapun
-════════════════════════════════════ --}}
-    <div id="global-loading"
-        style="
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:99999;
-    background:rgba(15,23,42,0.55);
-    backdrop-filter:blur(4px);
-    -webkit-backdrop-filter:blur(4px);
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    gap:18px;
-">
-        {{-- SPINNER BOX --}}
-        <div
-            style="
-        background:#fff;
-        border-radius:20px;
-        padding:32px 40px;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:16px;
-        box-shadow:0 20px 60px rgba(0,0,0,0.2);
-        min-width:200px;
-        text-align:center;
-        animation:loadingPop .25s ease;
-    ">
-            {{-- LOGO ANIMASI --}}
+    {{-- GLOBAL LOADING OVERLAY --}}
+    <div id="global-loading" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;gap:18px;">
+        <div style="background:#fff;border-radius:20px;padding:32px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);min-width:200px;text-align:center;animation:loadingPop .25s ease;">
             <div style="position:relative;width:56px;height:56px;">
-                {{-- Outer ring --}}
-                <svg style="position:absolute;inset:0;animation:spinRing 1.2s linear infinite;" viewBox="0 0 56 56"
-                    width="56" height="56">
+                <svg style="position:absolute;inset:0;animation:spinRing 1.2s linear infinite;" viewBox="0 0 56 56" width="56" height="56">
                     <circle cx="28" cy="28" r="24" fill="none" stroke="#e2e8f0" stroke-width="4" />
-                    <circle cx="28" cy="28" r="24" fill="none" stroke="var(--primary,#1e3a5f)"
-                        stroke-width="4" stroke-linecap="round" stroke-dasharray="40 110"
-                        transform="rotate(-90 28 28)" />
+                    <circle cx="28" cy="28" r="24" fill="none" stroke="var(--primary,#1e3a5f)" stroke-width="4" stroke-linecap="round" stroke-dasharray="40 110" transform="rotate(-90 28 28)" />
                 </svg>
-                {{-- Inner dot --}}
-                <div
-                    style="
-                position:absolute;
-                inset:0;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                    <div
-                        style="
-                    width:18px;height:18px;
-                    background:var(--primary,#1e3a5f);
-                    border-radius:50%;
-                    animation:pulseDot 1.2s ease-in-out infinite;
-                ">
-                    </div>
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                    <div style="width:18px;height:18px;background:var(--primary,#1e3a5f);border-radius:50%;animation:pulseDot 1.2s ease-in-out infinite;"></div>
                 </div>
             </div>
-
-            {{-- TEXT --}}
             <div>
-                <div id="loading-title"
-                    style="
-                font-size:14px;
-                font-weight:700;
-                color:#1e293b;
-                font-family:'Plus Jakarta Sans',sans-serif;
-            ">
-                    Memproses...</div>
-                <div id="loading-sub"
-                    style="
-                font-size:12px;
-                color:#64748b;
-                margin-top:4px;
-                font-family:'Plus Jakarta Sans',sans-serif;
-            ">
-                    Mohon tunggu sebentar</div>
+                <div id="loading-title" style="font-size:14px;font-weight:700;color:#1e293b;font-family:'Plus Jakarta Sans',sans-serif;">Memproses...</div>
+                <div id="loading-sub"   style="font-size:12px;color:#64748b;margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif;">Mohon tunggu sebentar</div>
             </div>
-
-            {{-- DOTS LOADER --}}
             <div style="display:flex;gap:6px;align-items:center;">
-                <div class="ldot"
-                    style="width:7px;height:7px;border-radius:50%;background:var(--primary,#1e3a5f);animation:dotBounce 1.2s ease-in-out infinite;animation-delay:0s;">
-                </div>
-                <div class="ldot"
-                    style="width:7px;height:7px;border-radius:50%;background:var(--primary,#1e3a5f);animation:dotBounce 1.2s ease-in-out infinite;animation-delay:.2s;">
-                </div>
-                <div class="ldot"
-                    style="width:7px;height:7px;border-radius:50%;background:var(--primary,#1e3a5f);animation:dotBounce 1.2s ease-in-out infinite;animation-delay:.4s;">
-                </div>
+                <div class="ldot" style="width:7px;height:7px;border-radius:50%;background:var(--primary,#1e3a5f);animation:dotBounce 1.2s ease-in-out infinite;animation-delay:0s;"></div>
+                <div class="ldot" style="width:7px;height:7px;border-radius:50%;background:var(--primary,#1e3a5f);animation:dotBounce 1.2s ease-in-out infinite;animation-delay:.2s;"></div>
+                <div class="ldot" style="width:7px;height:7px;border-radius:50%;background:var(--primary,#1e3a5f);animation:dotBounce 1.2s ease-in-out infinite;animation-delay:.4s;"></div>
             </div>
         </div>
     </div>
 
-    {{-- LOADING: TOP PROGRESS BAR (NProgress style) --}}
-    <div id="loading-bar"
-        style="
-    display:none;
-    position:fixed;
-    top:0;left:0;
-    height:3px;
-    background:linear-gradient(90deg,var(--primary,#1e3a5f),var(--accent,#f6ad3c));
-    z-index:100000;
-    border-radius:0 2px 2px 0;
-    width:0%;
-    transition:width .1s ease;
-    box-shadow:0 0 8px rgba(246,173,60,.6);
-">
-    </div>
+    {{-- LOADING BAR --}}
+    <div id="loading-bar" style="display:none;position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--primary,#1e3a5f),var(--accent,#f6ad3c));z-index:100000;border-radius:0 2px 2px 0;width:0%;transition:width .1s ease;box-shadow:0 0 8px rgba(246,173,60,.6);"></div>
 
     <style>
-        @keyframes spinRing {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes pulseDot {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(.6);
-                opacity: .5;
-            }
-        }
-
-        @keyframes dotBounce {
-
-            0%,
-            80%,
-            100% {
-                transform: translateY(0);
-                opacity: .4;
-            }
-
-            40% {
-                transform: translateY(-6px);
-                opacity: 1;
-            }
-        }
-
-        @keyframes loadingPop {
-            from {
-                transform: scale(.88) translateY(10px);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1) translateY(0);
-                opacity: 1;
-            }
-        }
+        @keyframes spinRing  { from { transform: rotate(0deg); }   to { transform: rotate(360deg); } }
+        @keyframes pulseDot  { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(.6); opacity:.5; } }
+        @keyframes dotBounce { 0%,80%,100% { transform:translateY(0); opacity:.4; } 40% { transform:translateY(-6px); opacity:1; } }
+        @keyframes loadingPop { from { transform:scale(.88) translateY(10px); opacity:0; } to { transform:scale(1) translateY(0); opacity:1; } }
     </style>
 
     <script>
-        (function() {
+        (function () {
             const overlay = document.getElementById('global-loading');
-            const bar = document.getElementById('loading-bar');
-            const ltitle = document.getElementById('loading-title');
-            const lsub = document.getElementById('loading-sub');
+            const bar     = document.getElementById('loading-bar');
+            const ltitle  = document.getElementById('loading-title');
+            const lsub    = document.getElementById('loading-sub');
 
-            let barTimer = null;
-            let barWidth = 0;
-            let hideTimer = null;
+            let barTimer = null, barWidth = 0;
 
-            /* ── PESAN KONTEKSTUAL ── */
             const messages = {
-                submit: {
-                    title: 'Menyimpan Data...',
-                    sub: 'Memproses permintaanmu'
-                },
-                login: {
-                    title: 'Masuk ke Akun...',
-                    sub: 'Memverifikasi kredensial'
-                },
-                logout: {
-                    title: 'Keluar dari Akun...',
-                    sub: 'Membersihkan sesi'
-                },
-                bayar: {
-                    title: 'Mengirim Pembayaran...',
-                    sub: 'Mengupload bukti transfer'
-                },
-                pesan: {
-                    title: 'Mengirim Pesanan...',
-                    sub: 'Memproses pesanan les'
-                },
-                hapus: {
-                    title: 'Menghapus Data...',
-                    sub: 'Mohon tunggu sebentar'
-                },
-                export: {
-                    title: 'Mengunduh File...',
-                    sub: 'Menyiapkan dokumenmu'
-                },
-                nav: {
-                    title: 'Membuka Halaman...',
-                    sub: 'Memuat konten'
-                },
-                default: {
-                    title: 'Memproses...',
-                    sub: 'Mohon tunggu sebentar'
-                },
+                submit  : { title: 'Menyimpan Data...',       sub: 'Memproses permintaanmu' },
+                login   : { title: 'Masuk ke Akun...',        sub: 'Memverifikasi kredensial' },
+                logout  : { title: 'Keluar dari Akun...',     sub: 'Membersihkan sesi' },
+                bayar   : { title: 'Mengirim Pembayaran...',  sub: 'Mengupload bukti transfer' },
+                pesan   : { title: 'Mengirim Pesanan...',     sub: 'Memproses pesanan les' },
+                hapus   : { title: 'Menghapus Data...',       sub: 'Mohon tunggu sebentar' },
+                export  : { title: 'Mengunduh File...',       sub: 'Menyiapkan dokumenmu' },
+                nav     : { title: 'Membuka Halaman...',      sub: 'Memuat konten' },
+                default : { title: 'Memproses...',            sub: 'Mohon tunggu sebentar' },
             };
 
             function detectContext(el) {
                 if (!el) return 'default';
-                const href = (el.href || '').toLowerCase();
+                const href   = (el.href   || '').toLowerCase();
                 const action = (el.action || '').toLowerCase();
-                const text = (el.textContent || el.innerText || '').toLowerCase();
-                const name = (el.name || el.id || '').toLowerCase();
-                const cls = (el.className || '').toLowerCase();
+                const text   = (el.textContent || el.innerText || '').toLowerCase();
+                const name   = (el.name || el.id || '').toLowerCase();
 
-                // Form actions
-                const method = (el.method || '').toLowerCase();
                 if (el.tagName === 'FORM' || el.closest?.('form')) {
-                    if (text.includes('login') || name.includes('login')) return 'login';
+                    if (text.includes('login')  || name.includes('login'))   return 'login';
                     if (text.includes('logout') || action.includes('logout')) return 'logout';
-                    if (text.includes('bayar') || text.includes('kirim bukti')) return 'bayar';
-                    if (text.includes('pesan') || text.includes('les')) return 'pesan';
-                    if (text.includes('hapus') || text.includes('delete')) return 'hapus';
-                    if (text.includes('export') || text.includes('unduh')) return 'export';
+                    if (text.includes('bayar')  || text.includes('kirim bukti')) return 'bayar';
+                    if (text.includes('pesan')  || text.includes('les'))     return 'pesan';
+                    if (text.includes('hapus')  || text.includes('delete'))  return 'hapus';
+                    if (text.includes('export') || text.includes('unduh'))   return 'export';
                     return 'submit';
                 }
-                // Links
-                if (href.includes('logout')) return 'logout';
+                if (href.includes('logout'))                            return 'logout';
                 if (href.includes('export') || href.includes('download')) return 'export';
                 if (href && !href.startsWith('#') && !href.startsWith('javascript')) return 'nav';
                 return 'default';
             }
 
-            /* ── SHOW / HIDE ── */
             function showLoading(ctx) {
                 const msg = messages[ctx] || messages.default;
                 ltitle.textContent = msg.title;
-                lsub.textContent = msg.sub;
+                lsub.textContent   = msg.sub;
                 overlay.style.display = 'flex';
                 startBar();
             }
 
             function hideLoading() {
                 finishBar();
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, 300);
+                setTimeout(() => { overlay.style.display = 'none'; }, 300);
             }
 
-            /* ── PROGRESS BAR ── */
             function startBar() {
                 barWidth = 0;
                 bar.style.display = 'block';
-                bar.style.width = '0%';
+                bar.style.width   = '0%';
                 clearInterval(barTimer);
                 barTimer = setInterval(() => {
                     if (barWidth < 85) {
@@ -823,70 +622,39 @@
             function finishBar() {
                 clearInterval(barTimer);
                 bar.style.width = '100%';
-                setTimeout(() => {
-                    bar.style.display = 'none';
-                    bar.style.width = '0%';
-                    barWidth = 0;
-                }, 350);
+                setTimeout(() => { bar.style.display = 'none'; bar.style.width = '0%'; barWidth = 0; }, 350);
             }
 
-            /* ── INTERCEPT FORM SUBMIT ── */
-            document.addEventListener('submit', function(e) {
+            document.addEventListener('submit', function (e) {
                 const form = e.target;
-                // Jangan loading untuk form pencarian kecil
                 if (form.dataset.noloading) return;
                 const btn = form.querySelector('[type=submit]');
-                const ctx = detectContext(btn || form);
-                showLoading(ctx);
-                // Disable tombol agar tidak double submit
-                if (btn) {
-                    btn.disabled = true;
-                    btn.style.opacity = '.7';
-                }
+                showLoading(detectContext(btn || form));
+                if (btn) { btn.disabled = true; btn.style.opacity = '.7'; }
             }, true);
 
-            /* ── INTERCEPT LINK CLICK ── */
-            document.addEventListener('click', function(e) {
-                const el = e.target.closest('a[href], button[onclick]');
-                if (!el) return;
-                if (el.dataset.noloading) return;
-                if (el.tagName === 'BUTTON' && !el.closest('form')) return; // hanya tombol di dalam form
-
+            document.addEventListener('click', function (e) {
+                const el = e.target.closest('a[href]');
+                if (!el || el.dataset.noloading) return;
                 const href = el.getAttribute('href') || '';
-                // Skip: anchor, javascript:, new tab, modal trigger
-                if (!href || href.startsWith('#') || href.startsWith('javascript') || el.target === '_blank')
-                    return;
-                // Skip download links
+                if (!href || href.startsWith('#') || href.startsWith('javascript') || el.target === '_blank') return;
                 if (el.hasAttribute('download')) return;
-
-                const ctx = detectContext(el);
-                showLoading(ctx);
+                showLoading(detectContext(el));
             }, true);
 
-            /* ── INTERCEPT TOMBOL SUBMIT MANUAL (onclick=submit) ── */
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const el = e.target.closest('[data-loading]');
                 if (!el) return;
-                const ctx = el.dataset.loading || 'default';
-                showLoading(ctx);
+                showLoading(el.dataset.loading || 'default');
             }, true);
 
-            /* ── HIDE SAAT PAGE LOAD SELESAI ── */
-            window.addEventListener('pageshow', function(e) {
-                hideLoading();
-            });
+            window.addEventListener('pageshow',  () => hideLoading());
+            window.addEventListener('popstate',  () => hideLoading());
 
-            /* ── HIDE JIKA KEMBALI (bfcache) ── */
-            window.addEventListener('popstate', function() {
-                hideLoading();
-            });
-
-            /* ── EXPOSE KE GLOBAL (bisa dipanggil manual) ── */
             window.showLoading = showLoading;
             window.hideLoading = hideLoading;
-
         })();
     </script>
-</body>
 
+</body>
 </html>

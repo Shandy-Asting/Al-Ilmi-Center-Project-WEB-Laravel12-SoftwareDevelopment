@@ -670,8 +670,15 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ]);
 
         auth()->user()->update($request->only([
-            'name', 'no_hp', 'tanggal_lahir', 'jenjang', 'kelas',
-            'kota', 'provinsi', 'tujuan_belajar', 'bio',
+            'name',
+            'no_hp',
+            'tanggal_lahir',
+            'jenjang',
+            'kelas',
+            'kota',
+            'provinsi',
+            'tujuan_belajar',
+            'bio',
         ]));
 
         return redirect('/siswa/profil')->with('sukses_info', 'Informasi pribadi berhasil diperbarui!');
@@ -726,6 +733,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         return redirect('/siswa/profil')
             ->with('sukses_info', 'Pengaturan notifikasi berhasil disimpan!')
             ->with('tab', 'keamanan');
+    });
+
+    Route::delete('/profil/hapus-akun', function () {
+        $user = auth()->user();
+
+        // Hapus avatar jika ada
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        // Logout dulu
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        // Hapus user (cascade delete data terkait tergantung foreign key)
+        $user->delete();
+
+        return redirect('/login')->with('sukses', 'Akun berhasil dihapus.');
     });
 
     // ── Pesan Jadwal ───────────────────────────────────────────────────────

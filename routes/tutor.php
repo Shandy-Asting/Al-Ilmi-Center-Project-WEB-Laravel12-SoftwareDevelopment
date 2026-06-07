@@ -851,7 +851,7 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
 
         return back()->with('sukses_info', 'Pengaturan notifikasi berhasil disimpan!');
     });
-    
+
     Route::post('/profil/simpan-keahlian', function (Request $request) {
         $request->validate([
             'mata_pelajaran'      => 'required|array|min:1',
@@ -871,4 +871,7 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
 
         return redirect('/tutor/profil')->with('sukses_info', 'Keahlian & jadwal berhasil disimpan!');
     });
+    // Route baru yang belum ada:
+    Route::delete('/tutor/profil/nonaktifkan', [TutorProfilController::class, 'nonaktifkan']);
+    Route::post('/tutor/profil/simpan-ketersediaan', [TutorProfilController::class, 'simpanKetersediaan']);
 });
