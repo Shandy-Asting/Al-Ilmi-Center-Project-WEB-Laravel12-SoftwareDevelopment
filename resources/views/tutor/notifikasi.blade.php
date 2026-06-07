@@ -41,352 +41,590 @@
 
 @push('styles')
 <style>
-    .filter-tabs {
-        display: flex;
-        gap: 6px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
+/* ─────────────────────────────────────────────────────
+   ROOT / TOKENS
+───────────────────────────────────────────────────── */
+.nt-page {
+    --nt-navy:   #0f2342;
+    --nt-blue:   #1d4ed8;
+    --nt-slate:  #64748b;
+    --nt-line:   #e8ecf0;
+    --nt-bg:     #f5f7fa;
+    --nt-card:   #ffffff;
+    --nt-unread: #f0f6ff;
+    --nt-accent: #0f2342;
+    --nt-red:    #dc2626;
+    --nt-green:  #16a34a;
+    --nt-amber:  #d97706;
+    --nt-info:   #0284c7;
+}
 
-    .filter-tab {
-        padding: 7px 16px;
-        border-radius: 20px;
+/* ─────────────────────────────────────────────────────
+   PAGE HEADER
+───────────────────────────────────────────────────── */
+.nt-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.nt-header-title {
+    font-size: clamp(16px, 4vw, 20px);
+    font-weight: 700;
+    color: var(--nt-navy);
+    line-height: 1.2;
+    margin-bottom: 3px;
+}
+
+.nt-header-sub {
+    font-size: 12px;
+    color: var(--nt-slate);
+}
+
+.nt-header-sub span {
+    color: var(--nt-blue);
+    font-weight: 600;
+}
+
+.nt-mark-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9px;
+    border: 1.5px solid var(--nt-navy);
+    background: transparent;
+    color: var(--nt-navy);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+    flex-shrink: 0;
+}
+
+.nt-mark-btn:hover {
+    background: var(--nt-navy);
+    color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────
+   ALERT
+───────────────────────────────────────────────────── */
+.nt-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 3px solid var(--nt-green);
+    border-radius: 10px;
+    padding: 11px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nt-green);
+}
+
+/* ─────────────────────────────────────────────────────
+   FILTER CHIPS  — scroll horizontal tanpa wrap di mobile
+───────────────────────────────────────────────────── */
+.nt-filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    /* Penting: jangan pakai flex-wrap agar tetap satu baris */
+}
+
+.nt-filters::-webkit-scrollbar { display: none; }
+
+.nt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--nt-line);
+    background: var(--nt-card);
+    color: var(--nt-slate);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all .15s;
+    user-select: none;
+}
+
+.nt-chip.active {
+    background: var(--nt-navy);
+    color: #fff;
+    border-color: var(--nt-navy);
+}
+
+.nt-chip:hover:not(.active) {
+    border-color: var(--nt-navy);
+    color: var(--nt-navy);
+}
+
+.nt-chip-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ─────────────────────────────────────────────────────
+   GRUP LABEL
+───────────────────────────────────────────────────── */
+.nt-group-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--nt-slate);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 0 2px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nt-group-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--nt-line);
+}
+
+/* ─────────────────────────────────────────────────────
+   CARD WRAPPER
+───────────────────────────────────────────────────── */
+.nt-card {
+    background: var(--nt-card);
+    border: 1px solid var(--nt-line);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+/* ─────────────────────────────────────────────────────
+   NOTIF ITEM
+   Layout: [icon] [konten flex-1] [aksi]
+   Di mobile: aksi turun ke bawah konten (wrap)
+───────────────────────────────────────────────────── */
+.nt-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--nt-line);
+    position: relative;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.nt-item:last-child {
+    border-bottom: none;
+}
+
+.nt-item:hover {
+    background: var(--nt-bg);
+}
+
+/* Unread: highlight biru muda + garis kiri */
+.nt-item.unread {
+    background: var(--nt-unread);
+}
+
+.nt-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--nt-navy);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Icon */
+.nt-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Konten tengah */
+.nt-body {
+    flex: 1;
+    min-width: 0; /* penting agar teks truncate bekerja */
+}
+
+.nt-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--nt-navy);
+    margin-bottom: 3px;
+    /* baris tunggal, tidak wrap di mobile jika terlalu panjang */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nt-desc {
+    font-size: 12.5px;
+    color: var(--nt-slate);
+    line-height: 1.55;
+    /* max 2 baris */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.nt-time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--nt-slate);
+    margin-top: 6px;
+}
+
+/* Kolom kanan: dot + tombol */
+.nt-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    /* Minimal lebar agar tidak geser */
+    min-width: 36px;
+}
+
+.nt-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nt-navy);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.nt-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    border-radius: 7px;
+    border: none;
+    background: var(--nt-navy);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s;
+}
+
+.nt-action-btn:hover { opacity: .85; }
+
+/* ─────────────────────────────────────────────────────
+   EMPTY STATE
+───────────────────────────────────────────────────── */
+.nt-empty {
+    text-align: center;
+    padding: 56px 20px;
+    background: var(--nt-card);
+    border: 1px solid var(--nt-line);
+    border-radius: 14px;
+    color: var(--nt-slate);
+}
+
+.nt-empty-icon {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 12px;
+    opacity: .4;
+}
+
+.nt-empty-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--nt-navy);
+    margin-bottom: 4px;
+}
+
+.nt-empty-sub {
+    font-size: 13px;
+}
+
+/* ─────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────── */
+
+/* HP kecil: title bisa 2 baris, desc tetap 2 baris */
+@media (max-width: 480px) {
+    .nt-item { padding: 12px 14px; gap: 10px; }
+    .nt-icon  { width: 38px; height: 38px; font-size: 16px; }
+
+    /* Judul boleh wrap di HP kecil, jangan clip */
+    .nt-title {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
         font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all .2s;
-        border: 1.5px solid var(--border);
-        background: var(--card-bg);
-        color: var(--muted);
     }
 
-    .filter-tab.active {
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-    }
+    /* Aksi (tombol) pindah ke bawah deskripsi dalam aliran normal */
+    .nt-item { flex-wrap: wrap; }
 
-    .filter-tab:hover:not(.active) {
-        border-color: var(--primary-light);
-        color: var(--primary);
-    }
-
-    .notif-item {
-        display: flex;
-        gap: 14px;
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border);
-        transition: background .15s;
-        cursor: pointer;
-        position: relative;
-    }
-
-    .notif-item:last-child {
-        border-bottom: none;
-    }
-
-    .notif-item:hover {
-        background: #f8faff;
-    }
-
-    .notif-item.unread {
-        background: #f0f6ff;
-    }
-
-    .notif-item.unread::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: var(--primary);
-        border-radius: 0 3px 3px 0;
-    }
-
-    .notif-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
+    /* icon tetap di kiri, body & actions ikut flow */
+    .nt-actions {
+        /* Mulai dari setelah body — tapi tetap di kanan icon */
+        /* Kita buat actions rata kiri supaya tidak mengambang */
+        flex-direction: row;
         align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        flex-shrink: 0;
+        min-width: unset;
+        width: 100%;
+        padding-left: 52px; /* lebar icon + gap */
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
     }
 
-    .notif-title {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 4px;
+    .nt-body {
+        /* Biarkan body dan actions berbagi lebar dengan icon */
+        /* icon sudah flex-shrink:0 jadi body otomatis mengisi sisa */
     }
 
-    .notif-desc {
-        font-size: 12.5px;
-        color: var(--muted);
-        line-height: 1.5;
-    }
+    .nt-mark-btn { padding: 7px 12px; font-size: 12px; }
+    .nt-header   { margin-bottom: 16px; }
+}
 
-    .notif-time {
-        font-size: 11px;
-        color: var(--muted);
-        margin-top: 6px;
-    }
-
-    .notif-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--primary);
-        flex-shrink: 0;
-        margin-top: 6px;
-    }
-
-    .btn-notif {
-        border: none;
-        border-radius: 8px;
-        padding: 5px 12px;
-        font-size: 11.5px;
-        font-weight: 600;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .card-box {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    @media(max-width:767px) {
-        .notif-item {
-            flex-wrap: wrap;
-            padding: 12px 14px;
-        }
-
-        .filter-tabs {
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding-bottom: 4px;
-        }
-
-        .filter-tab {
-            min-width: auto;
-            flex: none;
-            font-size: 12px;
-        }
-    }
+/* Layar sangat kecil */
+@media (max-width: 360px) {
+    .nt-chip { padding: 5px 11px; font-size: 12px; }
+    .nt-action-btn { font-size: 11px; padding: 4px 10px; }
+}
 </style>
 @endpush
 
 @section('content')
+<div class="nt-page">
 
-<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+{{-- ═══════════════ HEADER ═══════════════ --}}
+<div class="nt-header">
     <div>
-        <h4 class="fw-bold mb-1">🔔 Notifikasi</h4>
-        <div style="font-size:13px;color:var(--muted);">
-            Dashboard / <span style="color:var(--primary);font-weight:600;">Notifikasi</span>
+        <div class="nt-header-title">🔔 Notifikasi</div>
+        <div class="nt-header-sub">
+            Dashboard / <span>Notifikasi</span>
         </div>
     </div>
     <form method="POST" action="/tutor/notifikasi/tandai-semua">
         @csrf
-        <button type="submit" class="btn btn-sm fw-bold px-3 py-2"
-            style="background:var(--bg);color:var(--primary);border-radius:10px;border:1.5px solid var(--primary);font-size:12px;">
-            <i class="bi bi-check2-all me-1"></i> Tandai Semua Dibaca
+        <button type="submit" class="nt-mark-btn">
+            <i class="bi bi-check2-all"></i>
+            <span>Tandai Semua Dibaca</span>
         </button>
     </form>
 </div>
 
-{{-- ALERT --}}
+{{-- ═══════════════ ALERT ═══════════════ --}}
 @if(session('sukses'))
-<div style="background:var(--success-soft);border:1px solid var(--success);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-    <i class="bi bi-check-circle-fill" style="color:var(--success);font-size:18px;"></i>
-    <span style="font-size:13px;font-weight:600;color:var(--success);">{{ session('sukses') }}</span>
+<div class="nt-alert">
+    <i class="bi bi-check-circle-fill" style="font-size:16px;flex-shrink:0;"></i>
+    {{ session('sukses') }}
 </div>
 @endif
 
-<div class="filter-tabs">
-    <div class="filter-tab active" onclick="filterNotif(this,'semua')">
+{{-- ═══════════════ FILTER CHIPS ═══════════════ --}}
+@php
+$ikonMap = [
+    'les_privat' => ['bi-person-plus-fill', '#fff1f2',   '#dc2626'],
+    'pembayaran' => ['bi-cash-coin',        '#f0fdf4',   '#16a34a'],
+    'sistem'     => ['bi-gear-fill',        '#eff6ff',   '#1d4ed8'],
+    'ulasan'     => ['bi-star-fill',        '#fffbeb',   '#d97706'],
+    'jadwal'     => ['bi-calendar-x-fill',  '#f0f9ff',   '#0284c7'],
+];
+@endphp
+
+<div class="nt-filters">
+    {{-- Semua --}}
+    <div class="nt-chip active" onclick="filterNotif(this,'semua')">
         Semua
         @if($jumlahBelumDibaca > 0)
-        <span style="background:var(--danger);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:4px;">{{ $jumlahBelumDibaca }}</span>
+        <span class="nt-chip-badge" style="background:#dc2626;color:#fff;">{{ $jumlahBelumDibaca }}</span>
         @endif
     </div>
-    <div class="filter-tab" onclick="filterNotif(this,'belum')">Belum Dibaca</div>
 
+    {{-- Belum Dibaca --}}
+    <div class="nt-chip" onclick="filterNotif(this,'belum')">
+        Belum Dibaca
+    </div>
+
+    {{-- Per Tipe --}}
     @if(!in_array('les_privat', $tipeDisabled))
-    <div class="filter-tab" onclick="filterNotif(this,'les_privat')">
+    <div class="nt-chip" onclick="filterNotif(this,'les_privat')">
         Les Privat
-        @if($perTipe['les_privat'] > 0)
-        <span style="background:var(--primary);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:4px;">{{ $perTipe['les_privat'] }}</span>
+        @if(($perTipe['les_privat'] ?? 0) > 0)
+        <span class="nt-chip-badge" style="background:#dc2626;color:#fff;">{{ $perTipe['les_privat'] }}</span>
         @endif
     </div>
     @endif
 
     @if(!in_array('pembayaran', $tipeDisabled))
-    <div class="filter-tab" onclick="filterNotif(this,'pembayaran')">
+    <div class="nt-chip" onclick="filterNotif(this,'pembayaran')">
         Pembayaran
-        @if($perTipe['pembayaran'] > 0)
-        <span style="background:var(--success);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:4px;">{{ $perTipe['pembayaran'] }}</span>
+        @if(($perTipe['pembayaran'] ?? 0) > 0)
+        <span class="nt-chip-badge" style="background:#16a34a;color:#fff;">{{ $perTipe['pembayaran'] }}</span>
         @endif
     </div>
     @endif
 
     @if(!in_array('sistem', $tipeDisabled))
-    <div class="filter-tab" onclick="filterNotif(this,'sistem')">Sistem</div>
+    <div class="nt-chip" onclick="filterNotif(this,'sistem')">
+        Sistem
+    </div>
     @endif
 </div>
 
-@php
-$ikonMap = [
-'les_privat' => ['bi-person-plus-fill', 'var(--danger-soft)', 'var(--danger)'],
-'pembayaran' => ['bi-cash-coin', 'var(--success-soft)', 'var(--success)'],
-'sistem' => ['bi-gear-fill', '#eff6ff', 'var(--primary)'],
-'ulasan' => ['bi-star-fill', 'var(--accent-soft)', 'var(--warning)'],
-'jadwal' => ['bi-calendar-x-fill', 'var(--info-soft)', 'var(--info)'],
-];
-@endphp
-
+{{-- ═══════════════ KONTEN NOTIFIKASI ═══════════════ --}}
 @if($notifikasi->count() === 0)
 
 {{-- KOSONG --}}
-<div style="text-align:center;padding:60px;color:var(--muted);background:var(--card-bg);border-radius:16px;border:1px solid var(--border);">
-    <i class="bi bi-bell-slash" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i>
-    <div style="font-size:15px;font-weight:700;">Tidak Ada Notifikasi</div>
-    <div style="font-size:13px;margin-top:4px;">Semua notifikasi akan muncul di sini.</div>
+<div class="nt-empty">
+    <i class="bi bi-bell-slash nt-empty-icon"></i>
+    <div class="nt-empty-title">Tidak Ada Notifikasi</div>
+    <div class="nt-empty-sub">Semua notifikasi akan muncul di sini.</div>
 </div>
 
 @else
 
-{{-- HARI INI --}}
-@if($hariIni->count() > 0)
-<div class="grup-label">Hari Ini</div>
-<div class="card-box mb-3">
-    @foreach($hariIni as $n)
-    @php $ikon = $ikonMap[$n->tipe] ?? ['bi-bell-fill','#eff6ff','var(--primary)']; @endphp
-    <div class="notif-item {{ !$n->sudah_dibaca ? 'unread' : '' }}" data-tipe="{{ $n->tipe }}" data-dibaca="{{ $n->sudah_dibaca ? '1' : '0' }}">
-        <div class="notif-icon" style="background:{{ $ikon[1] }};color:{{ $ikon[2] }};"><i class="bi {{ $n->ikon ?: $ikon[0] }}"></i></div>
-        <div style="flex:1;">
-            <div class="notif-title">{{ $n->judul }}</div>
-            <div class="notif-desc">{{ $n->pesan }}</div>
-            <div class="notif-time"><i class="bi bi-clock me-1"></i>{{ $n->created_at->diffForHumans() }}</div>
+{{-- Macro/helper: render satu grup notifikasi --}}
+{{-- Kita pakai @include partial atau inline @foreach dengan variabel --}}
+
+@php
+$grupList = [
+    'Hari Ini'   => $hariIni,
+    'Kemarin'    => $kemarin,
+    'Minggu Ini' => $mingguIni,
+    'Lebih Lama' => $lebihLama,
+];
+@endphp
+
+@foreach($grupList as $grupLabel => $grupData)
+@if($grupData->count() > 0)
+
+<div class="nt-group-label">{{ $grupLabel }}</div>
+
+<div class="nt-card">
+    @foreach($grupData as $n)
+    @php
+        $ikon    = $ikonMap[$n->tipe] ?? ['bi-bell-fill', '#eff6ff', '#1d4ed8'];
+        $dibaca  = $n->sudah_dibaca ? '1' : '0';
+        $unread  = !$n->sudah_dibaca;
+    @endphp
+
+    <div class="nt-item {{ $unread ? 'unread' : '' }}"
+         data-tipe="{{ $n->tipe }}"
+         data-dibaca="{{ $dibaca }}">
+
+        {{-- Icon --}}
+        <div class="nt-icon" style="background:{{ $ikon[1] }};color:{{ $ikon[2] }};">
+            <i class="bi {{ $n->ikon ?: $ikon[0] }}"></i>
         </div>
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-            @if(!$n->sudah_dibaca)<div class="notif-dot"></div>@endif
+
+        {{-- Konten --}}
+        <div class="nt-body">
+            <div class="nt-title">{{ $n->judul }}</div>
+            <div class="nt-desc">{{ $n->pesan }}</div>
+            <div class="nt-time">
+                <i class="bi bi-clock"></i>
+                {{ $n->created_at->diffForHumans() }}
+            </div>
+        </div>
+
+        {{-- Aksi --}}
+        <div class="nt-actions">
+            @if($unread)
+                <div class="nt-dot"></div>
+            @endif
+
             @if($n->url_aksi && $n->label_aksi)
             <form method="POST" action="/tutor/notifikasi/{{ $n->id }}/buka">
                 @csrf
-                <button type="submit" class="btn-notif" style="background:var(--primary);color:#fff;">{{ $n->label_aksi }}</button>
+                <button type="submit" class="nt-action-btn">
+                    {{ $n->label_aksi }}
+                </button>
             </form>
             @endif
         </div>
+
     </div>
     @endforeach
 </div>
-@endif
 
-{{-- KEMARIN --}}
-@if($kemarin->count() > 0)
-<div class="grup-label">Kemarin</div>
-<div class="card-box mb-3">
-    @foreach($kemarin as $n)
-    @php $ikon = $ikonMap[$n->tipe] ?? ['bi-bell-fill','#eff6ff','var(--primary)']; @endphp
-    <div class="notif-item {{ !$n->sudah_dibaca ? 'unread' : '' }}" data-tipe="{{ $n->tipe }}" data-dibaca="{{ $n->sudah_dibaca ? '1' : '0' }}">
-        <div class="notif-icon" style="background:{{ $ikon[1] }};color:{{ $ikon[2] }};"><i class="bi {{ $n->ikon ?: $ikon[0] }}"></i></div>
-        <div style="flex:1;">
-            <div class="notif-title">{{ $n->judul }}</div>
-            <div class="notif-desc">{{ $n->pesan }}</div>
-            <div class="notif-time"><i class="bi bi-clock me-1"></i>{{ $n->created_at->diffForHumans() }}</div>
-        </div>
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-            @if(!$n->sudah_dibaca)<div class="notif-dot"></div>@endif
-            @if($n->url_aksi && $n->label_aksi)
-            <form method="POST" action="/tutor/notifikasi/{{ $n->id }}/buka">
-                @csrf
-                <button type="submit" class="btn-notif" style="background:var(--primary);color:#fff;">{{ $n->label_aksi }}</button>
-            </form>
-            @endif
-        </div>
-    </div>
-    @endforeach
-</div>
 @endif
-
-{{-- MINGGU INI --}}
-@if($mingguIni->count() > 0)
-<div class="grup-label">Minggu Ini</div>
-<div class="card-box mb-3">
-    @foreach($mingguIni as $n)
-    @php $ikon = $ikonMap[$n->tipe] ?? ['bi-bell-fill','#eff6ff','var(--primary)']; @endphp
-    <div class="notif-item {{ !$n->sudah_dibaca ? 'unread' : '' }}" data-tipe="{{ $n->tipe }}" data-dibaca="{{ $n->sudah_dibaca ? '1' : '0' }}">
-        <div class="notif-icon" style="background:{{ $ikon[1] }};color:{{ $ikon[2] }};"><i class="bi {{ $n->ikon ?: $ikon[0] }}"></i></div>
-        <div style="flex:1;">
-            <div class="notif-title">{{ $n->judul }}</div>
-            <div class="notif-desc">{{ $n->pesan }}</div>
-            <div class="notif-time"><i class="bi bi-clock me-1"></i>{{ $n->created_at->diffForHumans() }}</div>
-        </div>
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-            @if(!$n->sudah_dibaca)<div class="notif-dot"></div>@endif
-            @if($n->url_aksi && $n->label_aksi)
-            <form method="POST" action="/tutor/notifikasi/{{ $n->id }}/buka">
-                @csrf
-                <button type="submit" class="btn-notif" style="background:var(--primary);color:#fff;">{{ $n->label_aksi }}</button>
-            </form>
-            @endif
-        </div>
-    </div>
-    @endforeach
-</div>
-@endif
-
-{{-- LEBIH LAMA --}}
-@if($lebihLama->count() > 0)
-<div class="grup-label">Lebih Lama</div>
-<div class="card-box mb-3">
-    @foreach($lebihLama as $n)
-    @php $ikon = $ikonMap[$n->tipe] ?? ['bi-bell-fill','#eff6ff','var(--primary)']; @endphp
-    <div class="notif-item {{ !$n->sudah_dibaca ? 'unread' : '' }}" data-tipe="{{ $n->tipe }}" data-dibaca="{{ $n->sudah_dibaca ? '1' : '0' }}">
-        <div class="notif-icon" style="background:{{ $ikon[1] }};color:{{ $ikon[2] }};"><i class="bi {{ $n->ikon ?: $ikon[0] }}"></i></div>
-        <div style="flex:1;">
-            <div class="notif-title">{{ $n->judul }}</div>
-            <div class="notif-desc">{{ $n->pesan }}</div>
-            <div class="notif-time"><i class="bi bi-clock me-1"></i>{{ $n->created_at->diffForHumans() }}</div>
-        </div>
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-            @if(!$n->sudah_dibaca)<div class="notif-dot"></div>@endif
-            @if($n->url_aksi && $n->label_aksi)
-            <form method="POST" action="/tutor/notifikasi/{{ $n->id }}/buka">
-                @csrf
-                <button type="submit" class="btn-notif" style="background:var(--primary);color:#fff;">{{ $n->label_aksi }}</button>
-            </form>
-            @endif
-        </div>
-    </div>
-    @endforeach
-</div>
-@endif
+@endforeach
 
 @endif
 
+</div>{{-- /nt-page --}}
 @endsection
 
 @push('scripts')
 <script>
-    function filterNotif(el, tipe) {
-        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
+function filterNotif(el, tipe) {
+    /* Update chip aktif */
+    document.querySelectorAll('.nt-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
 
-        document.querySelectorAll('.notif-item').forEach(item => {
-            if (tipe === 'semua') {
-                item.style.display = '';
-            } else if (tipe === 'belum') {
-                item.style.display = item.dataset.dibaca === '0' ? '' : 'none';
-            } else {
-                item.style.display = item.dataset.tipe === tipe ? '' : 'none';
-            }
-        });
-    }
+    /* Tampilkan / sembunyikan item */
+    document.querySelectorAll('.nt-item').forEach(item => {
+        let show = false;
+
+        if (tipe === 'semua') {
+            show = true;
+        } else if (tipe === 'belum') {
+            show = item.dataset.dibaca === '0';
+        } else {
+            show = item.dataset.tipe === tipe;
+        }
+
+        item.style.display = show ? '' : 'none';
+    });
+
+    /* Sembunyikan grup / card yang semua itemnya tersembunyi */
+    document.querySelectorAll('.nt-card').forEach(card => {
+        const visible = [...card.querySelectorAll('.nt-item')]
+            .some(i => i.style.display !== 'none');
+        card.style.display = visible ? '' : 'none';
+
+        /* Sembunyikan juga label di atasnya */
+        const label = card.previousElementSibling;
+        if (label && label.classList.contains('nt-group-label')) {
+            label.style.display = visible ? '' : 'none';
+        }
+    });
+}
 </script>
 @endpush

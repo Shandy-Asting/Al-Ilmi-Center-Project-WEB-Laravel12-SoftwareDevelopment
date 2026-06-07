@@ -7,23 +7,33 @@
             <div class="form-label-custom">Email</div>
             <div class="input-wrap">
                 <i class="bi bi-envelope input-icon"></i>
-                <input type="email" class="form-control-custom" placeholder="contoh@email.com" wire:model="email"/>
+                <input type="email" class="form-control-custom" placeholder="contoh@email.com" wire:model="email" />
             </div>
-            @error('email') <span class="text-danger" style="font-size:12px">{{ $message }}</span> @enderror
+            @error('email')
+                <span class="text-danger" style="font-size:12px">{{ $message }}</span>
+            @enderror
         </div>
 
         <div class="mb-4">
             <div class="form-label-custom">Password</div>
             <div class="input-wrap">
                 <i class="bi bi-lock input-icon"></i>
-                <input type="password" class="form-control-custom" placeholder="Masukkan password" wire:model="password"/>
+                <input type="password" class="form-control-custom" placeholder="Masukkan password"
+                    wire:model="password" />
                 <i class="bi bi-eye input-toggle"></i>
             </div>
-            @error('password') <span class="text-danger" style="font-size:12px">{{ $message }}</span> @enderror
+            @error('password')
+                <span class="text-danger" style="font-size:12px">{{ $message }}</span>
+            @enderror
         </div>
 
-        <button type="submit" class="btn-primary-custom">
-            <i class="bi bi-box-arrow-in-right me-2"></i> Masuk
+        <button type="submit" class="btn-primary-custom" wire:loading.attr="disabled" wire:target="login">
+            <span wire:loading.remove wire:target="login">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Masuk
+            </span>
+            <span wire:loading wire:target="login">
+                <span class="spinner-border spinner-border-sm me-2"></span> Memproses...
+            </span>
         </button>
     </form>
 

@@ -469,9 +469,16 @@
                 finishBar();
                 setTimeout(() => overlay.style.display = 'none', 300);
             }
+
+            // Skip Livewire form — biarkan Livewire handle sendiri
             document.addEventListener('submit', function(e) {
-                if (!e.target.dataset.noloading) show();
+                const form = e.target;
+                if (form.dataset.noloading) return;
+                if (form.hasAttribute('wire:submit.prevent') ||
+                    form.hasAttribute('wire:submit')) return;
+                show();
             }, true);
+
             window.addEventListener('pageshow', hide);
             window.showLoading = show;
             window.hideLoading = hide;
