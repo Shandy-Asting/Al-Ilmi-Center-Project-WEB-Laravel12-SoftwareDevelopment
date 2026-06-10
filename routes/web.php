@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,16 +13,13 @@ Route::get('/', function () {
     $totalSiswa  = \App\Models\User::where('role', 'siswa')->count();
     $totalTutor  = \App\Models\User::where('role', 'tutor')->count();
 
-    // Tingkat kepuasan: rata-rata bintang ulasan, dikonversi ke persen
     $ulasan      = \App\Models\Ulasan::all();
     $kepuasan    = $ulasan->count() > 0
         ? round(($ulasan->avg('bintang') / 5) * 100)
         : 98;
 
-    // Paket harga dari DB, urutkan harga_min ascending
     $pakets      = \App\Models\Paket::orderBy('harga_min', 'asc')->get();
 
-    // Testimoni dari DB: ulasan bintang >= 4, ambil 3
     $testimoni   = \App\Models\Ulasan::with(['siswa', 'lesPrivat'])
         ->whereNotNull('komentar')
         ->where('bintang', '>=', 4)
@@ -29,12 +27,30 @@ Route::get('/', function () {
         ->take(3)
         ->get();
 
+    // Hero card
+    $progresHero = DB::table('hasil_latihan')
+        ->select('mata_pelajaran', DB::raw('ROUND(AVG(nilai), 1) as rata_nilai'))
+        ->where('created_at', '>=', now()->startOfWeek())
+        ->groupBy('mata_pelajaran')
+        ->orderByDesc('rata_nilai')
+        ->limit(4)
+        ->get();
+
+    $rataRataGlobal = round(
+        DB::table('hasil_latihan')
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->avg('nilai') ?? 0,
+        1
+    );
+
     return view('landing.index', compact(
         'totalSiswa',
         'totalTutor',
         'kepuasan',
         'pakets',
         'testimoni',
+        'progresHero',
+        'rataRataGlobal',
     ));
 });
 

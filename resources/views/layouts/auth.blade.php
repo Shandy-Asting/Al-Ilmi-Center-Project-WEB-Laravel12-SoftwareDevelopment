@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
     <title>@yield('title', 'Al Ilmi Center')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -294,7 +296,8 @@
     {{-- Kiri: Ilustrasi --}}
     <div class="auth-left">
         <div class="auth-left-content">
-            <div class="auth-logo">A</div>
+            <img src="{{ asset('logo.png') }}" alt="Al Ilmi Center"
+                style="width:64px;height:64px;object-fit:contain;border-radius:16px;background:#fff;padding:4px;margin:0 auto 20px;display:block;">
             <div class="auth-brand">Al Ilmi Center</div>
             <div class="auth-tagline">
                 Platform bimbingan belajar berbasis web untuk persiapan Tes Kemampuan Akademik (TKA)

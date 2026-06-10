@@ -393,7 +393,7 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
             ->map(function ($les) {
                 $sekarang  = now();
                 $mulai     = $les->jadwal;
-                $selesai   = $les->jadwal->copy()->addMinutes($les->durasi_menit);
+                $selesai   = $les->jadwal->copy()->addMinutes((int)$les->durasi_menit);
 
                 // Tentukan status tampilan
                 if ($les->status === 'selesai') {
