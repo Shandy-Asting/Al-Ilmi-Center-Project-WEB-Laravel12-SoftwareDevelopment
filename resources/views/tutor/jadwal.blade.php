@@ -992,7 +992,7 @@
                     @php
                     $sekarang = now();
                     $mulai = $sj->jadwal;
-                    $akhir = $sj->jadwal->copy()->addMinutes($sj->durasi_menit);
+                    $akhir = $sj->jadwal->copy()->addMinutes((int)$sj->durasi_menit);
                     if ($sj->status === 'selesai') {
                     $stLabel = 'selesai';
                     } elseif ($sekarang->between($mulai, $akhir)) {

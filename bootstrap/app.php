@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Application;
+require_once __DIR__.'/../app/Helpers/helpers.php';
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 

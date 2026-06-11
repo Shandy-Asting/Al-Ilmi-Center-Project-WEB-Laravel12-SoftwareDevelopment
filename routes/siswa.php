@@ -568,25 +568,29 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::get('/notifikasi', function () {
         $user = auth()->user();
 
-        $tipeAktif = [];
-        if ($user->notif_pembayaran)        $tipeAktif[] = 'pembayaran';
-        if ($user->notif_pengingat_sesi)    $tipeAktif[] = 'les_privat';
-        if ($user->notif_ulasan)            $tipeAktif[] = 'belajar';
-        if ($user->notif_permintaan_jadwal) $tipeAktif[] = 'sistem';
-        if ($user->notif_newsletter)        $tipeAktif[] = 'sistem';
-
+        // Ambil SEMUA notifikasi milik user
         $notifikasi = Notifikasi::where('user_id', $user->id)
-            ->whereIn('tipe', array_unique($tipeAktif))
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Tipe aktif hanya untuk menampilkan tab filter
+        $tipeAktif = $notifikasi->pluck('tipe')->unique()->values()->toArray();
+
         return view('siswa.notifikasi', [
             'jumlahBelumDibaca' => $notifikasi->where('sudah_dibaca', false)->count(),
-            'tipeAktif'         => array_unique($tipeAktif),
+            'tipeAktif'         => $tipeAktif,
             'hariIni'           => $notifikasi->filter(fn($n) => $n->created_at->isToday()),
             'kemarin'           => $notifikasi->filter(fn($n) => $n->created_at->isYesterday()),
-            'mingguIni'         => $notifikasi->filter(fn($n) => ! $n->created_at->isToday() && ! $n->created_at->isYesterday() && $n->created_at->diffInDays(now()) <= 7),
-            'lebihLama'         => $notifikasi->filter(fn($n) => $n->created_at->diffInDays(now()) > 7),
+            'mingguIni'         => $notifikasi->filter(
+                fn($n) =>
+                !$n->created_at->isToday() &&
+                    !$n->created_at->isYesterday() &&
+                    $n->created_at->diffInDays(now()) <= 7
+            ),
+            'lebihLama'         => $notifikasi->filter(
+                fn($n) =>
+                $n->created_at->diffInDays(now()) > 7
+            ),
         ]);
     });
 
