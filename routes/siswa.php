@@ -327,6 +327,30 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             ]
         );
 
+        // Notifikasi ke siswa
+        Notifikasi::create([
+            'user_id'    => auth()->id(),
+            'judul'      => '📅 Pesanan Les Privat Terkirim',
+            'pesan'      => 'Pesanan les privat <strong>' . $request->mata_pelajaran . '</strong> berhasil dikirim. Menunggu konfirmasi tutor.',
+            'tipe'       => 'les_privat',
+            'ikon'       => 'bi bi-person-video3',
+            'warna'      => 'var(--success-soft)',
+            'url_aksi'   => '/siswa/les-privat',
+            'label_aksi' => 'Lihat Pesanan',
+        ]);
+
+        // Notifikasi ke tutor
+        Notifikasi::create([
+            'user_id'    => $request->tutor_id,
+            'judul'      => '📅 Pesanan Les Privat Baru',
+            'pesan'      => '<strong>' . auth()->user()->name . '</strong> memesan les privat <strong>' . $request->mata_pelajaran . '</strong>.',
+            'tipe'       => 'les_privat',
+            'ikon'       => 'bi bi-person-video3',
+            'warna'      => 'var(--success-soft)',
+            'url_aksi'   => '/tutor/les-privat',
+            'label_aksi' => 'Konfirmasi',
+        ]);
+
         return redirect('/siswa/les-privat')
             ->with('sukses', 'Pesanan les berhasil dikirim! Tunggu konfirmasi dari tutor.');
     });
@@ -571,12 +595,22 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         // Ambil SEMUA notifikasi milik user
         $notifikasi = Notifikasi::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->filter(function ($n) use ($user) {
+                return match ($n->tipe) {
+                    'pembayaran' => (bool) ($user->notif_pembayaran ?? true),
+                    'les_privat' => (bool) ($user->notif_pengingat_sesi ?? true),
+                    'belajar'    => (bool) ($user->notif_ulasan ?? true),
+                    'sistem'     => (bool) ($user->notif_permintaan_jadwal ?? true),
+                    default      => true,
+                };
+            });
 
         // Tipe aktif hanya untuk menampilkan tab filter
         $tipeAktif = $notifikasi->pluck('tipe')->unique()->values()->toArray();
 
         return view('siswa.notifikasi', [
+            'user'              => $user,
             'jumlahBelumDibaca' => $notifikasi->where('sudah_dibaca', false)->count(),
             'tipeAktif'         => $tipeAktif,
             'hariIni'           => $notifikasi->filter(fn($n) => $n->created_at->isToday()),
@@ -783,6 +817,30 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             'mode'           => $request->mode,
         ]);
 
+        // Notifikasi ke siswa
+        Notifikasi::create([
+            'user_id'    => auth()->id(),
+            'judul'      => '📅 Pesanan Les Privat Terkirim',
+            'pesan'      => 'Pesanan les privat <strong>' . $request->mata_pelajaran . '</strong> berhasil dikirim. Menunggu konfirmasi tutor.',
+            'tipe'       => 'les_privat',
+            'ikon'       => 'bi bi-person-video3',
+            'warna'      => 'var(--success-soft)',
+            'url_aksi'   => '/siswa/les-privat',
+            'label_aksi' => 'Lihat Pesanan',
+        ]);
+
+        // Notifikasi ke tutor
+        Notifikasi::create([
+            'user_id'    => $request->tutor_id,
+            'judul'      => '📅 Pesanan Les Privat Baru',
+            'pesan'      => '<strong>' . auth()->user()->name . '</strong> memesan les privat <strong>' . $request->mata_pelajaran . '</strong>.',
+            'tipe'       => 'les_privat',
+            'ikon'       => 'bi bi-person-video3',
+            'warna'      => 'var(--success-soft)',
+            'url_aksi'   => '/tutor/les-privat',
+            'label_aksi' => 'Konfirmasi',
+        ]);
+
         return redirect('/siswa/les-privat')->with('sukses', 'Jadwal les berhasil dipesan!');
     });
 
@@ -843,7 +901,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ));
     });
 
-    // Return JSON agar kompatibel dengan fetch() di blade
     Route::post('/pembayaran/{les_id}/upload-bukti', function (Request $request, $les_id) {
         $request->validate([
             'bukti_transfer' => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -872,6 +929,41 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ]);
 
         $les->update(['pembayaran_status' => 'menunggu']);
+
+        notifAdmin(
+            '💳 Bukti Pembayaran Masuk',
+            '<strong>' . auth()->user()->name . '</strong> mengupload bukti transfer untuk les privat <strong>' . $les->mata_pelajaran . '</strong>.',
+            'pembayaran',
+            [
+                'ikon'  => 'bi bi-credit-card-fill',
+                'warna' => 'var(--accent-soft)',
+                'url'   => '/admin/pembayaran',
+                'label' => 'Verifikasi',
+            ]
+        );
+
+        Notifikasi::create([
+            'user_id'    => auth()->id(),
+            'judul'      => '💳 Bukti Pembayaran Terkirim',
+            'pesan'      => 'Bukti transfer berhasil dikirim. Menunggu verifikasi dari admin.',
+            'tipe'       => 'pembayaran',
+            'ikon'       => 'bi bi-credit-card-fill',
+            'warna'      => 'var(--accent-soft)',
+            'url_aksi'   => '/siswa/pembayaran',
+            'label_aksi' => 'Lihat Pembayaran',
+        ]);
+
+        // Notifikasi ke tutor
+        Notifikasi::create([
+            'user_id'    => $les->tutor_id,
+            'judul'      => '💳 Bukti Pembayaran Diterima',
+            'pesan'      => '<strong>' . auth()->user()->name . '</strong> mengupload bukti transfer untuk les privat <strong>' . $les->mata_pelajaran . '</strong>.',
+            'tipe'       => 'pembayaran',
+            'ikon'       => 'bi bi-credit-card-fill',
+            'warna'      => 'var(--accent-soft)',
+            'url_aksi'   => '/tutor/pembayaran',
+            'label_aksi' => 'Verifikasi',
+        ]);
 
         return response()->json(['sukses' => true]);
     });

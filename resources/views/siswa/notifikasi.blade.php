@@ -232,12 +232,13 @@
 @endpush
 
 @php
-$warnaMap = [
-'success' => ['bg' => 'var(--success-soft)', 'fg' => 'var(--success)'],
-'danger' => ['bg' => 'var(--danger-soft)', 'fg' => 'var(--danger)'],
-'warning' => ['bg' => 'var(--accent-soft)', 'fg' => 'var(--warning)'],
-'info' => ['bg' => 'var(--info-soft)', 'fg' => 'var(--info)'],
-'primary' => ['bg' => '#eff6ff', 'fg' => 'var(--primary)'],
+$tipeWarna = [
+'les_privat' => ['bg' => 'var(--success-soft)', 'fg' => 'var(--success)'],
+'pembayaran' => ['bg' => 'var(--accent-soft)', 'fg' => 'var(--warning)'],
+'belajar' => ['bg' => '#eff6ff', 'fg' => 'var(--primary)'],
+'sistem' => ['bg' => 'var(--info-soft)', 'fg' => 'var(--info)'],
+'ulasan' => ['bg' => 'var(--accent-soft)', 'fg' => 'var(--warning)'],
+'streak' => ['bg' => 'var(--danger-soft)', 'fg' => 'var(--danger)'],
 ];
 @endphp
 
@@ -271,16 +272,16 @@ $warnaMap = [
         @endif
     </div>
     <div class="filter-tab" data-filter="belum">Belum Dibaca</div>
-    @if($tipeAktif && in_array('les_privat', $tipeAktif))
+    @if($user->notif_pengingat_sesi)
     <div class="filter-tab" data-filter="les_privat">Les Privat</div>
     @endif
-    @if($tipeAktif && in_array('pembayaran', $tipeAktif))
+    @if($user->notif_pembayaran)
     <div class="filter-tab" data-filter="pembayaran">Pembayaran</div>
     @endif
-    @if($tipeAktif && in_array('belajar', $tipeAktif))
+    @if($user->notif_ulasan)
     <div class="filter-tab" data-filter="belajar">Belajar</div>
     @endif
-    @if($tipeAktif && in_array('sistem', $tipeAktif))
+    @if($user->notif_permintaan_jadwal)
     <div class="filter-tab" data-filter="sistem">Sistem</div>
     @endif
 </div>
@@ -295,10 +296,10 @@ $warnaMap = [
 
 {{-- MACRO NOTIF ITEM --}}
 @php
-$renderNotif = function($notif) use ($warnaMap) {
-$warna = $warnaMap[$notif->warna ?? 'primary'] ?? $warnaMap['primary'];
-$bg = $warna['bg'];
-$fg = $warna['fg'];
+$renderNotif = function($notif) use ($tipeWarna) {
+$w = $tipeWarna[$notif->tipe ?? 'sistem'] ?? ['bg' => '#eff6ff', 'fg' => 'var(--primary)'];
+$bg = $notif->warna ?? $w['bg'];
+$fg = $w['fg'];
 return compact('bg', 'fg');
 };
 @endphp
