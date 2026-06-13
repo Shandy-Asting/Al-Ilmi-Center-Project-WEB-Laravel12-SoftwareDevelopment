@@ -51,6 +51,22 @@ class Register extends Component
             'password' => Hash::make($this->password),
         ]);
 
+        if ($user->role !== 'admin') {
+            $admin = User::where('role', 'admin')->first();
+            if ($admin) {
+                \App\Models\Notifikasi::create([
+                    'user_id'    => $admin->id,
+                    'judul'      => '👥 Pengguna Baru Mendaftar',
+                    'pesan'      => '<strong>' . $user->name . '</strong> mendaftar sebagai <strong>' . $user->role . '</strong>.',
+                    'tipe'       => 'sistem',
+                    'ikon'       => 'bi bi-person-plus-fill',
+                    'warna'      => 'var(--info-soft)',
+                    'url_aksi'   => '/admin/pengguna',
+                    'label_aksi' => 'Lihat',
+                ]);
+            }
+        }
+
         Auth::login($user);
         session()->regenerate();
 

@@ -6,27 +6,27 @@
 @section('page-sub', 'Admin / Laporan / Ringkasan')
 
 @section('sidebar-menu')
-    <div class="menu-label">Utama</div>
-    <a href="/admin/dashboard" class="nav-item-custom {{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <div class="menu-label">Pengelolaan</div>
-    <a href="/admin/pengguna" class="nav-item-custom {{ request()->is('admin/pengguna') ? 'active' : '' }}">
-        <i class="bi bi-people-fill"></i> Pengelolaan Pengguna
-        <span class="nav-badge">12</span>
-    </a>
-    <a href="/admin/paket" class="nav-item-custom {{ request()->is('admin/paket') ? 'active' : '' }}">
-        <i class="bi bi-box-seam"></i> Pengelolaan Paket
-    </a>
-    <a href="/admin/pembayaran" class="nav-item-custom {{ request()->is('admin/pembayaran') ? 'active' : '' }}">
-        <i class="bi bi-cash-coin"></i> Pembayaran & Gaji
-    </a>
-    <a href="/admin/rekening" class="nav-item-custom {{ request()->is('admin/rekening') ? 'active' : '' }}">
-        <i class="bi bi-bank"></i> Rekening Bank
-    </a>
-    <a href="/admin/laporan" class="nav-item-custom {{ request()->is('admin/laporan') ? 'active' : '' }}">
-        <i class="bi bi-bar-chart-line-fill"></i> Laporan
-    </a>
+<div class="menu-label">Utama</div>
+<a href="/admin/dashboard" class="nav-item-custom {{ request()->is('admin/dashboard') ? 'active' : '' }}">
+    <i class="bi bi-speedometer2"></i> Dashboard
+</a>
+<div class="menu-label">Pengelolaan</div>
+<a href="/admin/pengguna" class="nav-item-custom {{ request()->is('admin/pengguna') ? 'active' : '' }}">
+    <i class="bi bi-people-fill"></i> Pengelolaan Pengguna
+    <span class="nav-badge">12</span>
+</a>
+<a href="/admin/paket" class="nav-item-custom {{ request()->is('admin/paket') ? 'active' : '' }}">
+    <i class="bi bi-box-seam"></i> Pengelolaan Paket
+</a>
+<a href="/admin/pembayaran" class="nav-item-custom {{ request()->is('admin/pembayaran') ? 'active' : '' }}">
+    <i class="bi bi-cash-coin"></i> Pembayaran & Gaji
+</a>
+<a href="/admin/rekening" class="nav-item-custom {{ request()->is('admin/rekening') ? 'active' : '' }}">
+    <i class="bi bi-bank"></i> Rekening Bank
+</a>
+<a href="/admin/laporan" class="nav-item-custom {{ request()->is('admin/laporan') ? 'active' : '' }}">
+    <i class="bi bi-bar-chart-line-fill"></i> Laporan
+</a>
 @endsection
 
 @push('styles')
@@ -305,6 +305,7 @@
                 @endfor
         </select>
         <a id="btn-export-pdf" href="/admin/laporan/export-pdf?periode={{ now()->format('Y-m') }}"
+            data-noloading
             style="background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
             <i class="bi bi-download"></i> Export PDF
         </a>
@@ -603,5 +604,12 @@
     function updateExport(periode) {
         document.getElementById('btn-export-pdf').href = '/admin/laporan/export-pdf?periode=' + periode;
     }
+
+    // Tutup loading otomatis setelah 3 detik (khusus halaman ini)
+    document.getElementById('btn-export-pdf').addEventListener('click', function() {
+        setTimeout(() => {
+            if (window.hideLoading) window.hideLoading();
+        }, 3000);
+    });
 </script>
 @endpush

@@ -641,20 +641,11 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
     Route::get('/notifikasi', function () {
         $user = auth()->user();
 
-        // Kumpulkan tipe yang dinonaktifkan user
         $tipeDisabled = [];
         if (!$user->notif_permintaan_jadwal) $tipeDisabled[] = 'les_privat';
         if (!$user->notif_pembayaran)        $tipeDisabled[] = 'pembayaran';
         if (!$user->notif_ulasan)            $tipeDisabled[] = 'ulasan';
-        // notif_pengingat_sesi & notif_newsletter = tipe 'sistem'
-        // hanya disable sistem jika keduanya off
         if (!$user->notif_pengingat_sesi && !$user->notif_newsletter) $tipeDisabled[] = 'sistem';
-
-        // Kumpulkan tipe yang dinonaktifkan user
-        $tipeDisabled = [];
-        if (!$user->notif_permintaan_jadwal) $tipeDisabled[] = 'les_privat';
-        if (!$user->notif_pembayaran)        $tipeDisabled[] = 'pembayaran';
-        if (!$user->notif_ulasan) $tipeDisabled[] = 'sistem';
 
         $notifikasi = Notifikasi::where('user_id', $user->id)
             ->when(count($tipeDisabled), fn($q) => $q->whereNotIn('tipe', $tipeDisabled))
@@ -709,40 +700,6 @@ Route::middleware(['auth', 'role:tutor'])->prefix('tutor')->group(function () {
         return redirect($notif->url_aksi ?? '/tutor/notifikasi');
     });
 
-    Route::get('/profil', function () {
-        $user = auth()->user();
-
-        $totalSiswa = LesPrivat::where('tutor_id', $user->id)->distinct('user_id')->count();
-        $totalSesi  = LesPrivat::where('tutor_id', $user->id)->whereIn('status', ['dikonfirmasi', 'selesai'])->count();
-        $pengalaman = $user->tahun_mengajar ? (now()->year - $user->tahun_mengajar) : 0;
-
-        // Data ulasan dari DB
-        $ulasanList = \App\Models\Ulasan::where('tutor_id', $user->id)
-            ->with('siswa')
-            ->latest()
-            ->get();
-
-        $totalUlasan  = $ulasanList->count();
-        $ratingRata   = $totalUlasan > 0 ? round($ulasanList->avg('bintang'), 1) : 0;
-
-        // Distribusi bintang (persentase)
-        $distribusi = [];
-        for ($b = 5; $b >= 1; $b--) {
-            $jumlah = $ulasanList->where('bintang', $b)->count();
-            $distribusi[$b] = $totalUlasan > 0 ? round($jumlah / $totalUlasan * 100) : 0;
-        }
-
-        return view('tutor.profil', compact(
-            'user',
-            'totalSiswa',
-            'totalSesi',
-            'pengalaman',
-            'ulasanList',
-            'totalUlasan',
-            'ratingRata',
-            'distribusi'
-        ));
-    });
     Route::get('/profil', function () {
         $user = auth()->user();
 
