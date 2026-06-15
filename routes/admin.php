@@ -175,6 +175,41 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         return view('admin.pengguna-detail', compact('user'));
     });
 
+    Route::delete('/pengguna/{id}', function ($id) {
+        $user = User::findOrFail($id);
+
+        if ($user->role === 'admin') {
+            return back()->with('error', 'Akun admin tidak bisa dihapus.');
+        }
+
+        $nama = $user->name;
+
+        // Hapus data relasi dulu
+        $user->lesPrivat()->delete();
+        $user->notifikasi()->delete();
+        $user->hasilLatihan()->delete();
+        $user->aktivitasBelajar()->delete();
+
+        $user->delete();
+
+        return back()->with('sukses', 'Akun ' . $nama . ' berhasil dihapus.');
+    });
+
+    // Nonaktifkan user
+    Route::post('/pengguna/{id}/nonaktifkan', function ($id) {
+        $user = User::findOrFail($id);
+        $user->update(['status' => 'nonaktif']);
+        return back()->with('sukses', 'Akun ' . $user->name . ' berhasil dinonaktifkan.');
+    });
+
+    // Aktifkan kembali user
+    Route::post('/pengguna/{id}/aktifkan', function ($id) {
+        $user = User::findOrFail($id);
+        $user->update(['status' => 'aktif']);
+        return back()->with('sukses', 'Akun ' . $user->name . ' berhasil diaktifkan kembali.');
+    });
+
+
     Route::get('/transaksi/export', function (Request $request) {
         $status = $request->query('status');
         $metode = $request->query('metode');

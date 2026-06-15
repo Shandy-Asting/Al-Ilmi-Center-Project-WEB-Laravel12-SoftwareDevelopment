@@ -22,6 +22,13 @@ class Login extends Component
         'password.min' => 'Password minimal 8 karakter.',
     ];
 
+    public function mount()
+    {
+        if (session()->has('info')) {
+            session()->reflash();
+        }
+    }
+
     public function login()
     {
         $this->validate();
@@ -29,7 +36,19 @@ class Login extends Component
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
             session()->regenerate();
 
-            $role = Auth::user()->role;
+            $user = Auth::user();
+
+            // Cek apakah akun nonaktif
+            if ($user->status === 'nonaktif') {
+                Auth::logout();
+                session()->invalidate();
+                session()->regenerateToken();
+
+                $this->addError('email', 'Akun Anda telah dinonaktifkan. Hubungi admin untuk mengaktifkan kembali.');
+                return;
+            }
+
+            $role = $user->role;
 
             if ($role === 'admin') {
                 return redirect()->intended('/admin/dashboard');
@@ -45,7 +64,7 @@ class Login extends Component
 
     public function render()
     {
-    return view('livewire.auth.login')
-        ->layout('layouts.auth', ['title' => 'Login - Al Ilmi Center']);
+        return view('livewire.auth.login')
+            ->layout('layouts.auth', ['title' => 'Login - Al Ilmi Center']);
     }
 }

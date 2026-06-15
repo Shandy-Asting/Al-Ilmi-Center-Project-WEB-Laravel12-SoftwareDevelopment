@@ -1,4 +1,25 @@
 <div>
+
+    {{-- Flash: akun dinonaktifkan / pesan redirect --}}
+    @if(session('info'))
+        <div style="
+            background:#eff6ff;
+            border:1px solid #3b82f6;
+            color:#1e3a5f;
+            border-radius:10px;
+            padding:11px 14px;
+            font-size:.81rem;
+            font-weight:600;
+            margin-bottom:16px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        ">
+            <i class="bi bi-info-circle-fill"></i>
+            {{ session('info') }}
+        </div>
+    @endif
+
     <div class="auth-title">Selamat Datang! 👋</div>
     <div class="auth-sub">Masuk ke akun Al Ilmi Center kamu</div>
 
