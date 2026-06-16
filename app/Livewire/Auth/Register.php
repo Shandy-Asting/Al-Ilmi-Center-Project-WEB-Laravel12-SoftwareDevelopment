@@ -20,7 +20,7 @@ class Register extends Component
         'name'     => 'required|min:3',
         'email'    => 'required|email|unique:users,email',
         'no_hp'    => 'required|min:10',
-        'role' => 'required|in:siswa,tutor,admin',
+        'role' => 'required|in:siswa,tutor',
         'password' => 'required|min:8|confirmed',
     ];
 

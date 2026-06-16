@@ -45,7 +45,6 @@
                     <option value="">-- Pilih Role --</option>
                     <option value="siswa">Siswa</option>
                     <option value="tutor">Tutor</option>
-                    <option value="admin">Admin</option>
                 </select>
             </div>
             @error('role')
