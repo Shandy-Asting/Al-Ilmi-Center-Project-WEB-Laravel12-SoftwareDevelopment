@@ -1,102 +1,104 @@
-# [Al Ilmi Center]
+# Al Ilmi Center
+### Aplikasi Bimbel Berbasis Web Persiapan Tes Kemampuan Akademik (TKA)
 
 ## Deskripsi Proyek
-Aplikasi ini merupakan sistem bimbingan belajar berbasis web yang dirancang untuk membantu siswa dalam mempersiapkan Tes Kemampuan Akademik (TKA) secara lebih efektif dan terarah. Sistem menyediakan fitur pembelajaran online, latihan soal, kuis evaluasi, monitoring progres belajar, serta layanan tutor atau les privat yang dapat diakses secara fleksibel melalui internet.
 
-Pengembangan aplikasi dilakukan untuk mendukung proses belajar yang lebih modern, terstruktur, dan mudah diakses tanpa terbatas oleh ruang dan waktu. Selain sebagai media pembelajaran, aplikasi juga berfungsi sebagai sarana evaluasi kemampuan siswa dalam meningkatkan kesiapan menghadapi jenjang pendidikan berikutnya.
-
----
-
-# Logistik Tim
-
-| Nama Anggota | NIM / Peran |
-|---|---|
-| [Shandy Prasetyo] | [2313020069 / Project Manager] |
-| [Mohamad Yusuf] | [2313020037 / Front-End Developer] |
-| [Frika Alditiyo] | [2313020008 / Back-End Developer] |
+Al Ilmi Center merupakan aplikasi bimbingan belajar berbasis web yang dirancang untuk membantu siswa mempersiapkan Tes Kemampuan Akademik (TKA). Aplikasi menyediakan materi pembelajaran, bank soal, kuis evaluasi, progres belajar, layanan les privat, pembayaran online, serta sistem notifikasi yang mendukung proses belajar secara terstruktur dan fleksibel.
 
 ---
 
-# Latar Belakang Proyek
+## Logistik Tim
 
-Perkembangan teknologi informasi mendorong dunia pendidikan untuk memanfaatkan sistem pembelajaran berbasis digital. Proses belajar yang sebelumnya dilakukan secara konvensional kini mulai beralih menuju pembelajaran berbasis web atau e-learning yang lebih fleksibel dan mudah diakses.
-
-Namun, masih terdapat berbagai kendala dalam proses pembelajaran, terutama bagi siswa yang sedang mempersiapkan Tes Kemampuan Akademik (TKA). Banyak siswa mengalami kesulitan dalam memahami pola soal, meningkatkan kemampuan berhitung, penalaran, serta mengatur proses belajar secara terarah. Selain itu, keterbatasan media latihan soal dan pendampingan belajar juga menjadi faktor yang memengaruhi kesiapan siswa dalam menghadapi ujian.
-
-Berdasarkan kondisi tersebut, dikembangkan sebuah aplikasi bimbingan belajar berbasis web yang menyediakan materi pembelajaran, latihan soal, kuis evaluasi, monitoring progres belajar, serta layanan tutor secara online. Dengan adanya sistem ini, diharapkan proses pembelajaran menjadi lebih efektif, terstruktur, dan mampu membantu meningkatkan kesiapan akademik siswa.
-
----
-
-# Masalah yang Diselesaikan
-
-- Belum tersedianya platform pembelajaran yang berfokus pada persiapan TKA secara terarah.
-- Kurangnya media latihan soal dan evaluasi pembelajaran yang terstruktur.
-- Siswa mengalami kesulitan dalam meningkatkan kemampuan hafalan, berhitung, dan penalaran.
-- Pembelajaran masih banyak dilakukan secara konvensional dan kurang fleksibel.
-- Kurangnya layanan pendampingan belajar yang mudah diakses.
-- Belum adanya sistem monitoring perkembangan belajar siswa secara terintegrasi.
+| Nama | NIM | Peran |
+|--------|--------|--------|
+| [Shandy Prasetyo] | [2313020069] | Project Manager |
+| [Mohamad Yusuf] | [2313020037] | Front-End Developer |
+| [Frika Alditiyo] | [2313020008] | Back-End Developer |
 
 ---
 
-# Fitur Utama
+## Latar Belakang Proyek
 
-- Registrasi dan login akun pengguna
-- Akses materi pembelajaran berbasis TKA
-- Latihan soal dan kuis evaluasi
-- Monitoring progres belajar siswa
-- Pemesanan layanan tutor atau les privat
-- Pengelolaan data pengguna oleh admin
-- Pengelolaan materi dan soal oleh tutor
-- Sistem evaluasi hasil pembelajaran
+Persiapan menghadapi TKA sering terkendala oleh kurangnya media belajar yang terarah, keterbatasan latihan soal, serta minimnya pendampingan belajar yang fleksibel. Oleh karena itu, Al Ilmi Center dikembangkan sebagai platform pembelajaran yang menyediakan materi, latihan soal, evaluasi, dan layanan tutor dalam satu sistem terintegrasi sehingga siswa dapat belajar secara lebih efektif dan terukur.
 
 ---
 
-# Teknologi yang Digunakan
+## Masalah yang Diselesaikan
 
-| Bagian | Teknologi |
-|---|---|
-| Framework | Laravel |
-| Bahasa Pemrograman | PHP |
-| Frontend | HTML, CSS, JavaScript |
-| Database | MySQL |
-
----
-
-# Struktur Pengguna Sistem
-
-## 1. Siswa
-Siswa dapat mengakses materi pembelajaran, mengerjakan latihan soal dan kuis, melihat progres belajar, serta melakukan pemesanan layanan tutor.
-
-## 2. Tutor
-Tutor bertugas mengelola materi pembelajaran, membuat soal dan kuis, memberikan evaluasi, serta mengatur jadwal pembelajaran atau les privat.
-
-## 3. Admin
-Admin memiliki akses untuk mengelola data pengguna, memantau aktivitas sistem, serta mengatur keseluruhan data dan proses dalam aplikasi.
+- Kurangnya platform khusus untuk persiapan TKA.
+- Keterbatasan latihan soal dan evaluasi belajar yang terstruktur.
+- Sulitnya memantau perkembangan belajar siswa.
+- Kurangnya akses terhadap layanan tutor yang fleksibel.
+- Pengelolaan materi dan pembelajaran yang belum terintegrasi.
 
 ---
 
-# Alur Sistem
+## Fitur Utama
 
-1. Pengguna melakukan registrasi atau login ke dalam sistem.
-2. Sistem memverifikasi data pengguna berdasarkan role masing-masing.
-3. Siswa dapat mengakses materi, latihan soal, dan kuis evaluasi.
-4. Tutor mengelola materi, soal, serta layanan pembelajaran.
-5. Admin mengelola data sistem dan pengguna.
-6. Hasil pembelajaran dan progres siswa disimpan ke database.
-7. Sistem menampilkan hasil evaluasi dan perkembangan belajar siswa.
+- Registrasi dan login pengguna.
+- Materi pembelajaran berbasis TKA.
+- Bank soal dan kuis evaluasi.
+- Monitoring progres belajar siswa.
+- Pemesanan les privat.
+- Sistem pembayaran online.
+- Notifikasi siswa dan tutor.
+- Manajemen materi dan soal oleh tutor.
+- Dashboard dan laporan untuk admin.
 
 ---
 
-# Kontribusi Tim
+## Teknologi yang Digunakan
+
+- **Framework:** Laravel
+- **Backend:** PHP
+- **Frontend:** HTML, CSS, JavaScript
+- **Database:** MySQL
+
+---
+
+## Struktur Pengguna Sistem
+
+### Siswa
+- Mengakses materi pembelajaran.
+- Mengerjakan kuis dan latihan soal.
+- Melihat progres belajar.
+- Memesan les privat.
+
+### Tutor
+- Mengelola materi dan bank soal.
+- Mengatur jadwal mengajar.
+- Menerima permintaan les privat.
+- Melakukan evaluasi siswa.
+
+### Admin
+- Mengelola data pengguna.
+- Mengelola pembayaran dan laporan.
+- Mengelola paket belajar dan notifikasi.
+- Memantau aktivitas sistem.
+
+---
+
+## Alur Sistem
+
+1. Pengguna melakukan registrasi dan login.
+2. Siswa mengakses materi, bank soal, dan kuis.
+3. Sistem menyimpan hasil pengerjaan dan progres belajar.
+4. Siswa dapat memesan layanan les privat.
+5. Tutor mengelola materi, soal, dan jadwal mengajar.
+6. Admin memantau pengguna, pembayaran, dan laporan sistem.
+
+---
+
+## Kontribusi Tim
 
 | Peran | Tanggung Jawab |
-|---|---|
-| Project Manager | Mengatur alur pengembangan proyek, dokumentasi, analisis kebutuhan sistem, dan koordinasi tim |
-| Front-End Developer | Mengembangkan tampilan antarmuka pengguna serta interaksi sistem |
-| Back-End Developer | Mengembangkan logika sistem, pengelolaan database, dan integrasi fitur aplikasi |
+|---------|---------|
+| Project Manager | Analisis kebutuhan, dokumentasi proyek, koordinasi tim, review progres pengembangan |
+| Front-End Developer | Pengembangan antarmuka pengguna, dashboard, halaman materi, bank soal, pembayaran, dan notifikasi |
+| Back-End Developer | Pengembangan API, database, autentikasi, pembayaran, les privat, laporan, dan notifikasi sistem |
 
 ---
 
-# Penutup
+## Penutup
 
-Pengembangan aplikasi bimbingan belajar berbasis web ini diharapkan mampu membantu siswa dalam mempersiapkan Tes Kemampuan Akademik (TKA) secara lebih efektif dan terarah. Dengan memanfaatkan teknologi web, sistem dapat memberikan kemudahan akses pembelajaran, evaluasi, serta pendampingan belajar yang lebih fleksibel. Selain meningkatkan kualitas proses belajar, aplikasi ini juga diharapkan dapat menjadi media pembelajaran digital yang mendukung perkembangan pendidikan berbasis teknologi.
+Al Ilmi Center dikembangkan sebagai solusi pembelajaran berbasis web yang membantu siswa mempersiapkan Tes Kemampuan Akademik (TKA) melalui materi belajar, evaluasi, dan layanan tutor yang terintegrasi. Sistem ini diharapkan dapat meningkatkan efektivitas pembelajaran serta mempermudah pengelolaan proses belajar bagi seluruh pengguna.
